@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.datasets.domain.entities import Dataset, DatasetConfiguration, DatasetIdentity, Datasets
@@ -19,8 +19,8 @@ def _make_dataset(name: str = "test") -> Dataset:
         identity=DatasetIdentity(
             entity_id=EntityId(uuid4()),
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow()),
-                _updated=UpdatedAt(datetime.utcnow()),
+                _created=CreatedAt(datetime.now(UTC)),
+                _updated=UpdatedAt(datetime.now(UTC)),
             ),
         ),
         configuration=DatasetConfiguration(

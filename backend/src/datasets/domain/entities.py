@@ -35,6 +35,12 @@ class Dataset(Entity):
         self._identity = identity
         self._configuration = configuration
 
+    def display_name(self) -> str:
+        return self._configuration._name.value
+
+    def columns_summary(self) -> str:
+        return ", ".join(f"{c._name} {c._dtype}" for c in self._configuration._schema._columns)
+
 
 class Datasets:
     def __init__(self, items: list[Dataset] | None = None) -> None:

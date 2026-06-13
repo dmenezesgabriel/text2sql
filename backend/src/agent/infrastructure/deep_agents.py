@@ -20,7 +20,7 @@ from src.agent.domain.value_objects import (
 )
 from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
 
-AGENT_TOOLS = [
+AGENT_TOOLS: list[dict[str, object]] = [
     {
         "type": "function",
         "function": {
@@ -100,12 +100,13 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
         toolkit: IToolKit,
     ) -> AsyncIterator[AgentEvent]:
         system_content = _SYSTEM_TEMPLATE.format(schemas=self._build_schema_context())
-        history = [
+        system_msg: dict[str, object] = {"role": "system", "content": system_content}
+        history: list[dict[str, object]] = [
             {"role": m._identity._role.name.lower(), "content": m._body._content.value}
             for m in conversation._history.to_list()
             if not m.is_from(MessageRole.SYSTEM)
         ]
-        messages: list[dict] = [{"role": "system", "content": system_content}] + history
+        messages: list[dict[str, object]] = [system_msg] + history
 
         yield ThinkingEvent("Analyzing your question...")
 
@@ -125,7 +126,8 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
                         yield event
                     continue
                 if tool_call._name == "build_visualization":
-                    yield SpecFragmentEvent(_payload=tool_call._arguments.get("spec", {}))
+                    spec = tool_call._arguments.get("spec", {})
+                    yield SpecFragmentEvent(_payload=spec if isinstance(spec, dict) else {})
                     return
 
         yield ErrorEvent(
@@ -136,16 +138,15 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
         lines = []
         for ds in self._datasets.find_all().to_list():
             view = f"ds_{ds._identity._id.value.hex}"
-            cols = ", ".join(f"{c._name} {c._dtype}" for c in ds._configuration._schema._columns)
             lines.append(
-                f"View: {view}  (dataset: {ds._configuration._name.value})\nColumns: {cols}",
+                f"View: {view}  (dataset: {ds.display_name()})\nColumns: {ds.columns_summary()}",
             )
         return "\n\n".join(lines) if lines else "No datasets registered yet."
 
     async def _handle_sql(
         self,
         tool_call: LLMToolCall,
-        messages: list[dict],
+        messages: list[dict[str, object]],
         toolkit: IToolKit,
     ) -> AsyncIterator[AgentEvent]:
         yield ThinkingEvent("Executing SQL...")
@@ -156,6 +157,9 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
         sql = tool_call._arguments.get("sql", "")
         try:
             sql_tool = toolkit.find(ToolName("sql_generator"))
+            if sql_tool is None:
+                msg = "sql_generator tool not registered in toolkit"
+                raise ValueError(msg)
             result = await sql_tool.execute(Parameters({"sql": sql}))
             content = json.dumps(
                 {
@@ -169,7 +173,7 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
         messages.append({"role": "tool", "tool_call_id": tool_call._id, "content": content})
 
 
-def _assistant_turn(tool_calls: tuple[LLMToolCall, ...]) -> dict:
+def _assistant_turn(tool_calls: tuple[LLMToolCall, ...]) -> dict[str, object]:
     return {
         "role": "assistant",
         "content": None,
@@ -184,7 +188,7 @@ def _assistant_turn(tool_calls: tuple[LLMToolCall, ...]) -> dict:
     }
 
 
-def _narrative_spec(text: str) -> dict:
+def _narrative_spec(text: str) -> dict[str, object]:
     return {
         "root": "answer",
         "elements": {"answer": {"type": "NarrativeText", "props": {"content": text}}},

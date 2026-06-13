@@ -7,7 +7,7 @@ from src.datasets.domain.value_objects import ColumnDefinition, FileFormat, Stor
 
 
 class IStorageIngestion(Protocol):
-    async def ingest(
+    def ingest(
         self,
         uri: StorageUri,
         file_format: FileFormat,

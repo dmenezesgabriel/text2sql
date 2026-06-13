@@ -55,9 +55,23 @@ class TestSchemaDefinition:
 
 
 class TestStorageUri:
-    def test_value_stored(self) -> None:
+    def test_s3_scheme_accepted(self) -> None:
         uri = StorageUri("s3://bucket/file.parquet")
         assert uri.value == "s3://bucket/file.parquet"
+
+    def test_s3a_scheme_accepted(self) -> None:
+        uri = StorageUri("s3a://bucket/file.parquet")
+        assert uri.value == "s3a://bucket/file.parquet"
+
+    def test_file_scheme_accepted(self) -> None:
+        uri = StorageUri("file:///tmp/data.parquet")
+        assert uri.value == "file:///tmp/data.parquet"
+
+    def test_invalid_scheme_raises(self) -> None:
+        import pytest
+
+        with pytest.raises(ValueError, match="StorageUri must start with"):
+            StorageUri("http://example.com/file.parquet")
 
 
 class TestConnectionString:
