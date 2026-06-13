@@ -29,6 +29,7 @@ dev = [
     "import-linter==2.11",
     "mutmut==3.5.0",
     "pre-commit==4.2.0",
+    "pyright==1.1.400",
 ]
 
 [tool.black]
@@ -107,6 +108,25 @@ max-branches = 6      # one level of indentation → few branches
 max-returns = 3       # early returns OK, but keep limited
 max-statements = 30   # small methods/classes
 max-public-methods = 5 # small classes (rule 7)
+
+[tool.pyright]
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
+typeCheckingMode = "strict"
+# _underscore attributes are used cross-class by design (OOP encapsulation via naming convention, not enforcement)
+reportPrivateUsage = false
+# pynamodb ORM's Meta inner class doesn't match pyright's structural expectations
+reportIncompatibleVariableOverride = false
+# FastAPI route functions are registered via decorators, not called directly
+reportUnusedFunction = false
+# Third-party libraries (litellm, pynamodb) ship without complete type stubs;
+# suppressing Unknown-propagation rules keeps strict coverage for owned code
+reportUnknownVariableType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownArgumentType = false
+# pynamodb generates DoesNotExist dynamically — no valid type annotation possible
+reportGeneralTypeIssues = false
 
 [tool.mutmut]
 paths_to_mutate = "src/"

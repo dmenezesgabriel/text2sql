@@ -7,6 +7,7 @@ UV_EXCLUDE_NEWER ?= $(shell date -d '7 days ago' +%Y-%m-%dT00:00:00Z)
 check:
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run ruff check src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run ruff format --check src/
+	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run pyright src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run deptry .
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run vulture src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run radon cc src/ -a
