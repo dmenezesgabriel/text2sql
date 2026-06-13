@@ -1,0 +1,2 @@
+class ConversationOrderError(Exception):
+    pass

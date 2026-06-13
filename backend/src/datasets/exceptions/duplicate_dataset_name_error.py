@@ -1,0 +1,2 @@
+class DuplicateDatasetNameError(Exception):
+    pass

@@ -1,0 +1,2 @@
+class SameVisualizationError(Exception):
+    pass

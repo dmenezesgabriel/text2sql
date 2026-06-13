@@ -1,0 +1,25 @@
+rules:
+  - id: max-two-ivars
+    message: >
+      Class '$CLASS' has more than 2 instance variables (found at least 3).
+      Object Calisthenics rule 8: max two instance variables per class.
+      Compose objects instead of accumulating state.
+    severity: WARNING
+    languages: [python]
+    pattern: |
+      class $CLASS(...):
+        ...
+        def __init__(self, ...):
+            ...
+            self.$_ = ...
+            ...
+            self.$_ = ...
+            ...
+            self.$_ = ...
+    path-exclude:
+      - "**/__init__.py"
+      - "**/conftest.py"
+    metadata:
+      category: design
+      technology: python
+      reference: https://williamdurand.fr/2013/06/03/object-calisthenics/#8-no-classes-with-more-than-two-instance-variables

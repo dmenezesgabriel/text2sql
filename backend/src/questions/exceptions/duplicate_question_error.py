@@ -1,0 +1,2 @@
+class DuplicateQuestionError(Exception):
+    pass

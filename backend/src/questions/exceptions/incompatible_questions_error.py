@@ -1,0 +1,2 @@
+class IncompatibleQuestionsError(Exception):
+    pass

@@ -1,0 +1,2 @@
+class TileOverlapError(Exception):
+    pass

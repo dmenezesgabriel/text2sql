@@ -1,0 +1,2 @@
+class SelfFilterError(Exception):
+    pass

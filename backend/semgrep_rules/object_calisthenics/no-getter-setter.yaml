@@ -1,0 +1,31 @@
+rules:
+  - id: no-getter-setter
+    message: >
+      Method 'get_$NAME' looks like a getter. Object Calisthenics rule 9:
+      no getters/setters — tell, don't ask. Use behavior methods instead
+      (e.g. `total()` not `get_total()`, `with_filter(f)` not `set_filter(f)`).
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern: "def get_$NAME(...): ..."
+      - metavariable-pattern:
+          metavariable: $NAME
+          patterns:
+            - pattern-not: "$_"
+    metadata:
+      category: design
+      technology: python
+      reference: https://williamdurand.fr/2013/06/03/object-calisthenics/#9-no-getterssetters
+  - id: no-setter-method
+    message: >
+      Method 'set_$NAME' looks like a setter. Object Calisthenics rule 9:
+      no getters/setters. Prefer immutable objects that return new instances
+      (e.g. `with_name(n)` instead of `set_name(n)`).
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern: "def set_$NAME(...): ..."
+    metadata:
+      category: design
+      technology: python
+      reference: https://williamdurand.fr/2013/06/03/object-calisthenics/#9-no-getterssetters

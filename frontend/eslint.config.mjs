@@ -1,0 +1,66 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import unicornPlugin from 'eslint-plugin-unicorn';
+import litPlugin from 'eslint-plugin-lit';
+import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
+import jsdocPlugin from 'eslint-plugin-jsdoc';
+import sonarjsPlugin from 'eslint-plugin-sonarjs';
+
+export default tseslint.config(
+  eslint.configs.recommended,
+  ...tseslint.configs.strictTypeChecked,
+  unicornPlugin.configs['flat/recommended'],
+  litPlugin.configs['flat/recommended'],
+  jsdocPlugin.configs['flat/recommended'],
+  sonarjsPlugin.configs.recommended,
+  {
+    plugins: {
+      'simple-import-sort': simpleImportSortPlugin,
+    },
+    rules: {
+      'simple-import-sort/imports': 'error',
+      'simple-import-sort/exports': 'error',
+    },
+  },
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      'max-lines': ['warn', { max: 500, skipBlankLines: true, skipComments: true }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      'unicorn/filename-case': [
+        'error',
+        {
+          cases: { camelCase: true, pascalCase: true },
+          ignore: ['^\\[[a-z]+\\]', '^\\.'],
+        },
+      ],
+      'unicorn/prevent-abbreviations': 'off',
+      'unicorn/no-null': 'off',
+      'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }],
+    },
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      'sonarjs/no-hardcoded-passwords': 'off',
+      'max-lines': 'off',
+    },
+  },
+  {
+    files: ['**/*.stories.ts', '**/*.stories.tsx'],
+    rules: {
+      'sonarjs/no-duplicate-string': 'off',
+      'unicorn/filename-case': 'off',
+      'max-lines': 'off',
+    },
+  },
+);

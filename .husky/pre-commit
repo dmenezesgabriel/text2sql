@@ -1,0 +1,13 @@
+. "$(dirname "$0")/_/husky.sh"
+
+# ── Frontend: lint-staged on staged TS/TSX files ──
+if git diff --cached --name-only | grep -q '^frontend/'; then
+  cd frontend && npx lint-staged || exit 1
+  cd "$(git rev-parse --show-toplevel)"
+fi
+
+# ── Backend: pre-commit on staged Python files ──
+if git diff --cached --name-only | grep -q '^backend/.*\.py$'; then
+  cd backend && uv run pre-commit run || exit 1
+  cd "$(git rev-parse --show-toplevel)"
+fi

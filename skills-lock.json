@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "orval": {
+      "source": "orval-labs/orval",
+      "sourceType": "github",
+      "skillPath": "skills/orval/SKILL.md",
+      "computedHash": "5184979818957c9ed7293a6e8345f3a1b76060a8ae31ba4e15f24e3656fd8061"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "32cf6cf8733ae75ae41f5241347bca74459629f90bcfbd4e25540ede5d4b8f95"
+    }
+  }
+}

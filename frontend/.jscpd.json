@@ -1,0 +1,8 @@
+{
+  "pattern": "src/**/*.{ts,tsx,css}",
+  "ignore": ["src/**/*.test.*", "src/**/*.spec.*", "src/**/*.stories.*", "**/node_modules/**"],
+  "threshold": 10,
+  "minLines": 5,
+  "maxLines": 500,
+  "reporters": ["console", "html"]
+}
