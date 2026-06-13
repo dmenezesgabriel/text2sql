@@ -21,6 +21,16 @@ from src.shared.domain.base import (
     ValueObject,
 )
 
+_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+
+def _validated_identifier(value: str) -> str:
+    """Reject values that cannot safely appear as SQL identifiers."""
+    if not _SAFE_IDENTIFIER.match(value):
+        msg = f"Unsafe SQL identifier: {value!r}"
+        raise ValueError(msg)
+    return value
+
 
 @dataclass(frozen=True)
 class DatasetReference(ValueObject):
@@ -38,9 +48,8 @@ class QueryDefinition(ValueObject):
 
     def __post_init__(self) -> None:
         if not self._sql.is_select():
-            raise InvalidQueryError(
-                f"Only SELECT queries supported, got: {self._sql.value[:50]}",
-            )
+            msg = f"Only SELECT queries supported, got: {self._sql.value[:50]}"
+            raise InvalidQueryError(msg)
 
     def with_filter(
         self,
@@ -59,12 +68,21 @@ class QueryDefinition(ValueObject):
         agg_column: str,
         agg_func: str,
     ) -> QueryDefinition:
-        grouped_sql = SqlQuery(
-            f"SELECT {group_column}, {agg_func}({agg_column}) "
-            f"FROM ({self._sql.value.rstrip(';')}) AS _drill "
-            f"GROUP BY {group_column}",
+        safe_group = _validated_identifier(group_column)
+        safe_col = _validated_identifier(agg_column)
+        safe_func = _validated_identifier(agg_func)
+        base = self._sql.value.rstrip(";")
+        sql = " ".join(
+            [
+                "SELECT",
+                f"{safe_group}, {safe_func}({safe_col})",
+                "FROM",
+                f"({base}) AS _drill",
+                "GROUP BY",
+                safe_group,
+            ],
         )
-        return QueryDefinition(sql=grouped_sql, source=self._source)
+        return QueryDefinition(sql=SqlQuery(sql), source=self._source)
 
     def with_limit(self, limit: int) -> QueryDefinition:
         limited_sql = SqlQuery(
@@ -101,8 +119,8 @@ class QuestionSpecification:
 
 
 class QuestionIdentity:
-    def __init__(self, id: EntityId, audit: AuditRecord) -> None:
-        self._id = id
+    def __init__(self, entity_id: EntityId, audit: AuditRecord) -> None:
+        self._id = entity_id
         self._audit = audit
 
 
@@ -126,7 +144,8 @@ class Question(Entity):
 
     def change_decision(self, new_decision: VizDecision) -> None:
         if new_decision._format is self._specification._rendering._decision._format:
-            raise SameVisualizationError("New viz must differ from current")
+            msg = "New viz must differ from current"
+            raise SameVisualizationError(msg)
         self._specification = QuestionSpecification(
             description=self._specification._description,
             rendering=RenderDirective(_decision=new_decision),
@@ -153,7 +172,7 @@ class Question(Entity):
         )
         return Question(
             identity=QuestionIdentity(
-                id=EntityId(uuid4()),
+                entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.utcnow()),
                     _updated=UpdatedAt(datetime.utcnow()),
@@ -165,7 +184,7 @@ class Question(Entity):
     def duplicate(self, new_title: QuestionTitle) -> Question:
         return Question(
             identity=QuestionIdentity(
-                id=EntityId(uuid4()),
+                entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.utcnow()),
                     _updated=UpdatedAt(datetime.utcnow()),

@@ -44,12 +44,12 @@ class CompareQuestionsUseCase:
         first = self._questions.load(request._first_id)
         second = self._questions.load(request._second_id)
         if first is None or second is None:
-            raise QuestionNotFoundError("One or both questions not found")
+            msg = "One or both questions not found"
+            raise QuestionNotFoundError(msg)
 
         if not first.is_compatible_with(second):
-            raise IncompatibleQuestionsError(
-                "Questions must query the same dataset",
-            )
+            msg = "Questions must query the same dataset"
+            raise IncompatibleQuestionsError(msg)
 
         first_result = await self._executor.execute(
             sql=first._specification._description._query._sql,

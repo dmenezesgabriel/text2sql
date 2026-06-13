@@ -56,8 +56,8 @@ class Tiles:
 
 
 class DashboardIdentity:
-    def __init__(self, id: EntityId, audit: AuditRecord) -> None:
-        self._id = id
+    def __init__(self, entity_id: EntityId, audit: AuditRecord) -> None:
+        self._id = entity_id
         self._audit = audit
 
 
@@ -69,9 +69,8 @@ class DashboardLayout:
 
     def add_tile(self, tile: DashboardTile) -> None:
         if self._tile_overlaps(tile):
-            raise TileOverlapError(
-                f"Tile {tile._identity._id.value} overlaps existing tile",
-            )
+            msg = f"Tile {tile._identity._id.value} overlaps existing tile"
+            raise TileOverlapError(msg)
         self._tiles.add(tile)
 
     def remove_tile(self, tile_id: EntityId) -> None:
@@ -88,13 +87,15 @@ class DashboardLayout:
     ) -> None:
         tile = self._tiles.find(tile_id)
         if tile is None:
-            raise TileNotFoundError(f"Tile {tile_id.value} not found")
+            msg = f"Tile {tile_id.value} not found"
+            raise TileNotFoundError(msg)
         moved = DashboardTile(
             identity=TileIdentity(_id=tile_id, _position=new_position),
             source=tile._source,
         )
         if self._tile_overlaps(moved):
-            raise TileOverlapError("Cannot move tile: position occupied")
+            msg = "Cannot move tile: position occupied"
+            raise TileOverlapError(msg)
         self._tiles.remove(tile_id)
         self._tiles.add(moved)
 
@@ -105,16 +106,15 @@ class DashboardLayout:
         target_tile_ids: set[EntityId],
     ) -> None:
         if not self._tiles.contains(source_tile_id):
-            raise TileNotFoundError(
-                f"Source tile {source_tile_id.value} not found",
-            )
+            msg = f"Source tile {source_tile_id.value} not found"
+            raise TileNotFoundError(msg)
         for target_id in target_tile_ids:
             if not self._tiles.contains(target_id):
-                raise TileNotFoundError(
-                    f"Target tile {target_id.value} not found",
-                )
+                msg = f"Target tile {target_id.value} not found"
+                raise TileNotFoundError(msg)
             if target_id == source_tile_id:
-                raise SelfFilterError("A tile cannot filter itself")
+                msg = "A tile cannot filter itself"
+                raise SelfFilterError(msg)
 
         binding = FilterBinding(
             _source_tile=source_tile_id,

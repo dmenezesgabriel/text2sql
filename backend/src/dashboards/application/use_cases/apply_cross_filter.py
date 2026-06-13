@@ -44,9 +44,8 @@ class ApplyCrossFilterUseCase:
     ) -> CrossFilterResult:
         dashboard = self._dashboards.load(request._dashboard_id)
         if dashboard is None:
-            raise DashboardNotFoundError(
-                f"Dashboard {request._dashboard_id.value} not found",
-            )
+            msg = f"Dashboard {request._dashboard_id.value} not found"
+            raise DashboardNotFoundError(msg)
 
         affected = dashboard._layout.tiles_affected_by(
             source_tile_id=request._source_tile_id,

@@ -13,8 +13,8 @@ from src.shared.domain.base import AuditRecord, Entity, EntityId, ValueObject
 
 
 class DatasetIdentity:
-    def __init__(self, id: EntityId, audit: AuditRecord) -> None:
-        self._id = id
+    def __init__(self, entity_id: EntityId, audit: AuditRecord) -> None:
+        self._id = entity_id
         self._audit = audit
 
 

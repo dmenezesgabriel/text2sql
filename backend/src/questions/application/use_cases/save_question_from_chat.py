@@ -43,20 +43,20 @@ class SaveQuestionFromChatUseCase:
             if existing._specification._description._query.is_equivalent_to(
                 request._spec._description._query,
             ):
-                raise DuplicateQuestionError(
+                msg = (
                     f"A question with identical SQL already exists: "
-                    f"'{existing._identity._id.value}'",
+                    f"'{existing._identity._id.value}'"
                 )
+                raise DuplicateQuestionError(msg)
 
         dataset = self._datasets.load(request._dataset_id)
         if dataset is None:
-            raise DatasetNotFoundError(
-                f"Dataset {request._dataset_id.value} not found",
-            )
+            msg = f"Dataset {request._dataset_id.value} not found"
+            raise DatasetNotFoundError(msg)
 
         question = Question(
             identity=QuestionIdentity(
-                id=EntityId(uuid4()),
+                entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.utcnow()),
                     _updated=UpdatedAt(datetime.utcnow()),

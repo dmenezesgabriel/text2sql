@@ -36,7 +36,7 @@ class RegisterS3DatasetUseCase:
         now = datetime.utcnow()
         dataset = Dataset(
             identity=DatasetIdentity(
-                id=dataset_id,
+                entity_id=dataset_id,
                 audit=AuditRecord(
                     _created=CreatedAt(now),
                     _updated=UpdatedAt(now),

@@ -35,9 +35,8 @@ class ReplayConversationUseCase:
     ) -> AsyncIterator[AgentEvent]:
         conversation = await self._conversations.load(conversation_id)
         if conversation is None:
-            raise ValueError(
-                f"Conversation {conversation_id.value} not found",
-            )
+            msg = f"Conversation {conversation_id.value} not found"
+            raise ValueError(msg)
 
         user_messages = [m for m in conversation._history.to_list() if m.is_from(MessageRole.USER)]
         for msg in user_messages:

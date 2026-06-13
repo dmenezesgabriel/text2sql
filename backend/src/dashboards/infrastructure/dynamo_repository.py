@@ -45,7 +45,7 @@ class DynamoDashboardRepository(IDashboardRepository):
     def _doc_to_dashboard(self, model: DashboardModel) -> Dashboard:
         return Dashboard(
             identity=DashboardIdentity(
-                id=EntityId(UUID(model.id)),
+                entity_id=EntityId(UUID(model.id)),
                 audit=AuditRecord(
                     _created=CreatedAt(
                         datetime.fromisoformat(model.created_at),

@@ -60,7 +60,7 @@ class DynamoQuestionRepository(IQuestionRepository):
     def _doc_to_question(self, model: QuestionModel) -> Question:
         return Question(
             identity=QuestionIdentity(
-                id=EntityId(UUID(model.id)),
+                entity_id=EntityId(UUID(model.id)),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.fromisoformat(model.created_at)),
                     _updated=UpdatedAt(datetime.fromisoformat(model.updated_at)),

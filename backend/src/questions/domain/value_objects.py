@@ -12,7 +12,8 @@ class QuestionTitle(ValueObject):
 
     def __post_init__(self) -> None:
         if not self.value.strip():
-            raise ValueError("Question title cannot be empty")
+            msg = "Question title cannot be empty"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True)

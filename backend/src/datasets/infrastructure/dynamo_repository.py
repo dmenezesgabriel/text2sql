@@ -64,7 +64,7 @@ class DynamoDatasetRepository(IDatasetRepository):
             )
         return Dataset(
             identity=DatasetIdentity(
-                id=EntityId(UUID(model.id)),
+                entity_id=EntityId(UUID(model.id)),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.fromisoformat(model.created_at)),
                     _updated=UpdatedAt(datetime.fromisoformat(model.updated_at)),

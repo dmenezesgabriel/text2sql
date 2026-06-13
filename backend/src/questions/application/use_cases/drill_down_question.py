@@ -25,9 +25,8 @@ class DrillDownQuestionUseCase:
     def execute(self, request: DrillDownRequest) -> Question:
         source = self._questions.load(request._source_id)
         if source is None:
-            raise QuestionNotFoundError(
-                f"Question {request._source_id.value} not found",
-            )
+            msg = f"Question {request._source_id.value} not found"
+            raise QuestionNotFoundError(msg)
 
         derived = source.derive_drill_down(
             column=request._column,

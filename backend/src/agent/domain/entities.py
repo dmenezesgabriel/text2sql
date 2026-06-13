@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
@@ -92,7 +93,8 @@ class MessageBody(ValueObject):
 class Message(Entity):
     def __init__(self, identity: MessageIdentity, body: MessageBody) -> None:
         if body._content.is_empty():
-            raise ValueError("Message content cannot be empty")
+            msg = "Message content cannot be empty"
+            raise ValueError(msg)
         self._identity = identity
         self._body = body
 
@@ -104,8 +106,6 @@ class Message(Entity):
 
     def append_content(self, fragment: str) -> None:
         merged = self._body._content.value + fragment
-        import dataclasses
-
         object.__setattr__(
             self._body,
             "_content",
@@ -119,10 +119,11 @@ class Messages:
 
     def append(self, message: Message) -> None:
         if self._items and self._items[-1].is_from(message._identity._role):
-            raise ConversationOrderError(
+            msg = (
                 f"Cannot append {message._identity._role.name} "
-                f"after {self._items[-1]._identity._role.name}",
+                f"after {self._items[-1]._identity._role.name}"
             )
+            raise ConversationOrderError(msg)
         self._items.append(message)
 
     def trim_to_token_limit(self, limit: TokenCount) -> None:
@@ -158,9 +159,8 @@ class Conversation(Entity):
 
     def add_user_message(self, content: str) -> Message:
         if self._state is ConversationState.CLOSED:
-            raise ClosedConversationError(
-                f"Conversation {self._identity.value} is closed",
-            )
+            msg = f"Conversation {self._identity.value} is closed"
+            raise ClosedConversationError(msg)
         message = Message(
             identity=MessageIdentity(
                 _id=EntityId(uuid4()),

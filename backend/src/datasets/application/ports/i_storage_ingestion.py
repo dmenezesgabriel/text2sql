@@ -10,5 +10,5 @@ class IStorageIngestion(Protocol):
     async def ingest(
         self,
         uri: StorageUri,
-        format: FileFormat,
+        file_format: FileFormat,
     ) -> AsyncIterator[ColumnDefinition]: ...

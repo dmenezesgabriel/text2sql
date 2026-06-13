@@ -10,6 +10,6 @@ class S3Ingester(IStorageIngestion):
     async def ingest(
         self,
         uri: StorageUri,
-        format: FileFormat,
+        file_format: FileFormat,
     ) -> AsyncIterator[ColumnDefinition]:
         yield ColumnDefinition(_name="placeholder", _dtype="VARCHAR", _nullable=True)

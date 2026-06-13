@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
 from src.questions.application.use_cases.compare_questions import (
     CompareQuestionsUseCase,
@@ -27,8 +28,6 @@ def create_questions_router(
     @router.post("")
     async def create_question(body: dict):
         if save_use_case is None:
-            from fastapi.responses import JSONResponse
-
             return JSONResponse(status_code=501, content={"error": "Not wired"})
         return {"status": "ok"}
 

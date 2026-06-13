@@ -50,9 +50,8 @@ class ComposeDashboardFromQuestionsUseCase:
         for i, question_id in enumerate(request._question_ids):
             question = self._questions.load(question_id)
             if question is None:
-                raise TileNotFoundError(
-                    f"Question {question_id.value} not found",
-                )
+                msg = f"Question {question_id.value} not found"
+                raise TileNotFoundError(msg)
 
             row, col = divmod(i, cols)
             tile = DashboardTile(
@@ -86,7 +85,7 @@ class ComposeDashboardFromQuestionsUseCase:
 
         dashboard = Dashboard(
             identity=DashboardIdentity(
-                id=EntityId(uuid4()),
+                entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.utcnow()),
                     _updated=UpdatedAt(datetime.utcnow()),

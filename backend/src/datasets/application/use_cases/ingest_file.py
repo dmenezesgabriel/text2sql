@@ -45,15 +45,13 @@ class IngestFileUseCase:
 
     async def execute(self, request: IngestFileRequest) -> Dataset:
         if request._format not in (FileFormat.CSV, FileFormat.PARQUET):
-            raise UnsupportedFormatError(
-                f"Format {request._format.value} not supported",
-            )
+            msg = f"Format {request._format.value} not supported"
+            raise UnsupportedFormatError(msg)
 
         existing = self._datasets.find_all()
         if existing.find_by_name(request._name):
-            raise DuplicateDatasetNameError(
-                f"Dataset '{request._name.value}' already exists",
-            )
+            msg = f"Dataset '{request._name.value}' already exists"
+            raise DuplicateDatasetNameError(msg)
 
         columns: list[ColumnDefinition] = []
         async for column in self._storage.ingest(
@@ -69,7 +67,7 @@ class IngestFileUseCase:
 
         dataset = Dataset(
             identity=DatasetIdentity(
-                id=dataset_id,
+                entity_id=dataset_id,
                 audit=AuditRecord(
                     _created=CreatedAt(datetime.utcnow()),
                     _updated=UpdatedAt(datetime.utcnow()),
