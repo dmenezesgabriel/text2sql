@@ -1,0 +1,25 @@
+rules:
+  - id: test-not-in-class
+    message: >
+      Test function is defined at module level. Group tests into a scoped
+      class (e.g. `class TestMyFeature:`) to improve organisation and allow
+      shared fixtures via class-level setup.
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern: |
+          def $NAME(...):
+              ...
+      - metavariable-pattern:
+          metavariable: $NAME
+          patterns:
+            - pattern-regex: "^test_"
+      - pattern-not-inside: |
+          class $CLASS:
+              ...
+    path-exclude:
+      - "**/__init__.py"
+      - "**/conftest.py"
+    metadata:
+      category: testing
+      technology: python
