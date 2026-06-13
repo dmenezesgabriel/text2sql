@@ -6,6 +6,7 @@ export interface AgentMessage {
   id: string;
   role: MessageRole;
   content: string;
+  spec?: Record<string, unknown>;
   toolCall?: ToolCall;
   createdAt: string;
 }
@@ -17,7 +18,7 @@ export interface ToolCall {
 
 export interface AgentEvent {
   type: string;
-  payload: string;
+  payload: string | Record<string, unknown>;
 }
 
 export interface ThinkingEvent extends AgentEvent {

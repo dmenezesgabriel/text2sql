@@ -1,6 +1,8 @@
+import { JSONUIProvider, Renderer } from '@json-render/react';
 import React from 'react';
 
 import type { AgentMessage } from '@/entities/agent/types';
+import { registry } from '@/widgets/json-render/registry';
 
 interface ChatMessageProps {
   readonly message: AgentMessage;
@@ -52,7 +54,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
         alignSelf: isUser ? 'flex-end' : 'flex-start',
       }}
     >
-      {message.content}
+      {!isUser && message.spec ? (
+        <JSONUIProvider registry={registry}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
+          <Renderer spec={message.spec as any} registry={registry} />
+        </JSONUIProvider>
+      ) : (
+        message.content
+      )}
     </div>
   );
 }
