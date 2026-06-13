@@ -1,17 +1,22 @@
 FROM python:3.12-slim AS builder
 
-ENV UV_SYSTEM_PYTHON=1
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev --frozen
+RUN uv venv /app/.venv && \
+    uv sync --no-dev --frozen --no-editable --python /app/.venv/bin/python
 
 FROM python:3.12-slim
 
 WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /app/.venv /app/.venv
 COPY src/ src/
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Pre-install DuckDB extensions so startup doesn't block on download
+RUN python -c "import duckdb; c = duckdb.connect(); c.execute('INSTALL httpfs'); c.close()"
 
 EXPOSE 8000
 
