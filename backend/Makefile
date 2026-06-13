@@ -15,7 +15,7 @@ check:
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run lint-imports --config .import_linter.cfg
 
 test:
-	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run pytest -v
+	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run pytest --cov=src --cov-report=term-missing
 
 mutate:
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run mutmut run

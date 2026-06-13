@@ -116,6 +116,7 @@ runner = "pytest"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+addopts = "-q --tb=short -ra --no-header"
 
 [tool.uv]
 
