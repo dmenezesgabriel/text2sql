@@ -90,3 +90,30 @@ class TestConversation:
         conv = _make_conversation()
         msg = conv.add_user_message("Hi")
         assert msg is not None
+
+    def test_history_text_returns_formatted_messages(self) -> None:
+        conv = _make_conversation()
+        conv.add_user_message("Hello")
+        assert "Hello" in conv.history_text()
+
+    def test_recent_messages_returns_last_n(self) -> None:
+        conv = _make_conversation()
+        conv.add_user_message("first")
+        conv.add_assistant_response("response", None)
+        conv.add_user_message("second")
+        recent = conv.recent_messages(window=1)
+        assert len(recent) == 1
+        assert recent[0]._body._content.value == "second"
+
+    def test_apply_summary_replaces_history(self) -> None:
+        conv = _make_conversation()
+        conv.add_user_message("old message")
+        conv.add_assistant_response("old reply", None)
+        recent = conv.recent_messages(window=1)
+        conv.apply_summary("compressed context", recent)
+        messages = conv._history.to_list()
+        assert (
+            messages[0]._body._content.value
+            == "Summary of earlier conversation: compressed context"
+        )
+        assert messages[-1]._body._content.value == "old reply"

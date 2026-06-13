@@ -9,9 +9,6 @@ class FakeLLMProvider:
     async def generate(self, messages: list[Message], config: AgentConfiguration) -> str:
         return "summary text"
 
-    def stream(self, messages: list[Message], config: AgentConfiguration):
-        yield "stream"
-
     async def call_with_tools(
         self,
         messages: list[dict],

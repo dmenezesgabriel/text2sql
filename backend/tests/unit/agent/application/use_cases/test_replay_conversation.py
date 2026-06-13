@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -26,7 +26,7 @@ class FakeConversationRepository:
     def __init__(self, conversations: dict[str, Conversation]) -> None:
         self._conversations = conversations
 
-    async def load(self, conversation_id: ConversationId) -> Conversation | None:
+    def load(self, conversation_id: ConversationId) -> Conversation | None:
         return self._conversations.get(str(conversation_id.value))
 
     def save(self, conversation: Conversation) -> None:
@@ -70,7 +70,7 @@ def _make_conversation_with_user_message(conv_id: ConversationId) -> Conversatio
         identity=MessageIdentity(
             _id=EntityId(uuid4()),
             _role=MessageRole.ASSISTANT,
-            _timestamp=CreatedAt(datetime.utcnow()),
+            _timestamp=CreatedAt(datetime.now(UTC)),
         ),
         body=MessageBody(
             _content=MessageContent("Answer"),

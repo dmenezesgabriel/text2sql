@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from uuid import uuid4
 
 from src.agent.application.use_cases.handle_chat_message import (
+    AgentConfig,
     HandleChatMessageUseCase,
     ProcessMessageRequest,
 )
@@ -57,7 +58,7 @@ class FakeToolKit:
 
 
 class FakeSummarizer:
-    def summarize(self, text: str) -> str:
+    async def summarize(self, text: str) -> str:
         return f"Summary of: {text[:20]}"
 
 
@@ -67,13 +68,19 @@ class TestHandleChatMessageUseCase:
         self.toolkit = FakeToolKit()
         self.summarizer = FakeSummarizer()
 
-    def _make_use_case(self, events: list[AgentEvent]) -> HandleChatMessageUseCase:
+    def _make_use_case(
+        self,
+        events: list[AgentEvent],
+        token_limit: TokenCount = TokenCount(10000),
+    ) -> HandleChatMessageUseCase:
         return HandleChatMessageUseCase(
             conversations=self.repo,
-            orchestrator=FakeOrchestrator(events),
-            toolkit=self.toolkit,
-            summarizer=self.summarizer,
-            token_limit=TokenCount(10000),
+            agent=AgentConfig(
+                _orchestrator=FakeOrchestrator(events),
+                _toolkit=self.toolkit,
+                _summarizer=self.summarizer,
+                _token_limit=token_limit,
+            ),
         )
 
     async def _collect(self, use_case: HandleChatMessageUseCase, content: str) -> list[AgentEvent]:
@@ -100,3 +107,12 @@ class TestHandleChatMessageUseCase:
         use_case = self._make_use_case([])
         events = await self._collect(use_case, "Hello")
         assert len(events) > 0
+
+    async def test_summarizes_when_token_limit_exceeded(self) -> None:
+        # Token limit of 1 forces summarization on any non-empty message.
+        use_case = self._make_use_case([], token_limit=TokenCount(1))
+        await self._collect(use_case, "A message long enough to exceed the limit")
+        saved = next(iter(self.repo._store.values()))
+        # After summarization the history starts with a SYSTEM summary message.
+        first_msg = saved._history.to_list()[0]
+        assert "Summary of earlier conversation:" in first_msg._body._content.value

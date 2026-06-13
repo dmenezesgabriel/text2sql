@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.agent.domain.entities import Conversation, Message, MessageBody, MessageIdentity, Messages
@@ -34,9 +34,6 @@ class FakeLLMProvider:
 
     async def generate(self, messages: object, config: object) -> str:
         return ""
-
-    def stream(self, messages: object, config: object) -> AsyncIterator[str]:
-        raise NotImplementedError
 
 
 class FakeDatasetRepository:
@@ -90,7 +87,7 @@ def _make_user_message() -> Message:
         identity=MessageIdentity(
             _id=EntityId(uuid4()),
             _role=MessageRole.USER,
-            _timestamp=CreatedAt(datetime.utcnow()),
+            _timestamp=CreatedAt(datetime.now(UTC)),
         ),
         body=MessageBody(
             _content=MessageContent("what is the count?"),

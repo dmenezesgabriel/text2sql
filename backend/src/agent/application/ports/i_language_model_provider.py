@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
 from typing import Protocol
 
 from src.agent.domain.entities import AgentConfiguration, Message
@@ -14,14 +13,8 @@ class ILanguageModelProvider(Protocol):
         config: AgentConfiguration,
     ) -> str: ...
 
-    def stream(
-        self,
-        messages: list[Message],
-        config: AgentConfiguration,
-    ) -> AsyncIterator[str]: ...
-
     async def call_with_tools(
         self,
-        messages: list[dict],
-        tools: list[dict],
+        messages: list[dict[str, object]],
+        tools: list[dict[str, object]],
     ) -> LLMToolResponse: ...

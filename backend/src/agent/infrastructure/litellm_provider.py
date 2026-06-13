@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from collections.abc import AsyncIterator
+from typing import cast
 
-from litellm import acompletion, completion
+from litellm import ModelResponse, acompletion
 
 from src.agent.application.ports.i_language_model_provider import ILanguageModelProvider
 from src.agent.domain.entities import AgentConfiguration, Message
@@ -19,35 +19,29 @@ class LiteLLMProvider(ILanguageModelProvider):
             {"role": m._identity._role.name.lower(), "content": m._body._content.value}
             for m in messages
         ]
-        response = await acompletion(
-            model=self._model_name,
-            messages=formatted,
-            temperature=config._model._temperature.value,
+        response = cast(
+            ModelResponse,
+            await acompletion(
+                model=self._model_name,
+                messages=formatted,
+                temperature=config._profile._model._temperature.value,
+            ),
         )
         return response.choices[0].message.content or ""
 
-    def stream(self, messages: list[Message], config: AgentConfiguration) -> AsyncIterator[str]:
-        formatted = [
-            {"role": m._identity._role.name.lower(), "content": m._body._content.value}
-            for m in messages
-        ]
-        response = completion(
-            model=self._model_name,
-            messages=formatted,
-            temperature=config._model._temperature.value,
-            stream=True,
-        )
-        for chunk in response:
-            delta = chunk.choices[0].delta.content or ""
-            if delta:
-                yield delta
-
-    async def call_with_tools(self, messages: list[dict], tools: list[dict]) -> LLMToolResponse:
-        response = await acompletion(
-            model=self._model_name,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
+    async def call_with_tools(
+        self,
+        messages: list[dict[str, object]],
+        tools: list[dict[str, object]],
+    ) -> LLMToolResponse:
+        response = cast(
+            ModelResponse,
+            await acompletion(
+                model=self._model_name,
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",
+            ),
         )
         choice = response.choices[0]
         msg = choice.message
@@ -55,7 +49,7 @@ class LiteLLMProvider(ILanguageModelProvider):
             calls = tuple(
                 LLMToolCall(
                     _id=tc.id,
-                    _name=tc.function.name,
+                    _name=tc.function.name or "",
                     _arguments=json.loads(tc.function.arguments),
                 )
                 for tc in msg.tool_calls

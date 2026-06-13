@@ -40,21 +40,13 @@ class AgentConfig:
 
 
 class HandleChatMessageUseCase:
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         conversations: IConversationRepository,
-        orchestrator: IAgentOrchestrator,
-        toolkit: IToolKit,
-        summarizer: ISummarizer,
-        token_limit: TokenCount,
+        agent: AgentConfig,
     ) -> None:
         self._conversations = conversations
-        self._agent = AgentConfig(
-            _orchestrator=orchestrator,
-            _toolkit=toolkit,
-            _summarizer=summarizer,
-            _token_limit=token_limit,
-        )
+        self._agent = agent
 
     async def execute(self, request: ProcessMessageRequest) -> AsyncIterator[AgentEvent]:
         conversation = self._load_or_create(request._conversation_id)
@@ -63,10 +55,12 @@ class HandleChatMessageUseCase:
         yield ThinkingEvent("Processing your question...")
 
         if conversation.should_summarize(self._agent._token_limit):
-            conversation.summarize_oldest(self._agent._summarizer)
+            recent = conversation.recent_messages(window=10)
+            summary = await self._agent._summarizer.summarize(conversation.history_text())
+            conversation.apply_summary(summary, recent)
             yield ThinkingEvent("Summarizing conversation context...")
 
-        final_spec: dict | None = None
+        final_spec: dict[str, object] | None = None
         async for event in self._agent._orchestrator.run(
             message=message,
             conversation=conversation,

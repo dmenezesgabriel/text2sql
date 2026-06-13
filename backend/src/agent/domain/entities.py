@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import dataclasses
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum, auto
 from uuid import uuid4
 
@@ -111,14 +110,6 @@ class Message(Entity):
     def has_tool_call(self) -> bool:
         return self._body._tool_call is not None
 
-    def append_content(self, fragment: str) -> None:
-        merged = self._body._content.value + fragment
-        object.__setattr__(
-            self._body,
-            "_content",
-            dataclasses.replace(self._body._content, value=merged),
-        )
-
 
 class Messages:
     def __init__(self) -> None:
@@ -187,7 +178,7 @@ class Conversation(Entity):
             identity=MessageIdentity(
                 _id=EntityId(uuid4()),
                 _role=MessageRole.USER,
-                _timestamp=CreatedAt(datetime.utcnow()),
+                _timestamp=CreatedAt(datetime.now(UTC)),
             ),
             body=MessageBody(
                 _content=MessageContent(content),
@@ -206,7 +197,7 @@ class Conversation(Entity):
             identity=MessageIdentity(
                 _id=EntityId(uuid4()),
                 _role=MessageRole.ASSISTANT,
-                _timestamp=CreatedAt(datetime.utcnow()),
+                _timestamp=CreatedAt(datetime.now(UTC)),
             ),
             body=MessageBody(
                 _content=MessageContent(content),
@@ -220,31 +211,30 @@ class Conversation(Entity):
         total = sum(len(m._body._content.value) for m in self._thread._history.to_list())
         return TokenCount(total).value > threshold.value
 
-    def summarize_oldest(self, summarizer: ISummarizer) -> None:
-        to_summarize = self._thread._history.recent_context(window=10)
-        summary_text = summarizer.summarize(self._thread._history.summary())
+    def history_text(self) -> str:
+        return self._thread._history.summary()
+
+    def recent_messages(self, window: int) -> list[Message]:
+        return self._thread._history.recent_context(window)
+
+    def apply_summary(self, summary: str, recent: list[Message]) -> None:
+        """Replace history: one SYSTEM summary message followed by `recent`."""
         self._thread._history = Messages()
         self._thread._history.append(
             Message(
                 identity=MessageIdentity(
                     _id=EntityId(uuid4()),
                     _role=MessageRole.SYSTEM,
-                    _timestamp=CreatedAt(datetime.utcnow()),
+                    _timestamp=CreatedAt(datetime.now(UTC)),
                 ),
                 body=MessageBody(
-                    _content=MessageContent(
-                        f"Summary of earlier conversation: {summary_text}",
-                    ),
+                    _content=MessageContent(f"Summary of earlier conversation: {summary}"),
                     _tool_call=None,
                 ),
             ),
         )
-        for msg in to_summarize:
+        for msg in recent:
             self._thread._history.append(msg)
 
     def close(self) -> None:
         self._thread._state = ConversationState.CLOSED
-
-
-class ISummarizer:
-    def summarize(self, text: str) -> str: ...

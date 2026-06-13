@@ -4,7 +4,10 @@ from dataclasses import dataclass
 
 from fastapi import APIRouter
 
-from src.agent.application.use_cases.handle_chat_message import HandleChatMessageUseCase
+from src.agent.application.use_cases.handle_chat_message import (
+    AgentConfig,
+    HandleChatMessageUseCase,
+)
 from src.agent.domain.value_objects import TokenCount
 from src.agent.infrastructure.deep_agents import DeepAgentsOrchestrator
 from src.agent.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
@@ -87,10 +90,12 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
     # ── Use Cases: Agent ──
     chat_use_case = HandleChatMessageUseCase(
         conversations=conversation_repo,
-        orchestrator=orchestrator,
-        toolkit=toolkit,
-        summarizer=summarizer,
-        token_limit=TokenCount(cfg.token_limit),
+        agent=AgentConfig(
+            _orchestrator=orchestrator,
+            _toolkit=toolkit,
+            _summarizer=summarizer,
+            _token_limit=TokenCount(cfg.token_limit),
+        ),
     )
 
     # ── Use Cases: Questions ──

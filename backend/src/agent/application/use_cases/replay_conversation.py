@@ -41,7 +41,7 @@ class ReplayConversationUseCase:
         conversation_id: ConversationId,
         new_config: AgentConfiguration,
     ) -> AsyncIterator[AgentEvent]:
-        conversation = await self._conversations.load(conversation_id)
+        conversation = self._conversations.load(conversation_id)
         if conversation is None:
             msg = f"Conversation {conversation_id.value} not found"
             raise ValueError(msg)
