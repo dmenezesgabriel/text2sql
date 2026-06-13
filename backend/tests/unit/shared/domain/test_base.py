@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import pytest
 
 from src.shared.domain.base import (
-    AggregateRoot,
     AuditRecord,
     CreatedAt,
-    DomainEvent,
     EntityId,
     QueryResult,
     ResponseKind,
@@ -52,26 +50,6 @@ class TestAuditRecord:
         new_record = record.touch()
         assert new_record._created == created
         assert new_record._updated != updated
-
-
-class TestDomainEvent:
-    def test_has_event_id_and_occurred_at(self) -> None:
-        event = DomainEvent()
-        assert isinstance(event.event_id, UUID)
-        assert isinstance(event.occurred_at, datetime)
-
-
-class TestAggregateRoot:
-    def test_record_and_pull_events(self) -> None:
-        class ConcreteAggregate(AggregateRoot):
-            def do_something(self) -> None:
-                self._record(DomainEvent())
-
-        aggregate = ConcreteAggregate()
-        aggregate.do_something()
-        events = aggregate.pull_events()
-        assert len(events) == 1
-        assert aggregate.pull_events() == []
 
 
 class TestValueObject:

@@ -1,23 +1,19 @@
 from src.shared.domain.base import (
-    Entity,
-    ValueObject,
-    AggregateRoot,
-    DomainEvent,
-    EntityCollection,
     AuditRecord,
     CreatedAt,
-    UpdatedAt,
+    Entity,
+    EntityCollection,
     EntityId,
+    UpdatedAt,
+    ValueObject,
 )
 
 __all__ = [
-    "Entity",
-    "ValueObject",
-    "AggregateRoot",
-    "DomainEvent",
-    "EntityCollection",
     "AuditRecord",
     "CreatedAt",
-    "UpdatedAt",
+    "Entity",
+    "EntityCollection",
     "EntityId",
+    "UpdatedAt",
+    "ValueObject",
 ]

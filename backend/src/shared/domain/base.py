@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum, auto
-from uuid import UUID, uuid4
+from uuid import UUID
 
 
 @dataclass(frozen=True)
@@ -45,12 +45,6 @@ class AuditRecord:
         )
 
 
-@dataclass(frozen=True)
-class DomainEvent:
-    event_id: UUID = field(default_factory=uuid4)
-    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-
-
 class Entity:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entity):
@@ -59,19 +53,6 @@ class Entity:
 
     def __hash__(self) -> int:
         return hash(getattr(self, "_identity", None))
-
-
-class AggregateRoot(Entity):
-    def __init__(self) -> None:
-        self._events: list[DomainEvent] = []
-
-    def _record(self, event: DomainEvent) -> None:
-        self._events.append(event)
-
-    def pull_events(self) -> list[DomainEvent]:
-        events = list(self._events)
-        self._events.clear()
-        return events
 
 
 @dataclass(frozen=True)
