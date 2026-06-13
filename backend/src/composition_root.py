@@ -4,42 +4,29 @@ from dataclasses import dataclass
 
 from fastapi import APIRouter
 
-from src.agent.application.use_cases.handle_chat_message import (
-    HandleChatMessageUseCase,
-)
+from src.agent.application.use_cases.handle_chat_message import HandleChatMessageUseCase
 from src.agent.domain.value_objects import TokenCount
 from src.agent.infrastructure.deep_agents import DeepAgentsOrchestrator
-from src.agent.infrastructure.dynamo_conversation_repository import (
-    DynamoConversationRepository,
-)
+from src.agent.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
 from src.agent.infrastructure.fastapi.router import create_chat_router
 from src.agent.infrastructure.litellm_provider import LiteLLMProvider
 from src.agent.infrastructure.summarizer import LiteLLMSummarizer
 from src.agent.infrastructure.tool_kit import ToolKit
 from src.agent.infrastructure.tools.sql_generator import SQLGeneratorTool
 from src.agent.infrastructure.tools.viz_selector import VizSelectorTool
-from src.dashboards.application.use_cases.apply_cross_filter import (
-    ApplyCrossFilterUseCase,
-)
+from src.dashboards.application.use_cases.apply_cross_filter import ApplyCrossFilterUseCase
 from src.dashboards.application.use_cases.compose_dashboard import (
     ComposeDashboardFromQuestionsUseCase,
 )
 from src.dashboards.infrastructure.dynamo_repository import DynamoDashboardRepository
 from src.dashboards.infrastructure.fastapi.router import create_dashboards_router
-from src.datasets.application.use_cases.ingest_file import IngestFileUseCase
+from src.datasets.application.use_cases.register_s3_dataset import RegisterS3DatasetUseCase
 from src.datasets.infrastructure.duckdb_executor import DuckDBExecutor
 from src.datasets.infrastructure.dynamo_repository import DynamoDatasetRepository
 from src.datasets.infrastructure.fastapi.router import create_datasets_router
-from src.datasets.infrastructure.s3_ingester import S3Ingester
-from src.questions.application.use_cases.compare_questions import (
-    CompareQuestionsUseCase,
-)
-from src.questions.application.use_cases.drill_down_question import (
-    DrillDownQuestionUseCase,
-)
-from src.questions.application.use_cases.save_question_from_chat import (
-    SaveQuestionFromChatUseCase,
-)
+from src.questions.application.use_cases.compare_questions import CompareQuestionsUseCase
+from src.questions.application.use_cases.drill_down_question import DrillDownQuestionUseCase
+from src.questions.application.use_cases.save_question_from_chat import SaveQuestionFromChatUseCase
 from src.questions.infrastructure.dynamo_repository import DynamoQuestionRepository
 from src.questions.infrastructure.fastapi.router import create_questions_router
 from src.shared.infrastructure.duckdb_pool import DuckDBPool
@@ -62,11 +49,9 @@ class Composition:
     duckdb: DuckDBPool
 
 
-def compose(
-    pool: DuckDBPool,
-    config: ComposeConfig | None = None,
-) -> Composition:
+def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Composition:
     cfg = config or ComposeConfig()
+
     # ── Repositories ──
     question_repo = DynamoQuestionRepository()
     dataset_repo = DynamoDatasetRepository()
@@ -86,7 +71,7 @@ def compose(
 
     # ── LLM / Agent ──
     llm = LiteLLMProvider(cfg.llm_model_name)
-    orchestrator = DeepAgentsOrchestrator(llm)
+    orchestrator = DeepAgentsOrchestrator(llm=llm, datasets=dataset_repo)
     summarizer = LiteLLMSummarizer(llm, cfg.summarizer_model_name)
 
     # ── Use Cases: Agent ──
@@ -120,11 +105,7 @@ def compose(
     )
 
     # ── Use Cases: Datasets ──
-    ingest_file_use_case = IngestFileUseCase(
-        datasets=dataset_repo,
-        storage=S3Ingester(),
-        engine=engine,
-    )
+    register_s3_use_case = RegisterS3DatasetUseCase(datasets=dataset_repo, engine=engine)
 
     # ── Routers ──
     return Composition(
@@ -139,7 +120,9 @@ def compose(
             compose_use_case=compose_dashboard_use_case,
         ),
         datasets_router=create_datasets_router(
-            ingest_use_case=ingest_file_use_case,
+            register_use_case=register_s3_use_case,
+            dataset_repo=dataset_repo,
+            engine=engine,
         ),
         duckdb=pool,
     )

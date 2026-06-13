@@ -44,6 +44,8 @@ class DatasetModel(BaseModel):
     id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     kind = UnicodeAttribute()
+    schema = UnicodeAttribute(null=True)  # JSON list of {name, dtype, nullable}
+    location = UnicodeAttribute(null=True)  # S3 URI: s3://bucket/file.parquet
     created_at = UnicodeAttribute()
     updated_at = UnicodeAttribute()
 

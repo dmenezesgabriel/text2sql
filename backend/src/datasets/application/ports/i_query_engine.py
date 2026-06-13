@@ -14,6 +14,12 @@ class IQueryEngine(Protocol):
         schema: SchemaDefinition,
     ) -> None: ...
 
+    async def create_view_from_s3(
+        self,
+        dataset_id: EntityId,
+        s3_uri: str,
+    ) -> SchemaDefinition: ...
+
     async def execute(self, sql: str) -> QueryResult: ...
 
     async def preview(

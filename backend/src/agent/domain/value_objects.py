@@ -41,7 +41,8 @@ class Temperature(ValueObject):
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.value <= 2.0:
-            raise ValueError(f"Temperature must be between 0 and 2, got {self.value}")
+            msg = f"Temperature must be between 0 and 2, got {self.value}"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -120,3 +121,20 @@ class MessageRole(Enum):
     ASSISTANT = auto()
     SYSTEM = auto()
     TOOL = auto()
+
+
+@dataclass(frozen=True)
+class LLMToolCall(ValueObject):
+    _id: str
+    _name: str
+    _arguments: dict
+
+
+@dataclass(frozen=True)
+class LLMToolResponse(ValueObject):
+    _text: str | None
+    _tool_calls: tuple[LLMToolCall, ...]
+    _stop_reason: str
+
+    def has_tool_calls(self) -> bool:
+        return len(self._tool_calls) > 0
