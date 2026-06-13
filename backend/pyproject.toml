@@ -83,7 +83,7 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "I001"]
-"tests/*" = ["S101", "S106", "PLR", "RET"]
+"tests/*" = ["S101", "S106", "PLR", "RET", "E501", "EM101", "PLC0415"]
 "src/*/infrastructure/*" = ["S101"]
 "src/*/infrastructure/fastapi/*" = ["S101"]
 "src/main.py" = ["S101"]
@@ -117,6 +117,16 @@ runner = "pytest"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-q --tb=short -ra --no-header"
+pythonpath = ["."]
+
+[tool.deptry]
+# CLI-only and runtime deps not imported directly in Python source.
+per_rule_ignores = { DEP002 = [
+    "uvicorn", "deepagents", "pydantic", "sse-starlette", "boto3",
+    "pytest", "pytest-asyncio", "pytest-cov", "pytest-bdd",
+    "ruff", "semgrep", "deptry", "vulture", "radon",
+    "import-linter", "mutmut", "pre-commit",
+] }
 
 [tool.uv]
 
