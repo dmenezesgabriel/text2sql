@@ -17,5 +17,5 @@ class SQLGeneratorTool(IToolExecutor):
         return True
 
     async def execute(self, parameters: Parameters) -> QueryResult:
-        sql = parameters.value.get("sql", "")
+        sql = str(parameters.value.get("sql", ""))
         return await self._engine.execute(sql)

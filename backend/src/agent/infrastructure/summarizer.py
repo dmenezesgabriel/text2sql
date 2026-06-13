@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.agent.application.ports.i_language_model_provider import (
@@ -41,7 +41,7 @@ class LiteLLMSummarizer(ISummarizer):
                 identity=MessageIdentity(
                     _id=EntityId(uuid4()),
                     _role=MessageRole.SYSTEM,
-                    _timestamp=CreatedAt(datetime.utcnow()),
+                    _timestamp=CreatedAt(datetime.now(UTC)),
                 ),
                 body=MessageBody(
                     _content=MessageContent(
@@ -56,7 +56,7 @@ class LiteLLMSummarizer(ISummarizer):
                 identity=MessageIdentity(
                     _id=EntityId(uuid4()),
                     _role=MessageRole.USER,
-                    _timestamp=CreatedAt(datetime.utcnow()),
+                    _timestamp=CreatedAt(datetime.now(UTC)),
                 ),
                 body=MessageBody(
                     _content=MessageContent(text),

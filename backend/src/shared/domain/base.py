@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum, auto
 from uuid import UUID, uuid4
 
@@ -41,24 +41,24 @@ class AuditRecord:
     def touch(self) -> AuditRecord:
         return AuditRecord(
             _created=self._created,
-            _updated=UpdatedAt(datetime.utcnow()),
+            _updated=UpdatedAt(datetime.now(UTC)),
         )
 
 
 @dataclass(frozen=True)
 class DomainEvent:
     event_id: UUID = field(default_factory=uuid4)
-    occurred_at: datetime = field(default_factory=datetime.utcnow)
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class Entity:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Entity):
             return NotImplemented
-        return self._identity == other._identity
+        return getattr(self, "_identity", None) == getattr(other, "_identity", None)
 
     def __hash__(self) -> int:
-        return hash(self._identity)
+        return hash(getattr(self, "_identity", None))
 
 
 class AggregateRoot(Entity):

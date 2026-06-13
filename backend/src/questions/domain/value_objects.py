@@ -26,8 +26,8 @@ class SqlQuery(ValueObject):
 @dataclass(frozen=True)
 class VizSpec(ValueObject):
     _component: str
-    _props: dict
-    _children: tuple
+    _props: dict[str, object]
+    _children: tuple[object, ...]
 
 
 @dataclass(frozen=True)

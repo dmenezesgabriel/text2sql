@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Protocol
 
 from src.questions.application.ports.i_query_executor import IQueryExecutor
@@ -42,7 +42,7 @@ class RefreshStaleQuestionsUseCase:
         all_questions = self._questions.find_all()
         changed: list[Question] = []
         failed: list[tuple[EntityId, str]] = []
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         for question in all_questions.to_list():
             age = now - question._identity._audit._updated.value

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -20,8 +20,8 @@ def _make_dashboard(dashboard_id: EntityId) -> Dashboard:
         identity=DashboardIdentity(
             entity_id=dashboard_id,
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow()),
-                _updated=UpdatedAt(datetime.utcnow()),
+                _created=CreatedAt(datetime.now(UTC)),
+                _updated=UpdatedAt(datetime.now(UTC)),
             ),
         ),
         layout=DashboardLayout(

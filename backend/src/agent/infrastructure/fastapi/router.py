@@ -19,7 +19,7 @@ from src.agent.domain.value_objects import (
 )
 
 
-def _serialize_event(event: AgentEvent) -> dict:  # noqa: PLR0911
+def _serialize_event(event: AgentEvent) -> dict[str, object]:  # noqa: PLR0911
     if isinstance(event, ThinkingEvent):
         return {"type": "ThinkingEvent", "payload": event.message}
     if isinstance(event, ToolCallEvent):
@@ -36,7 +36,7 @@ def create_chat_router(use_case: HandleChatMessageUseCase | None = None) -> APIR
 
     @router.post("")
     async def chat(
-        body: dict,
+        body: dict[str, object],
         _use_case: HandleChatMessageUseCase | None = Depends(lambda: use_case),
     ):
         if _use_case is None:
@@ -45,9 +45,9 @@ def create_chat_router(use_case: HandleChatMessageUseCase | None = None) -> APIR
             return JSONResponse(status_code=501, content={"error": "Chat use case not wired"})
 
         raw_id = body.get("conversation_id")
-        conversation_id = UUID(raw_id) if raw_id else uuid4()
+        conversation_id = UUID(str(raw_id)) if raw_id is not None else uuid4()
         request = ProcessMessageRequest(
-            content=body.get("message", ""),
+            content=str(body.get("message", "")),
             conversation_id=conversation_id,
         )
 

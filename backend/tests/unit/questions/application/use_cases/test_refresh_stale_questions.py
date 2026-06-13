@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from src.questions.application.use_cases.refresh_stale_questions import (
@@ -72,8 +72,8 @@ def _make_stale_question(days_old: int = 10) -> Question:
         identity=QuestionIdentity(
             entity_id=EntityId(uuid4()),
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow() - timedelta(days=days_old)),
-                _updated=UpdatedAt(datetime.utcnow() - timedelta(days=days_old)),
+                _created=CreatedAt(datetime.now(UTC) - timedelta(days=days_old)),
+                _updated=UpdatedAt(datetime.now(UTC) - timedelta(days=days_old)),
             ),
         ),
         specification=QuestionSpecification(

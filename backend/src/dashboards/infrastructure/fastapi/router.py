@@ -21,7 +21,7 @@ def create_dashboards_router(
         return {"dashboards": []}
 
     @router.post("")
-    async def create_dashboard(body: dict):
+    async def create_dashboard(body: dict[str, object]):
         return {"status": "created"}
 
     @router.get("/{dashboard_id}")
@@ -29,7 +29,7 @@ def create_dashboards_router(
         return {"id": dashboard_id}
 
     @router.post("/{dashboard_id}/filter")
-    async def filter_dashboard(dashboard_id: str, body: dict):
+    async def filter_dashboard(dashboard_id: str, body: dict[str, object]):
         return {"status": "filtered"}
 
     @router.delete("/{dashboard_id}")

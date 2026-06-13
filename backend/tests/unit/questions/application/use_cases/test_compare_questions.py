@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -37,8 +37,8 @@ def _make_question(dataset_id: EntityId) -> Question:
         identity=QuestionIdentity(
             entity_id=EntityId(uuid4()),
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow()),
-                _updated=UpdatedAt(datetime.utcnow()),
+                _created=CreatedAt(datetime.now(UTC)),
+                _updated=UpdatedAt(datetime.now(UTC)),
             ),
         ),
         specification=QuestionSpecification(

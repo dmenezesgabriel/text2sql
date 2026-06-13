@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
@@ -33,7 +33,7 @@ class RegisterS3DatasetUseCase:
         dataset_id = EntityId(uuid4())
         schema = await self._engine.create_view_from_s3(dataset_id, request._s3_uri.value)
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         dataset = Dataset(
             identity=DatasetIdentity(
                 entity_id=dataset_id,

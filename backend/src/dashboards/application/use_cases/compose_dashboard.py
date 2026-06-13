@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.dashboards.application.ports.i_dashboard_repository import (
@@ -87,8 +87,8 @@ class ComposeDashboardFromQuestionsUseCase:
             identity=DashboardIdentity(
                 entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
-                    _created=CreatedAt(datetime.utcnow()),
-                    _updated=UpdatedAt(datetime.utcnow()),
+                    _created=CreatedAt(datetime.now(UTC)),
+                    _updated=UpdatedAt(datetime.now(UTC)),
                 ),
             ),
             layout=layout,

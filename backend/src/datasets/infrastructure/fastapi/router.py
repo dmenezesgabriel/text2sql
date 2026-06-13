@@ -16,7 +16,7 @@ from src.datasets.exceptions.duplicate_dataset_name_error import DuplicateDatase
 from src.shared.domain.base import EntityId
 
 
-def _dataset_to_dict(dataset: Dataset) -> dict:
+def _dataset_to_dict(dataset: Dataset) -> dict[str, object]:
     return {
         "id": str(dataset._identity._id.value),
         "name": dataset._configuration._name.value,
@@ -42,9 +42,9 @@ def create_datasets_router(
         return {"datasets": [_dataset_to_dict(ds) for ds in datasets.to_list()]}
 
     @router.post("/register-s3", status_code=201)
-    async def register_s3_dataset(body: dict):
-        name = body.get("name", "").strip()
-        s3_uri = body.get("s3_uri", "").strip()
+    async def register_s3_dataset(body: dict[str, object]):
+        name = str(body.get("name", "")).strip()
+        s3_uri = str(body.get("s3_uri", "")).strip()
         if not name or not s3_uri:
             raise HTTPException(status_code=400, detail="'name' and 's3_uri' are required")
         try:
@@ -86,7 +86,7 @@ def create_datasets_router(
     return router
 
 
-def _make_serializable(row: dict) -> dict:
+def _make_serializable(row: dict[str, object]) -> dict[str, object]:
     return {
         k: v if isinstance(v, (int, float, str, bool, type(None))) else str(v)
         for k, v in row.items()

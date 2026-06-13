@@ -26,7 +26,7 @@ def create_questions_router(
         return {"questions": []}
 
     @router.post("")
-    async def create_question(body: dict):
+    async def create_question(body: dict[str, object]):
         if save_use_case is None:
             return JSONResponse(status_code=501, content={"error": "Not wired"})
         return {"status": "ok"}
@@ -40,11 +40,11 @@ def create_questions_router(
         return {"status": "deleted"}
 
     @router.post("/{question_id}/drill")
-    async def drill_question(question_id: str, body: dict):
+    async def drill_question(question_id: str, body: dict[str, object]):
         return {"status": "drilled"}
 
     @router.post("/compare")
-    async def compare_questions(body: dict):
+    async def compare_questions(body: dict[str, object]):
         return {"status": "compared"}
 
     return router

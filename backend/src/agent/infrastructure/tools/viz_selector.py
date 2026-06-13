@@ -26,7 +26,8 @@ class VizSelectorTool(IToolExecutor):
         return True
 
     async def execute(self, parameters: Parameters) -> QueryResult:
-        row_count = parameters.value.get("row_count", 0)
+        raw = parameters.value.get("row_count", 0)
+        row_count = raw if isinstance(raw, int) else 0
         kind = _select_kind(row_count)
         return QueryResult(
             _columns=("kind",),

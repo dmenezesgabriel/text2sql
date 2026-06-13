@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.questions.application.ports.i_dataset_existence import IDatasetExistence
@@ -57,8 +57,8 @@ class SaveQuestionFromChatUseCase:
             identity=QuestionIdentity(
                 entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
-                    _created=CreatedAt(datetime.utcnow()),
-                    _updated=UpdatedAt(datetime.utcnow()),
+                    _created=CreatedAt(datetime.now(UTC)),
+                    _updated=UpdatedAt(datetime.now(UTC)),
                 ),
             ),
             specification=request._spec,

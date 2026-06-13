@@ -17,8 +17,8 @@ class CompareRequest:
 
 @dataclass(frozen=True)
 class RowDifference:
-    _added: list[dict] = field(default_factory=list)
-    _removed: list[dict] = field(default_factory=list)
+    _added: list[dict[str, object]] = field(default_factory=list)
+    _removed: list[dict[str, object]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

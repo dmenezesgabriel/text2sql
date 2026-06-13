@@ -49,7 +49,7 @@ class Temperature(ValueObject):
 
 @dataclass(frozen=True)
 class Parameters(ValueObject):
-    value: dict
+    value: dict[str, object]
 
 
 @dataclass(frozen=True)
@@ -86,7 +86,7 @@ class ToolCallEvent(AgentEvent):
 
 @dataclass(frozen=True)
 class SpecFragmentEvent(AgentEvent):
-    _payload: dict
+    _payload: dict[str, object]
 
 
 @dataclass(frozen=True)
@@ -105,7 +105,7 @@ class MessageRole(Enum):
 class LLMToolCall(ValueObject):
     _id: str
     _name: str
-    _arguments: dict
+    _arguments: dict[str, object]
 
 
 @dataclass(frozen=True)

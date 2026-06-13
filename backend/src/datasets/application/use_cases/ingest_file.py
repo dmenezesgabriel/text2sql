@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
@@ -73,8 +73,8 @@ class IngestFileUseCase:
             identity=DatasetIdentity(
                 entity_id=dataset_id,
                 audit=AuditRecord(
-                    _created=CreatedAt(datetime.utcnow()),
-                    _updated=UpdatedAt(datetime.utcnow()),
+                    _created=CreatedAt(datetime.now(UTC)),
+                    _updated=UpdatedAt(datetime.now(UTC)),
                 ),
             ),
             configuration=DatasetConfiguration(

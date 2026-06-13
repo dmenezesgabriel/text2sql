@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from src.agent.application.ports.i_conversation_repository import (
@@ -49,7 +49,7 @@ class DynamoConversationRepository(IConversationRepository):
             id=str(conversation._identity.value),
             state=conversation._state.name,
             messages=json.dumps(messages),
-            updated_at=datetime.utcnow().isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
         )
         model.save()
 
