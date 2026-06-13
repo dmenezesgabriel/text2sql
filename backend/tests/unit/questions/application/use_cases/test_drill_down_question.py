@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -29,8 +29,8 @@ def _make_question(question_id: EntityId | None = None) -> Question:
         identity=QuestionIdentity(
             entity_id=question_id or EntityId(uuid4()),
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow()),
-                _updated=UpdatedAt(datetime.utcnow()),
+                _created=CreatedAt(datetime.now(UTC)),
+                _updated=UpdatedAt(datetime.now(UTC)),
             ),
         ),
         specification=QuestionSpecification(
@@ -80,11 +80,7 @@ class TestDrillDownQuestionUseCase:
         with pytest.raises(QuestionNotFoundError):
             use_case.execute(request)
 
-    def test_execute_raises_due_to_source_bug_in_with_filter(self) -> None:
-        # DrillDownQuestionUseCase.execute calls question.derive_drill_down which
-        # calls QueryDefinition.with_filter. That method has a bug: it passes
-        # sql= and source= as kwargs, but the frozen dataclass fields are _sql and _source.
-        # This test documents the bug.
+    def test_execute_creates_drill_down_question(self) -> None:
         source = _make_question()
         repo = FakeQuestionRepository({source._identity._id: source})
         use_case = DrillDownQuestionUseCase(questions=repo)
@@ -93,5 +89,6 @@ class TestDrillDownQuestionUseCase:
             _column="country",
             _value="US",
         )
-        with pytest.raises(TypeError):
-            use_case.execute(request)
+        drilled = use_case.execute(request)
+        assert drilled is not None
+        assert "WHERE country = 'US'" in drilled.compiled_sql()

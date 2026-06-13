@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.questions.domain.value_objects import (
@@ -60,7 +60,7 @@ class QueryDefinition(ValueObject):
         filtered_sql = SqlQuery(
             f"{self._sql.value.rstrip(';')} WHERE {column} {operator} '{value}'",
         )
-        return QueryDefinition(sql=filtered_sql, source=self._source)
+        return QueryDefinition(_sql=filtered_sql, _source=self._source)
 
     def with_grouping(
         self,
@@ -82,13 +82,13 @@ class QueryDefinition(ValueObject):
                 safe_group,
             ],
         )
-        return QueryDefinition(sql=SqlQuery(sql), source=self._source)
+        return QueryDefinition(_sql=SqlQuery(sql), _source=self._source)
 
     def with_limit(self, limit: int) -> QueryDefinition:
         limited_sql = SqlQuery(
             f"{self._sql.value.rstrip(';')} LIMIT {limit}",
         )
-        return QueryDefinition(sql=limited_sql, source=self._source)
+        return QueryDefinition(_sql=limited_sql, _source=self._source)
 
     def is_equivalent_to(self, other: QueryDefinition) -> bool:
         return self._normalize() == other._normalize()
@@ -174,8 +174,8 @@ class Question(Entity):
             identity=QuestionIdentity(
                 entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
-                    _created=CreatedAt(datetime.utcnow()),
-                    _updated=UpdatedAt(datetime.utcnow()),
+                    _created=CreatedAt(datetime.now(UTC)),
+                    _updated=UpdatedAt(datetime.now(UTC)),
                 ),
             ),
             specification=drill_spec,
@@ -186,8 +186,8 @@ class Question(Entity):
             identity=QuestionIdentity(
                 entity_id=EntityId(uuid4()),
                 audit=AuditRecord(
-                    _created=CreatedAt(datetime.utcnow()),
-                    _updated=UpdatedAt(datetime.utcnow()),
+                    _created=CreatedAt(datetime.now(UTC)),
+                    _updated=UpdatedAt(datetime.now(UTC)),
                 ),
             ),
             specification=QuestionSpecification(

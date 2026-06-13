@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -30,8 +30,8 @@ def _make_question(
         identity=QuestionIdentity(
             entity_id=EntityId(uuid4()),
             audit=AuditRecord(
-                _created=CreatedAt(datetime.utcnow()),
-                _updated=UpdatedAt(datetime.utcnow()),
+                _created=CreatedAt(datetime.now(UTC)),
+                _updated=UpdatedAt(datetime.now(UTC)),
             ),
         ),
         specification=QuestionSpecification(
@@ -63,12 +63,10 @@ class TestQueryDefinition:
                 _source=DatasetReference(_id=EntityId(uuid4()), _alias=None),
             )
 
-    def test_with_filter_raises_due_to_source_bug(self) -> None:
-        # with_filter calls QueryDefinition(sql=..., source=...) using wrong kwarg names
-        # (_sql and _source are the correct dataclass field names). This documents the bug.
+    def test_with_filter_appends_where_clause(self) -> None:
         q = _make_question()
-        with pytest.raises(TypeError):
-            q._specification._description._query.with_filter("status", "=", "active")
+        filtered = q._specification._description._query.with_filter("status", "=", "active")
+        assert "WHERE status = 'active'" in filtered._sql.value
 
     def test_is_equivalent_to_normalizes_whitespace(self) -> None:
         qd1 = QueryDefinition(
@@ -106,12 +104,10 @@ class TestQuestion:
         q.change_decision(new_decision)
         assert q._specification._rendering._decision._format == ResponseKind.CHART
 
-    def test_derive_drill_down_raises_due_to_source_bug(self) -> None:
-        # derive_drill_down internally calls with_filter which has a source bug.
-        # Documents that the code path raises TypeError.
+    def test_derive_drill_down_returns_new_question_with_filter(self) -> None:
         q = _make_question()
-        with pytest.raises(TypeError):
-            q.derive_drill_down("country", "US")
+        drilled = q.derive_drill_down("country", "US")
+        assert "WHERE country = 'US'" in drilled.compiled_sql()
 
     def test_is_compatible_with_same_dataset(self) -> None:
         dataset_id = EntityId(uuid4())
