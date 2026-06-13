@@ -32,6 +32,14 @@ class IngestFileRequest:
     _format: FileFormat
 
 
+@dataclass
+class IngestionPipeline:
+    """Bundles storage ingestion and query engine for the ingest use case."""
+
+    _storage: IStorageIngestion
+    _engine: IQueryEngine
+
+
 class IngestFileUseCase:
     def __init__(
         self,
@@ -40,8 +48,7 @@ class IngestFileUseCase:
         engine: IQueryEngine,
     ) -> None:
         self._datasets = datasets
-        self._storage = storage
-        self._engine = engine
+        self._pipeline = IngestionPipeline(_storage=storage, _engine=engine)
 
     async def execute(self, request: IngestFileRequest) -> Dataset:
         if request._format not in (FileFormat.CSV, FileFormat.PARQUET):
@@ -54,16 +61,13 @@ class IngestFileUseCase:
             raise DuplicateDatasetNameError(msg)
 
         columns: list[ColumnDefinition] = []
-        async for column in self._storage.ingest(
-            request._uri,
-            request._format,
-        ):
+        async for column in self._pipeline._storage.ingest(request._uri, request._format):
             columns.append(column)
 
         schema = SchemaDefinition(_columns=tuple(columns))
 
         dataset_id = EntityId(uuid4())
-        await self._engine.register_schema(dataset_id, schema)
+        await self._pipeline._engine.register_schema(dataset_id, schema)
 
         dataset = Dataset(
             identity=DatasetIdentity(

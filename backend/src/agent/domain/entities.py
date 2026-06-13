@@ -49,6 +49,14 @@ class AgentDirectives(ValueObject):
         return count.is_within_limit(self._max_tokens)
 
 
+@dataclass(frozen=True)
+class AgentProfile(ValueObject):
+    """Bundles model config and directives for an agent configuration."""
+
+    _model: ModelConfig
+    _directives: AgentDirectives
+
+
 class AgentConfiguration(Entity):
     def __init__(
         self,
@@ -57,24 +65,23 @@ class AgentConfiguration(Entity):
         directives: AgentDirectives,
     ) -> None:
         self._identity = identity
-        self._model = model
-        self._directives = directives
+        self._profile = AgentProfile(_model=model, _directives=directives)
 
     def provider_is(self, provider: str) -> bool:
-        return self._model.provider_is(provider)
+        return self._profile._model.provider_is(provider)
 
     def with_temperature(self, temperature: Temperature) -> AgentConfiguration:
         return AgentConfiguration(
             identity=self._identity,
-            model=self._model.with_temperature(temperature),
-            directives=self._directives,
+            model=self._profile._model.with_temperature(temperature),
+            directives=self._profile._directives,
         )
 
     def supports_tool(self, tool_name: str) -> bool:
-        return self._model.supports_tool_calling()
+        return self._profile._model.supports_tool_calling()
 
     def context_limit_is(self, limit: TokenCount) -> bool:
-        return self._directives.within_limit(limit)
+        return self._profile._directives.within_limit(limit)
 
 
 @dataclass(frozen=True)
@@ -151,14 +158,29 @@ class Messages:
         return list(self._items)
 
 
-class Conversation(Entity):
-    def __init__(self, identity: EntityId, history: Messages) -> None:
-        self._identity = identity
-        self._history = history
+class ConversationThread:
+    """Bundles conversation history and lifecycle state."""
+
+    def __init__(self, history: Messages | None = None) -> None:
+        self._history = history or Messages()
         self._state: ConversationState = ConversationState.ACTIVE
 
+
+class Conversation(Entity):
+    def __init__(self, identity: EntityId, history: Messages | None = None) -> None:
+        self._identity = identity
+        self._thread = ConversationThread(history)
+
+    @property
+    def _history(self) -> Messages:
+        return self._thread._history
+
+    @property
+    def _state(self) -> ConversationState:
+        return self._thread._state
+
     def add_user_message(self, content: str) -> Message:
-        if self._state is ConversationState.CLOSED:
+        if self._thread._state is ConversationState.CLOSED:
             msg = f"Conversation {self._identity.value} is closed"
             raise ClosedConversationError(msg)
         message = Message(
@@ -172,7 +194,7 @@ class Conversation(Entity):
                 _tool_call=None,
             ),
         )
-        self._history.append(message)
+        self._thread._history.append(message)
         return message
 
     def add_assistant_response(
@@ -191,18 +213,18 @@ class Conversation(Entity):
                 _tool_call=tool_call,
             ),
         )
-        self._history.append(message)
+        self._thread._history.append(message)
         return message
 
     def should_summarize(self, threshold: TokenCount) -> bool:
-        total = sum(len(m._body._content.value) for m in self._history.to_list())
+        total = sum(len(m._body._content.value) for m in self._thread._history.to_list())
         return TokenCount(total).value > threshold.value
 
     def summarize_oldest(self, summarizer: ISummarizer) -> None:
-        to_summarize = self._history.recent_context(window=10)
-        summary_text = summarizer.summarize(self._history.summary())
-        self._history = Messages()
-        self._history.append(
+        to_summarize = self._thread._history.recent_context(window=10)
+        summary_text = summarizer.summarize(self._thread._history.summary())
+        self._thread._history = Messages()
+        self._thread._history.append(
             Message(
                 identity=MessageIdentity(
                     _id=EntityId(uuid4()),
@@ -218,10 +240,10 @@ class Conversation(Entity):
             ),
         )
         for msg in to_summarize:
-            self._history.append(msg)
+            self._thread._history.append(msg)
 
     def close(self) -> None:
-        self._state = ConversationState.CLOSED
+        self._thread._state = ConversationState.CLOSED
 
 
 class ISummarizer:

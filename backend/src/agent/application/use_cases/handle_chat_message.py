@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
+from dataclasses import dataclass
 from uuid import UUID
 
 from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
@@ -28,6 +29,16 @@ class ProcessMessageRequest:
         return not self._content.is_empty()
 
 
+@dataclass
+class AgentConfig:
+    """Bundles all agent dependencies for chat use cases."""
+
+    _orchestrator: IAgentOrchestrator
+    _toolkit: IToolKit
+    _summarizer: ISummarizer
+    _token_limit: TokenCount
+
+
 class HandleChatMessageUseCase:
     def __init__(  # noqa: PLR0913
         self,
@@ -38,10 +49,12 @@ class HandleChatMessageUseCase:
         token_limit: TokenCount,
     ) -> None:
         self._conversations = conversations
-        self._orchestrator = orchestrator
-        self._toolkit = toolkit
-        self._summarizer = summarizer
-        self._token_limit = token_limit
+        self._agent = AgentConfig(
+            _orchestrator=orchestrator,
+            _toolkit=toolkit,
+            _summarizer=summarizer,
+            _token_limit=token_limit,
+        )
 
     async def execute(self, request: ProcessMessageRequest) -> AsyncIterator[AgentEvent]:
         conversation = self._load_or_create(request._conversation_id)
@@ -49,15 +62,15 @@ class HandleChatMessageUseCase:
         message = conversation.add_user_message(request._content.value)
         yield ThinkingEvent("Processing your question...")
 
-        if conversation.should_summarize(self._token_limit):
-            conversation.summarize_oldest(self._summarizer)
+        if conversation.should_summarize(self._agent._token_limit):
+            conversation.summarize_oldest(self._agent._summarizer)
             yield ThinkingEvent("Summarizing conversation context...")
 
         final_spec: dict | None = None
-        async for event in self._orchestrator.run(
+        async for event in self._agent._orchestrator.run(
             message=message,
             conversation=conversation,
-            toolkit=self._toolkit,
+            toolkit=self._agent._toolkit,
         ):
             if isinstance(event, SpecFragmentEvent):
                 final_spec = event._payload

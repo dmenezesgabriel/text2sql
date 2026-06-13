@@ -20,6 +20,14 @@ class RefreshReport:
     _failed: list[tuple[EntityId, str]]
 
 
+@dataclass
+class QueryServices:
+    """Bundles query execution and notification for the refresh use case."""
+
+    _executor: IQueryExecutor
+    _notifier: INotificationPort
+
+
 class RefreshStaleQuestionsUseCase:
     def __init__(
         self,
@@ -28,8 +36,7 @@ class RefreshStaleQuestionsUseCase:
         notifier: INotificationPort,
     ) -> None:
         self._questions = questions
-        self._executor = executor
-        self._notifier = notifier
+        self._services = QueryServices(_executor=executor, _notifier=notifier)
 
     async def execute(self, threshold_days: int) -> RefreshReport:
         all_questions = self._questions.find_all()
@@ -43,8 +50,8 @@ class RefreshStaleQuestionsUseCase:
                 continue
 
             try:
-                await self._executor.execute(
-                    sql=question._specification._description._query._sql,
+                await self._services._executor.execute(
+                    sql=question.compiled_sql(),
                     dataset_id=question._specification._description._query._source._id,
                 )
                 changed.append(question)
@@ -52,7 +59,7 @@ class RefreshStaleQuestionsUseCase:
                 failed.append((question._identity._id, str(exc)))
 
         for question in changed:
-            self._notifier.notify(
+            self._services._notifier.notify(
                 f"Question '{question._specification._description._title.value}' "
                 f"has new data available",
             )

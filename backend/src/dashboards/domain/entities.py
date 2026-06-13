@@ -61,20 +61,35 @@ class DashboardIdentity:
         self._audit = audit
 
 
+@dataclass
+class LayoutContent:
+    """Bundles the immutable composition of a dashboard (title + tiles)."""
+
+    _title: DashboardTitle
+    _tiles: Tiles
+
+
 class DashboardLayout:
     def __init__(self, title: DashboardTitle, tiles: Tiles) -> None:
-        self._title = title
-        self._tiles = tiles
+        self._content = LayoutContent(_title=title, _tiles=tiles)
         self._filters: dict[EntityId, tuple[FilterBinding, ...]] = {}
+
+    @property
+    def _title(self) -> DashboardTitle:
+        return self._content._title
+
+    @property
+    def _tiles(self) -> Tiles:
+        return self._content._tiles
 
     def add_tile(self, tile: DashboardTile) -> None:
         if self._tile_overlaps(tile):
             msg = f"Tile {tile._identity._id.value} overlaps existing tile"
             raise TileOverlapError(msg)
-        self._tiles.add(tile)
+        self._content._tiles.add(tile)
 
     def remove_tile(self, tile_id: EntityId) -> None:
-        self._tiles.remove(tile_id)
+        self._content._tiles.remove(tile_id)
         self._filters.pop(tile_id, None)
         for source_id, bindings in self._filters.items():
             cleaned = tuple(b for b in bindings if tile_id not in b._target_tiles)
@@ -85,7 +100,7 @@ class DashboardLayout:
         tile_id: EntityId,
         new_position: TilePosition,
     ) -> None:
-        tile = self._tiles.find(tile_id)
+        tile = self._content._tiles.find(tile_id)
         if tile is None:
             msg = f"Tile {tile_id.value} not found"
             raise TileNotFoundError(msg)
@@ -96,8 +111,8 @@ class DashboardLayout:
         if self._tile_overlaps(moved):
             msg = "Cannot move tile: position occupied"
             raise TileOverlapError(msg)
-        self._tiles.remove(tile_id)
-        self._tiles.add(moved)
+        self._content._tiles.remove(tile_id)
+        self._content._tiles.add(moved)
 
     def bind_filter(
         self,
@@ -105,11 +120,11 @@ class DashboardLayout:
         column: str,
         target_tile_ids: set[EntityId],
     ) -> None:
-        if not self._tiles.contains(source_tile_id):
+        if not self._content._tiles.contains(source_tile_id):
             msg = f"Source tile {source_tile_id.value} not found"
             raise TileNotFoundError(msg)
         for target_id in target_tile_ids:
-            if not self._tiles.contains(target_id):
+            if not self._content._tiles.contains(target_id):
                 msg = f"Target tile {target_id.value} not found"
                 raise TileNotFoundError(msg)
             if target_id == source_tile_id:
@@ -134,11 +149,11 @@ class DashboardLayout:
         for binding in bindings:
             if binding._column == column:
                 targets.update(binding._target_tiles)
-        return [t for t in self._tiles.to_list() if t._identity._id in targets]
+        return [t for t in self._content._tiles.to_list() if t._identity._id in targets]
 
     def _tile_overlaps(self, tile: DashboardTile) -> bool:
         pos = tile._identity._position
-        for existing in self._tiles.to_list():
+        for existing in self._content._tiles.to_list():
             epos = existing._identity._position
             if (
                 pos._row < epos._row + epos._height
