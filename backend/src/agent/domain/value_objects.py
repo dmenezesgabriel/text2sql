@@ -4,7 +4,9 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from uuid import UUID
 
-from src.shared.domain.base import ValueObject
+from src.shared.domain.base import QueryResult, ResponseKind, ValueObject
+
+__all__ = ["QueryResult", "ResponseKind"]  # re-export so existing imports still work
 
 
 @dataclass(frozen=True)
@@ -58,13 +60,6 @@ class TokenCount(ValueObject):
         return self.value <= limit.value
 
 
-class ResponseKind(Enum):
-    CHART = auto()
-    TABLE = auto()
-    TEXT = auto()
-    DASHBOARD = auto()
-
-
 @dataclass(frozen=True)
 class ResponseFormat(ValueObject):
     _kind: ResponseKind
@@ -72,23 +67,6 @@ class ResponseFormat(ValueObject):
 
     def kind_is(self, kind: ResponseKind) -> bool:
         return self._kind is kind
-
-
-@dataclass(frozen=True)
-class QueryResult(ValueObject):
-    _columns: tuple[str, ...]
-    _rows: tuple[dict[str, object], ...]
-
-    def column_count(self) -> int:
-        return len(self._columns)
-
-    def row_count(self) -> int:
-        return len(self._rows)
-
-    def has_numeric_columns(self) -> bool:
-        return any(
-            isinstance(row.get(col), (int, float)) for col in self._columns for row in self._rows
-        )
 
 
 class AgentEvent:

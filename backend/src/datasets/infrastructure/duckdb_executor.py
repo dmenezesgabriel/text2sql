@@ -1,10 +1,9 @@
 # ruff: noqa: S608 -- view names are hex UUIDs, not user input
 from __future__ import annotations
 
-from src.agent.domain.value_objects import QueryResult
 from src.datasets.application.ports.i_query_engine import IQueryEngine
 from src.datasets.domain.value_objects import ColumnDefinition, SchemaDefinition
-from src.shared.domain.base import EntityId
+from src.shared.domain.base import EntityId, QueryResult
 from src.shared.infrastructure.duckdb_pool import DuckDBPool
 
 

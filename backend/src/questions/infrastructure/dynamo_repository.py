@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from src.agent.domain.value_objects import ResponseKind
 from src.questions.application.ports.i_question_repository import IQuestionRepository
 from src.questions.domain.entities import (
     DatasetReference,
@@ -21,7 +20,7 @@ from src.questions.domain.value_objects import (
     VizDecision,
     VizSpec,
 )
-from src.shared.domain.base import AuditRecord, CreatedAt, EntityId, UpdatedAt
+from src.shared.domain.base import AuditRecord, CreatedAt, EntityId, ResponseKind, UpdatedAt
 from src.shared.infrastructure.dynamo_models import QuestionModel
 
 

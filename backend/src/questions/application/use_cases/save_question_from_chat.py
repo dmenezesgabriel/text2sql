@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import uuid4
 
-from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
+from src.questions.application.ports.i_dataset_existence import IDatasetExistence
 from src.questions.application.ports.i_question_repository import IQuestionRepository
 from src.questions.domain.entities import (
     Question,
@@ -31,7 +31,7 @@ class SaveQuestionFromChatUseCase:
     def __init__(
         self,
         questions: IQuestionRepository,
-        datasets: IDatasetRepository,
+        datasets: IDatasetExistence,
     ) -> None:
         self._questions = questions
         self._datasets = datasets
@@ -49,8 +49,7 @@ class SaveQuestionFromChatUseCase:
                 )
                 raise DuplicateQuestionError(msg)
 
-        dataset = self._datasets.load(request._dataset_id)
-        if dataset is None:
+        if not self._datasets.exists(request._dataset_id):
             msg = f"Dataset {request._dataset_id.value} not found"
             raise DatasetNotFoundError(msg)
 

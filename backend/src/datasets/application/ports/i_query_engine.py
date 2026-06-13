@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from src.agent.domain.value_objects import QueryResult
 from src.datasets.domain.value_objects import SchemaDefinition
-from src.shared.domain.base import EntityId
+from src.shared.domain.base import EntityId, QueryResult
 
 
 class IQueryEngine(Protocol):

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.agent.domain.value_objects import QueryResult
 from src.dashboards.application.ports.i_dashboard_repository import (
     IDashboardRepository,
 )
@@ -10,7 +9,7 @@ from src.dashboards.application.ports.i_query_executor import IQueryExecutor
 from src.dashboards.exceptions.dashboard_not_found_error import (
     DashboardNotFoundError,
 )
-from src.shared.domain.base import EntityId
+from src.shared.domain.base import EntityId, QueryResult
 
 
 @dataclass(frozen=True)
@@ -61,7 +60,7 @@ class ApplyCrossFilterUseCase:
                 value=request._value,
             )
             results[tile._identity._id] = await self._executor.execute(
-                sql=filtered._sql,
+                sql=filtered._sql.value,
                 dataset_id=query._source._id,
             )
 

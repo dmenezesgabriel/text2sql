@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from src.agent.domain.value_objects import QueryResult
 from src.questions.application.ports.i_query_executor import IQueryExecutor
 from src.questions.application.ports.i_question_repository import IQuestionRepository
 from src.questions.exceptions.incompatible_questions_error import IncompatibleQuestionsError
 from src.questions.exceptions.question_not_found_error import QuestionNotFoundError
-from src.shared.domain.base import EntityId
+from src.shared.domain.base import EntityId, QueryResult
 
 
 @dataclass(frozen=True)
@@ -52,11 +51,11 @@ class CompareQuestionsUseCase:
             raise IncompatibleQuestionsError(msg)
 
         first_result = await self._executor.execute(
-            sql=first._specification._description._query._sql,
+            sql=first.compiled_sql(),
             dataset_id=first._specification._description._query._source._id,
         )
         second_result = await self._executor.execute(
-            sql=second._specification._description._query._sql,
+            sql=second.compiled_sql(),
             dataset_id=second._specification._description._query._source._id,
         )
 

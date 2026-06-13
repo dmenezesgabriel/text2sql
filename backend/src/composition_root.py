@@ -20,17 +20,27 @@ from src.dashboards.application.use_cases.compose_dashboard import (
 )
 from src.dashboards.infrastructure.dynamo_repository import DynamoDashboardRepository
 from src.dashboards.infrastructure.fastapi.router import create_dashboards_router
+from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
 from src.datasets.application.use_cases.register_s3_dataset import RegisterS3DatasetUseCase
 from src.datasets.infrastructure.duckdb_executor import DuckDBExecutor
 from src.datasets.infrastructure.dynamo_repository import DynamoDatasetRepository
 from src.datasets.infrastructure.fastapi.router import create_datasets_router
+from src.datasets.infrastructure.query_executor import DuckDBQueryExecutor
 from src.questions.application.use_cases.compare_questions import CompareQuestionsUseCase
 from src.questions.application.use_cases.drill_down_question import DrillDownQuestionUseCase
 from src.questions.application.use_cases.save_question_from_chat import SaveQuestionFromChatUseCase
 from src.questions.infrastructure.dynamo_repository import DynamoQuestionRepository
 from src.questions.infrastructure.fastapi.router import create_questions_router
+from src.shared.domain.base import EntityId
 from src.shared.infrastructure.duckdb_pool import DuckDBPool
-from src.shared.infrastructure.query_executor_adapter import DuckDBQueryExecutor
+
+
+class DatasetExistenceAdapter:
+    def __init__(self, repo: IDatasetRepository) -> None:
+        self._repo = repo
+
+    def exists(self, dataset_id: EntityId) -> bool:
+        return self._repo.load(dataset_id) is not None
 
 
 @dataclass
@@ -86,7 +96,7 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
     # ── Use Cases: Questions ──
     save_question_use_case = SaveQuestionFromChatUseCase(
         questions=question_repo,
-        datasets=dataset_repo,
+        datasets=DatasetExistenceAdapter(dataset_repo),
     )
     drill_question_use_case = DrillDownQuestionUseCase(questions=question_repo)
     compare_questions_use_case = CompareQuestionsUseCase(
