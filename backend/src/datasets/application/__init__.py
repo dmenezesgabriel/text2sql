@@ -1,7 +1,8 @@
 from src.datasets.application.ports import (
     IDatasetRepository,
-    IStorageIngestion,
     IQueryEngine,
+    IQueryRegistrar,
+    IStorageIngestion,
 )
 from src.datasets.application.use_cases import (
     IngestFileRequest,
@@ -10,8 +11,9 @@ from src.datasets.application.use_cases import (
 
 __all__ = [
     "IDatasetRepository",
-    "IStorageIngestion",
     "IQueryEngine",
+    "IQueryRegistrar",
+    "IStorageIngestion",
     "IngestFileRequest",
     "IngestFileUseCase",
 ]

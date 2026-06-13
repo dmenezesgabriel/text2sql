@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
-from src.datasets.application.ports.i_query_engine import IQueryEngine
+from src.datasets.application.ports.i_query_registrar import IQueryRegistrar
 from src.datasets.application.ports.i_storage_ingestion import IStorageIngestion
 from src.datasets.domain.entities import (
     Dataset,
@@ -37,7 +37,7 @@ class IngestionPipeline:
     """Bundles storage ingestion and query engine for the ingest use case."""
 
     _storage: IStorageIngestion
-    _engine: IQueryEngine
+    _engine: IQueryRegistrar
 
 
 class IngestFileUseCase:
@@ -45,7 +45,7 @@ class IngestFileUseCase:
         self,
         datasets: IDatasetRepository,
         storage: IStorageIngestion,
-        engine: IQueryEngine,
+        engine: IQueryRegistrar,
     ) -> None:
         self._datasets = datasets
         self._pipeline = IngestionPipeline(_storage=storage, _engine=engine)

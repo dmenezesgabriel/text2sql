@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
-from src.datasets.application.ports.i_query_engine import IQueryEngine
+from src.datasets.application.ports.i_query_registrar import IQueryRegistrar
 from src.datasets.domain.entities import Dataset, DatasetConfiguration, DatasetIdentity
 from src.datasets.domain.value_objects import DatasetKind, DatasetName, StorageUri
 from src.datasets.exceptions.duplicate_dataset_name_error import DuplicateDatasetNameError
@@ -21,7 +21,7 @@ class RegisterS3DatasetRequest:
 class RegisterS3DatasetUseCase:
     """Register a Parquet file stored in S3/MinIO as a queryable DuckDB view."""
 
-    def __init__(self, datasets: IDatasetRepository, engine: IQueryEngine) -> None:
+    def __init__(self, datasets: IDatasetRepository, engine: IQueryRegistrar) -> None:
         self._datasets = datasets
         self._engine = engine
 

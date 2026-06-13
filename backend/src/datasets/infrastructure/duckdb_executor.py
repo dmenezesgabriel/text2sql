@@ -1,13 +1,19 @@
 # ruff: noqa: S608 -- view names are hex UUIDs, not user input
 from __future__ import annotations
 
-from src.datasets.application.ports.i_query_engine import IQueryEngine
 from src.datasets.domain.value_objects import ColumnDefinition, SchemaDefinition
 from src.shared.domain.base import EntityId, QueryResult
 from src.shared.infrastructure.duckdb_pool import DuckDBPool
 
 
-class DuckDBExecutor(IQueryEngine):
+class DuckDBExecutor:
+    """Implements IQueryRegistrar + IQueryEngine via structural typing.
+
+    DuckDB is in-process and synchronous. The async def wrappers exist for
+    interface consistency with the rest of the application, not for non-blocking
+    I/O — DuckDB queries at BI scale are sub-100ms and concurrency is low.
+    """
+
     def __init__(self, pool: DuckDBPool) -> None:
         self._pool = pool
 
