@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from src.agent.domain.value_objects import ToolName
 from src.agent.application.ports.i_tool_executor import IToolExecutor
+from src.agent.domain.value_objects import ToolName
 
 
 class IToolKit(Protocol):

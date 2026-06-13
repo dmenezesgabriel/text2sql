@@ -1,7 +1,9 @@
 from src.datasets.application.use_cases.ingest_file import (
-    IngestFileRequest, IngestFileUseCase,
+    IngestFileRequest,
+    IngestFileUseCase,
 )
 
 __all__ = [
-    "IngestFileRequest", "IngestFileUseCase",
+    "IngestFileRequest",
+    "IngestFileUseCase",
 ]

@@ -1,0 +1,38 @@
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath /data
+    volumes:
+      - dynamodb-data:/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DYNAMODB_HOST=http://dynamodb-local:8000
+      - AWS_ACCESS_KEY_ID=fake
+      - AWS_SECRET_ACCESS_KEY=fake
+      - AWS_DEFAULT_REGION=us-east-1
+      - DUCKDB_PATH=/data/analytics.duckdb
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o}
+      - SUMMARIZER_MODEL=${SUMMARIZER_MODEL:-gpt-4o-mini}
+      - TOKEN_LIMIT=${TOKEN_LIMIT:-100000}
+    volumes:
+      - duckdb-data:/data
+    depends_on:
+      dynamodb-local:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  dynamodb-data:
+  duckdb-data:

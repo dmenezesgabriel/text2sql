@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from src.agent.domain.value_objects import ToolName, Parameters, QueryResult
 from src.agent.application.ports.i_tool_executor import IToolExecutor
+from src.agent.domain.value_objects import Parameters, QueryResult, ToolName
+from src.datasets.application.ports.i_query_engine import IQueryEngine
 
 
 class SQLGeneratorTool(IToolExecutor):
+    def __init__(self, engine: IQueryEngine) -> None:
+        self._engine = engine
+
     @property
     def name(self) -> ToolName:
         return ToolName("sql_generator")
@@ -14,8 +18,4 @@ class SQLGeneratorTool(IToolExecutor):
 
     async def execute(self, parameters: Parameters) -> QueryResult:
         sql = parameters.value.get("sql", "")
-        dataset_id = parameters.value.get("dataset_id")
-
-        from datasets.infrastructure.duckdb_executor import DuckDBExecutor
-        executor = DuckDBExecutor()
-        return await executor.execute_raw(sql)
+        return await self._engine.execute(sql)

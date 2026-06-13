@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from src.questions.application.use_cases.save_question_from_chat import (
-    SaveQuestionFromChatUseCase,
+from src.questions.application.use_cases.compare_questions import (
+    CompareQuestionsUseCase,
 )
 from src.questions.application.use_cases.drill_down_question import (
     DrillDownQuestionUseCase,
 )
-from src.questions.application.use_cases.compare_questions import (
-    CompareQuestionsUseCase,
+from src.questions.application.use_cases.save_question_from_chat import (
+    SaveQuestionFromChatUseCase,
 )
 
 
@@ -28,6 +28,7 @@ def create_questions_router(
     async def create_question(body: dict):
         if save_use_case is None:
             from fastapi.responses import JSONResponse
+
             return JSONResponse(status_code=501, content={"error": "Not wired"})
         return {"status": "ok"}
 

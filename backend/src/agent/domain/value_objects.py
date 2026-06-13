@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 from enum import Enum, auto
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from src.shared.domain.base import ValueObject
 
@@ -87,9 +86,7 @@ class QueryResult(ValueObject):
 
     def has_numeric_columns(self) -> bool:
         return any(
-            isinstance(row.get(col), (int, float))
-            for col in self._columns
-            for row in self._rows
+            isinstance(row.get(col), (int, float)) for col in self._columns for row in self._rows
         )
 
 

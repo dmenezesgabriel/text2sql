@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.shared.domain.base import Entity, EntityId, ValueObject, AuditRecord
-
 from src.datasets.domain.value_objects import (
-    DatasetKind, DatasetName, SchemaDefinition,
-    StorageUri, ConnectionString,
+    ConnectionString,
+    DatasetKind,
+    DatasetName,
+    SchemaDefinition,
+    StorageUri,
 )
+from src.shared.domain.base import AuditRecord, Entity, EntityId, ValueObject
 
 
 class DatasetIdentity:
@@ -42,9 +44,7 @@ class Datasets:
         self._items.append(dataset)
 
     def remove(self, dataset_id: EntityId) -> None:
-        self._items = [
-            d for d in self._items if d._identity._id != dataset_id
-        ]
+        self._items = [d for d in self._items if d._identity._id != dataset_id]
 
     def find_by_name(self, name: DatasetName) -> Dataset | None:
         for dataset in self._items:

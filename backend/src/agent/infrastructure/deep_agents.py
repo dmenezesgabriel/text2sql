@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
-from src.agent.domain.value_objects import (
-    AgentEvent, ThinkingEvent, ToolCallEvent, SpecFragmentEvent,
-    ToolName, Parameters,
-)
-from src.agent.domain.entities import Message, Conversation, AgentConfiguration
 from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
-from src.agent.application.ports.i_tool_kit import IToolKit
 from src.agent.application.ports.i_language_model_provider import ILanguageModelProvider
+from src.agent.application.ports.i_tool_kit import IToolKit
+from src.agent.domain.entities import Conversation, Message
+from src.agent.domain.value_objects import (
+    AgentEvent,
+    Parameters,
+    SpecFragmentEvent,
+    ThinkingEvent,
+    ToolCallEvent,
+    ToolName,
+)
 
 
 class DeepAgentsOrchestrator(IAgentOrchestrator):

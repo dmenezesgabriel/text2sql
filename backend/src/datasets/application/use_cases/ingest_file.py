@@ -4,21 +4,25 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import uuid4
 
-from src.shared.domain.base import EntityId, AuditRecord, CreatedAt, UpdatedAt
-
+from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
+from src.datasets.application.ports.i_query_engine import IQueryEngine
+from src.datasets.application.ports.i_storage_ingestion import IStorageIngestion
 from src.datasets.domain.entities import (
-    Dataset, DatasetIdentity, DatasetConfiguration,
+    Dataset,
+    DatasetConfiguration,
+    DatasetIdentity,
     DatasetKind,
 )
 from src.datasets.domain.value_objects import (
-    DatasetName, ColumnDefinition, SchemaDefinition,
-    FileFormat, StorageUri,
+    ColumnDefinition,
+    DatasetName,
+    FileFormat,
+    SchemaDefinition,
+    StorageUri,
 )
-from src.datasets.application.ports.i_dataset_repository import IDatasetRepository
-from src.datasets.application.ports.i_storage_ingestion import IStorageIngestion
-from src.datasets.application.ports.i_query_engine import IQueryEngine
-from src.datasets.exceptions.unsupported_format_error import UnsupportedFormatError
 from src.datasets.exceptions.duplicate_dataset_name_error import DuplicateDatasetNameError
+from src.datasets.exceptions.unsupported_format_error import UnsupportedFormatError
+from src.shared.domain.base import AuditRecord, CreatedAt, EntityId, UpdatedAt
 
 
 @dataclass(frozen=True)
@@ -42,18 +46,19 @@ class IngestFileUseCase:
     async def execute(self, request: IngestFileRequest) -> Dataset:
         if request._format not in (FileFormat.CSV, FileFormat.PARQUET):
             raise UnsupportedFormatError(
-                f"Format {request._format.value} not supported"
+                f"Format {request._format.value} not supported",
             )
 
-        existing = await self._datasets.find_all()
+        existing = self._datasets.find_all()
         if existing.find_by_name(request._name):
             raise DuplicateDatasetNameError(
-                f"Dataset '{request._name.value}' already exists"
+                f"Dataset '{request._name.value}' already exists",
             )
 
         columns: list[ColumnDefinition] = []
         async for column in self._storage.ingest(
-            request._uri, request._format
+            request._uri,
+            request._format,
         ):
             columns.append(column)
 
@@ -77,5 +82,5 @@ class IngestFileUseCase:
                 _location=request._uri,
             ),
         )
-        await self._datasets.save(dataset)
+        self._datasets.save(dataset)
         return dataset

@@ -2,7 +2,7 @@
 
 ## Vision
 
-A chat-based generative BI application where users interact with their data through natural language. The application uses an LLM-powered agent (via DeepAgents + LiteLLM) to understand questions, generate SQL, query datasets via DuckDB, and return results as rich artifacts: charts, tables, narratives, dashboards, and eventually slide decks and videos. All artifacts are persistable, composable into dashboards with cross-filtering, and organizable into collections.
+A chat-based generative Business Intelligence application where users interact with their data through natural language. The application uses an LLM-powered agent (via DeepAgents + LiteLLM) to understand questions, generate SQL, query datasets via DuckDB, and return results as rich artifacts: charts, tables, narratives, dashboards, and eventually slide decks and videos. All artifacts are persistable, composable into dashboards with cross-filtering, and organizable into collections.
 
 The agent always thinks in **storytelling with data narratives** — choosing the best format to answer each question, not just raw numbers.
 
@@ -32,15 +32,15 @@ The agent always thinks in **storytelling with data narratives** — choosing th
 | **DeepAgents** | Agent harness — planning, tool calling, context management, sub-agents |
 | **LiteLLM** | Model-agnostic LLM provider (OpenAI, Claude, local, etc.) |
 | **DuckDB** | In-process OLAP engine — directly queries CSV, Parquet, JSON files |
-| **Motor** | Async MongoDB driver |
-| **Boto3 / aiobotocore** | S3 file ingestion |
+| **PynamoDB** | DynamoDB ORM |
+| **Boto3** | S3 file ingestion |
 | **LangGraph** | Underlying graph runtime for DeepAgents |
 
 ### Data Stores
 
 | Store | What it holds |
 |-------|---------------|
-| **MongoDB** | App state: questions, dashboards, collections, conversations, datasets metadata |
+| **DynamoDB** (Local) | App state: questions, dashboards, conversations, datasets metadata |
 | **DuckDB** | Analytics data: registered tables, query execution, ad-hoc file queries |
 | **S3** *(optional)* | Source files (CSV, Parquet, JSON) for ingestion |
 
@@ -54,9 +54,11 @@ The agent always thinks in **storytelling with data narratives** — choosing th
 text2sql/
 ├── frontend/          # Vite + React + Lit (pnpm workspace)
 ├── backend/           # Python (uv + FastAPI)
+├── docker-compose.yml # DynamoDB Local + backend + frontend
 ├── package.json       # pnpm workspace root
 ├── pyproject.toml     # Root project pointer
 ├── plan.md            # This file
+├── .env.example       # Environment variables template
 └── .gitignore
 ```
 
@@ -89,7 +91,7 @@ backend/src/
 │   ├── domain/
 │   │   └── base.py                 # Entity, ValueObject, AggregateRoot, DomainEvent
 │   └── infrastructure/
-│       ├── mongo_client.py         # AsyncMotor client singleton
+│       ├── dynamo_models.py        # PynamoDB model definitions
 │       └── duckdb_pool.py          # Thread-safe DuckDB connection pool
 ├── agent/                          # Chat agent orchestration
 │   ├── exceptions/
@@ -139,7 +141,7 @@ backend/src/
 │   │       └── refresh_stale_questions.py
 │   ├── infrastructure/
 │   │   ├── fastapi/router.py       # CRUD /api/v1/questions
-│   │   └── mongo_repository.py
+│   │   └── dynamo_repository.py
 ├── dashboards/                     # Composed dashboards with cross-filtering
 │   ├── exceptions/
 │   │   ├── tile_overlap_error.py
@@ -159,7 +161,7 @@ backend/src/
 │   │       └── compose_dashboard.py
 │   ├── infrastructure/
 │   │   ├── fastapi/router.py       # CRUD /api/v1/dashboards
-│   │   └── mongo_repository.py
+│   │   └── dynamo_repository.py
 ├── datasets/                       # Data sources
 │   ├── exceptions/
 │   │   ├── unsupported_format_error.py
@@ -176,7 +178,7 @@ backend/src/
 │   │       └── ingest_file.py
 │   ├── infrastructure/
 │   │   ├── fastapi/router.py       # CRUD /api/v1/datasets
-│   │   ├── mongo_repository.py
+│   │   ├── dynamo_repository.py
 │   │   ├── duckdb_executor.py      # Schema registration + query execution
 │   │   └── s3_ingester.py          # S3 file → DuckDB ingestion
 └── collections/                    # Cross-component artifact grouping
@@ -194,7 +196,7 @@ backend/src/
     │       └── merge_collections.py
     ├── infrastructure/
     │   ├── fastapi/router.py       # CRUD /api/v1/collections
-    │   └── mongo_repository.py
+    │   └── dynamo_repository.py
 ```
 
 ### DuckDB Ownership Rule
@@ -205,43 +207,33 @@ backend/src/
 
 ### Dependency Injection
 
-FastAPI `Depends()` with manual wiring. Each use case receives its ports via constructor injection. Infrastructure adapters are wired at the composition root (`main.py` or a `deps.py` module).
+Dependencies are wired manually in `composition_root.py`. Each use case receives its ports via constructor injection. Infrastructure adapters (DynamoDB repositories, DuckDB executor, LLM provider) are instantiated and wired at the composition root.
 
 ```python
-# main.py
-from fastapi import FastAPI, Depends
-from motor.motor_asyncio import AsyncIOMotorClient
-from shared.infrastructure.mongo_client import MongoClientSingleton
-from agent.infrastructure.deep_agents import DeepAgentsOrchestrator
-from agent.infrastructure.litellm_provider import LiteLLMProvider
-from agent.application.use_cases.handle_chat_message import HandleChatMessageUseCase
-from agent.infrastructure.fastapi.router import create_chat_router
+# composition_root.py (simplified)
+from agent.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
+from questions.infrastructure.dynamo_repository import DynamoQuestionRepository
+from datasets.infrastructure.dynamo_repository import DynamoDatasetRepository
+from dashboards.infrastructure.dynamo_repository import DynamoDashboardRepository
+from datasets.infrastructure.duckdb_executor import DuckDBExecutor
+from datasets.application.use_cases.ingest_file import IngestFileUseCase
 
-app = FastAPI()
+conversation_repo = DynamoConversationRepository()
+question_repo = DynamoQuestionRepository()
+dataset_repo = DynamoDatasetRepository()
+dashboard_repo = DynamoDashboardRepository()
 
-# Wiring at composition root
-mongo = MongoClientSingleton("mongodb://localhost:27017")
-engine = DuckDBPool()
-llm = LiteLLMProvider()
-orchestrator = DeepAgentsOrchestrator(llm)
-toolkit = build_toolkit(engine)
-
-handle_chat = HandleChatMessageUseCase(
-    conversations=mongo,
-    orchestrator=orchestrator,
-    toolkit=toolkit,
-    summarizer=mongo,
-    token_limit=TokenCount(128_000),
-)
-
-app.include_router(create_chat_router(handle_chat))
+engine = DuckDBExecutor(pool)
+use_case = IngestFileUseCase(datasets=dataset_repo, storage=S3Ingester(), engine=engine)
 ```
+
+Repository classes are **sync** (PynamoDB is synchronous). Use cases that mix repository calls with async I/O (e.g., LLM, DuckDB executor) remain `async def`; use cases that only call repositories are `def`.
 
 ### Design Patterns
 
 | Pattern | Where | Why |
 |---------|-------|-----|
-| **Repository** | All `I*Repository` ports | Abstracts MongoDB behind domain-owned interface |
+| **Repository** | All `I*Repository` ports | Abstracts DynamoDB behind domain-owned interface |
 | **Command** | All `*UseCase` classes | Single-responsibility business transactions |
 | **Strategy** | `IVizSpecBuilder`, `IToolExecutor` | Swap viz type / tool without changing client code |
 | **Composite** | `IToolKit` | Tools as a collection of `IToolExecutor` |
@@ -409,8 +401,8 @@ POST /api/v1/chat  ──SSE──→  HandleChatMessageUseCase
                                                           │
                                               POST /api/v1/questions
                                               → SaveQuestionFromChatUseCase
-                                                  → deduplicates by SQL hash
-                                                  → persists to MongoDB
+                                                   → deduplicates by SQL hash
+                                                   → persists to DynamoDB (Local)
 ```
 
 ---
@@ -476,7 +468,7 @@ POST /api/v1/chat  ──SSE──→  HandleChatMessageUseCase
 | Step | What | Why First |
 |------|------|-----------|
 | 1 | Scaffold: monorepo, tsconfig, vite, pyproject, directory tree | Foundation |
-| 2 | Backend shared: base.py, mongo_client, duckdb_pool | Everything depends on these |
+| 2 | Backend shared: base.py, dynamo_models, duckdb_pool | Everything depends on these |
 | 3 | Backend datasets: domain → use cases → infra → routes | Data must exist before questions |
 | 4 | Backend agent: domain → use cases → infra (deep_agents + tools) → routes | Core AI pipeline |
 | 5 | Backend questions: domain → use cases → infra → routes | Persist chat results |

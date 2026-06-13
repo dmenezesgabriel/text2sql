@@ -1,0 +1,10 @@
+.venv
+__pycache__
+.ruff_cache
+.import_linter.cfg
+.pre-commit-config.yaml
+semgrep_rules/
+tests/
+Makefile
+pyproject.toml
+uv.lock

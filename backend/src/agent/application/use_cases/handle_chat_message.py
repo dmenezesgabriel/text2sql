@@ -1,21 +1,26 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 from uuid import UUID
 
-from src.agent.domain.value_objects import (
-    AgentEvent, ConversationId, MessageContent, TokenCount,
-    ThinkingEvent,
-)
-from src.agent.domain.entities import (
-    Conversation, EntityId, Messages,
-)
+from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
 from src.agent.application.ports.i_conversation_repository import (
     IConversationRepository,
 )
-from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
-from src.agent.application.ports.i_tool_kit import IToolKit
 from src.agent.application.ports.i_summarizer import ISummarizer
+from src.agent.application.ports.i_tool_kit import IToolKit
+from src.agent.domain.entities import (
+    Conversation,
+    EntityId,
+    Messages,
+)
+from src.agent.domain.value_objects import (
+    AgentEvent,
+    ConversationId,
+    MessageContent,
+    ThinkingEvent,
+    TokenCount,
+)
 
 
 class ProcessMessageRequest:
@@ -46,7 +51,7 @@ class HandleChatMessageUseCase:
         self,
         request: ProcessMessageRequest,
     ) -> AsyncIterator[AgentEvent]:
-        conversation = await self._load_or_create(request._conversation_id)
+        conversation = self._load_or_create(request._conversation_id)
 
         message = conversation.add_user_message(request._content.value)
         yield ThinkingEvent("Processing your question...")
@@ -62,12 +67,13 @@ class HandleChatMessageUseCase:
         ):
             yield event
 
-        await self._conversations.save(conversation)
+        self._conversations.save(conversation)
 
-    async def _load_or_create(
-        self, conversation_id: ConversationId
+    def _load_or_create(
+        self,
+        conversation_id: ConversationId,
     ) -> Conversation:
-        existing = await self._conversations.load(conversation_id)
+        existing = self._conversations.load(conversation_id)
         if existing is not None:
             return existing
         return Conversation(

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
 from uuid import uuid4
 
+from fastapi import APIRouter, Depends
+
 from src.agent.application.use_cases.handle_chat_message import (
-    HandleChatMessageUseCase, ProcessMessageRequest,
+    HandleChatMessageUseCase,
+    ProcessMessageRequest,
 )
 
 
@@ -20,6 +22,7 @@ def create_chat_router(
     ):
         if _use_case is None:
             from fastapi.responses import JSONResponse
+
             return JSONResponse(
                 status_code=501,
                 content={"error": "Chat use case not wired"},
@@ -30,8 +33,9 @@ def create_chat_router(
             conversation_id=body.get("conversation_id", uuid4()),
         )
 
-        from fastapi.responses import StreamingResponse
         import json
+
+        from fastapi.responses import StreamingResponse
 
         async def event_stream():
             async for event in _use_case.execute(request):

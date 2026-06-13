@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
-from src.agent.domain.value_objects import MessageContent
-from src.agent.domain.entities import Message, AgentConfiguration
 from src.agent.application.ports.i_language_model_provider import ILanguageModelProvider
+from src.agent.domain.entities import AgentConfiguration, Message
 
 
 class LiteLLMProvider(ILanguageModelProvider):
@@ -22,6 +21,7 @@ class LiteLLMProvider(ILanguageModelProvider):
         ]
 
         from litellm import acompletion
+
         response = await acompletion(
             model=self._model_name,
             messages=formatted,
@@ -40,6 +40,7 @@ class LiteLLMProvider(ILanguageModelProvider):
         ]
 
         from litellm import completion
+
         response = completion(
             model=self._model_name,
             messages=formatted,

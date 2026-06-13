@@ -3,17 +3,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
-from uuid import UUID, uuid4
-
-from src.shared.domain.base import Entity, EntityId, AuditRecord, CreatedAt, ValueObject
-
-from src.agent.exceptions.conversation_order_error import ConversationOrderError
-from src.agent.exceptions.closed_conversation_error import ClosedConversationError
+from uuid import uuid4
 
 from src.agent.domain.value_objects import (
-    MessageContent, MessageRole, ToolCallEvent,
-    ModelProvider, SystemPrompt, Temperature, TokenCount,
+    MessageContent,
+    MessageRole,
+    ModelProvider,
+    SystemPrompt,
+    Temperature,
+    TokenCount,
+    ToolCallEvent,
 )
+from src.agent.exceptions.closed_conversation_error import ClosedConversationError
+from src.agent.exceptions.conversation_order_error import ConversationOrderError
+from src.shared.domain.base import CreatedAt, Entity, EntityId, ValueObject
 
 
 class ConversationState(Enum):
@@ -102,8 +105,10 @@ class Message(Entity):
     def append_content(self, fragment: str) -> None:
         merged = self._body._content.value + fragment
         import dataclasses
+
         object.__setattr__(
-            self._body, "_content",
+            self._body,
+            "_content",
             dataclasses.replace(self._body._content, value=merged),
         )
 
@@ -116,7 +121,7 @@ class Messages:
         if self._items and self._items[-1].is_from(message._identity._role):
             raise ConversationOrderError(
                 f"Cannot append {message._identity._role.name} "
-                f"after {self._items[-1]._identity._role.name}"
+                f"after {self._items[-1]._identity._role.name}",
             )
         self._items.append(message)
 
@@ -154,7 +159,7 @@ class Conversation(Entity):
     def add_user_message(self, content: str) -> Message:
         if self._state is ConversationState.CLOSED:
             raise ClosedConversationError(
-                f"Conversation {self._identity.value} is closed"
+                f"Conversation {self._identity.value} is closed",
             )
         message = Message(
             identity=MessageIdentity(
@@ -171,7 +176,9 @@ class Conversation(Entity):
         return message
 
     def add_assistant_response(
-        self, content: str, tool_call: ToolCallEvent | None
+        self,
+        content: str,
+        tool_call: ToolCallEvent | None,
     ) -> Message:
         message = Message(
             identity=MessageIdentity(
@@ -188,9 +195,7 @@ class Conversation(Entity):
         return message
 
     def should_summarize(self, threshold: TokenCount) -> bool:
-        total = sum(
-            len(m._body._content.value) for m in self._history.to_list()
-        )
+        total = sum(len(m._body._content.value) for m in self._history.to_list())
         return TokenCount(total).value > threshold.value
 
     def summarize_oldest(self, summarizer: ISummarizer) -> None:
@@ -206,11 +211,11 @@ class Conversation(Entity):
                 ),
                 body=MessageBody(
                     _content=MessageContent(
-                        f"Summary of earlier conversation: {summary_text}"
+                        f"Summary of earlier conversation: {summary_text}",
                     ),
                     _tool_call=None,
                 ),
-            )
+            ),
         )
         for msg in to_summarize:
             self._history.append(msg)
@@ -220,5 +225,4 @@ class Conversation(Entity):
 
 
 class ISummarizer:
-    def summarize(self, text: str) -> str:
-        ...
+    def summarize(self, text: str) -> str: ...

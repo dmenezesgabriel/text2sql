@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import AsyncIterator, Protocol
+from collections.abc import AsyncIterator
+from typing import Protocol
 
-from src.agent.domain.entities import Message, AgentConfiguration
+from src.agent.domain.entities import AgentConfiguration, Message
 
 
 class ILanguageModelProvider(Protocol):

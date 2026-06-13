@@ -3,17 +3,22 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID, uuid4
-
-from src.shared.domain.base import (
-    Entity, EntityId, ValueObject, AuditRecord, CreatedAt, UpdatedAt,
-)
-
-from src.questions.exceptions.invalid_query_error import InvalidQueryError
-from src.questions.exceptions.same_visualization_error import SameVisualizationError
+from uuid import uuid4
 
 from src.questions.domain.value_objects import (
-    QuestionTitle, SqlQuery, VizDecision,
+    QuestionTitle,
+    SqlQuery,
+    VizDecision,
+)
+from src.questions.exceptions.invalid_query_error import InvalidQueryError
+from src.questions.exceptions.same_visualization_error import SameVisualizationError
+from src.shared.domain.base import (
+    AuditRecord,
+    CreatedAt,
+    Entity,
+    EntityId,
+    UpdatedAt,
+    ValueObject,
 )
 
 
@@ -34,30 +39,36 @@ class QueryDefinition(ValueObject):
     def __post_init__(self) -> None:
         if not self._sql.is_select():
             raise InvalidQueryError(
-                f"Only SELECT queries supported, got: {self._sql.value[:50]}"
+                f"Only SELECT queries supported, got: {self._sql.value[:50]}",
             )
 
     def with_filter(
-        self, column: str, operator: str, value: str
+        self,
+        column: str,
+        operator: str,
+        value: str,
     ) -> QueryDefinition:
         filtered_sql = SqlQuery(
-            f"{self._sql.value.rstrip(';')} WHERE {column} {operator} '{value}'"
+            f"{self._sql.value.rstrip(';')} WHERE {column} {operator} '{value}'",
         )
         return QueryDefinition(sql=filtered_sql, source=self._source)
 
     def with_grouping(
-        self, group_column: str, agg_column: str, agg_func: str
+        self,
+        group_column: str,
+        agg_column: str,
+        agg_func: str,
     ) -> QueryDefinition:
         grouped_sql = SqlQuery(
             f"SELECT {group_column}, {agg_func}({agg_column}) "
             f"FROM ({self._sql.value.rstrip(';')}) AS _drill "
-            f"GROUP BY {group_column}"
+            f"GROUP BY {group_column}",
         )
         return QueryDefinition(sql=grouped_sql, source=self._source)
 
     def with_limit(self, limit: int) -> QueryDefinition:
         limited_sql = SqlQuery(
-            f"{self._sql.value.rstrip(';')} LIMIT {limit}"
+            f"{self._sql.value.rstrip(';')} LIMIT {limit}",
         )
         return QueryDefinition(sql=limited_sql, source=self._source)
 
@@ -65,7 +76,7 @@ class QueryDefinition(ValueObject):
         return self._normalize() == other._normalize()
 
     def _normalize(self) -> str:
-        return re.sub(r'\s+', ' ', self._sql.value).strip().lower()
+        return re.sub(r"\s+", " ", self._sql.value).strip().lower()
 
 
 @dataclass(frozen=True)
@@ -122,16 +133,19 @@ class Question(Entity):
         )
 
     def derive_drill_down(
-        self, column: str, value: str
+        self,
+        column: str,
+        value: str,
     ) -> Question:
         new_query = self._specification._description._query.with_filter(
-            column=column, operator="=", value=value,
+            column=column,
+            operator="=",
+            value=value,
         )
         drill_spec = QuestionSpecification(
             description=QuestionDescription(
                 _title=QuestionTitle(
-                    f"{self._specification._description._title.value}"
-                    f" \u2014 {column}={value}"
+                    f"{self._specification._description._title.value} \u2014 {column}={value}",
                 ),
                 _query=new_query,
             ),
@@ -184,9 +198,7 @@ class Questions:
         self._items.append(question)
 
     def remove(self, question_id: EntityId) -> None:
-        self._items = [
-            q for q in self._items if q._identity._id != question_id
-        ]
+        self._items = [q for q in self._items if q._identity._id != question_id]
 
     def to_list(self) -> list[Question]:
         return list(self._items)

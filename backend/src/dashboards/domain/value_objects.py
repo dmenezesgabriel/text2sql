@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from uuid import UUID
 
-from src.shared.domain.base import ValueObject, EntityId
+from src.shared.domain.base import EntityId, ValueObject
 
 
 @dataclass(frozen=True)

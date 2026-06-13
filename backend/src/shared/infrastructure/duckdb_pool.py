@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import duckdb
 from collections.abc import Generator
 from contextlib import contextmanager
+
+import duckdb
 
 
 class DuckDBPool:

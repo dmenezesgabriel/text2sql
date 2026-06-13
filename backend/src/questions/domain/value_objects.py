@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.shared.domain.base import ValueObject
-
 from src.agent.domain.value_objects import ResponseKind
+from src.shared.domain.base import ValueObject
 
 
 @dataclass(frozen=True)

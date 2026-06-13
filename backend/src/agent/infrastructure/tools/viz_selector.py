@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from src.agent.domain.value_objects import (
-    ToolName, Parameters, QueryResult, ResponseKind, ResponseFormat,
-)
 from src.agent.application.ports.i_tool_executor import IToolExecutor
+from src.agent.domain.value_objects import (
+    Parameters,
+    QueryResult,
+    ResponseKind,
+    ToolName,
+)
 
 
 class VizSelectorTool(IToolExecutor):
@@ -19,8 +22,7 @@ class VizSelectorTool(IToolExecutor):
         row_count = parameters.value.get("row_count", 0)
 
         has_numeric = any(
-            isinstance(col.get("type"), str) and "int" in col.get("type", "")
-            for col in columns
+            isinstance(col.get("type"), str) and "int" in col.get("type", "") for col in columns
         )
 
         if row_count == 1 and has_numeric:

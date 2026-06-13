@@ -1,0 +1,9 @@
+node_modules
+dist
+__pycache__
+.ruff_cache
+.venv
+coverage
+reports
+e2e
+.storybook

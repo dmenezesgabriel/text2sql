@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from src.shared.domain.base import EntityId
-from src.questions.application.ports.i_question_repository import IQuestionRepository
-from src.questions.application.ports.i_query_executor import IQueryExecutor
-from src.questions.exceptions.question_not_found_error import QuestionNotFoundError
-from src.questions.exceptions.incompatible_questions_error import IncompatibleQuestionsError
 from src.agent.domain.value_objects import QueryResult
+from src.questions.application.ports.i_query_executor import IQueryExecutor
+from src.questions.application.ports.i_question_repository import IQuestionRepository
+from src.questions.exceptions.incompatible_questions_error import IncompatibleQuestionsError
+from src.questions.exceptions.question_not_found_error import QuestionNotFoundError
+from src.shared.domain.base import EntityId
 
 
 @dataclass(frozen=True)
@@ -41,14 +41,14 @@ class CompareQuestionsUseCase:
         self._executor = executor
 
     async def execute(self, request: CompareRequest) -> ComparisonReport:
-        first = await self._questions.load(request._first_id)
-        second = await self._questions.load(request._second_id)
+        first = self._questions.load(request._first_id)
+        second = self._questions.load(request._second_id)
         if first is None or second is None:
             raise QuestionNotFoundError("One or both questions not found")
 
         if not first.is_compatible_with(second):
             raise IncompatibleQuestionsError(
-                "Questions must query the same dataset"
+                "Questions must query the same dataset",
             )
 
         first_result = await self._executor.execute(
@@ -69,7 +69,9 @@ class CompareQuestionsUseCase:
         )
 
     def _compute_differences(
-        self, first: QueryResult, second: QueryResult
+        self,
+        first: QueryResult,
+        second: QueryResult,
     ) -> list[RowDifference]:
         first_set = {tuple(sorted(r.items())) for r in first._rows}
         second_set = {tuple(sorted(r.items())) for r in second._rows}
@@ -77,5 +79,5 @@ class CompareQuestionsUseCase:
             RowDifference(
                 _added=[dict(r) for r in second_set - first_set],
                 _removed=[dict(r) for r in first_set - second_set],
-            )
+            ),
         ]

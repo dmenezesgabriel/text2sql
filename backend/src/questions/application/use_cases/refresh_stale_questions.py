@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from src.shared.domain.base import EntityId
-from src.questions.domain.entities import Question
-from src.questions.application.ports.i_question_repository import IQuestionRepository
 from src.questions.application.ports.i_query_executor import IQueryExecutor
+from src.questions.application.ports.i_question_repository import IQuestionRepository
+from src.questions.domain.entities import Question
+from src.shared.domain.base import EntityId
 
 
 class INotificationPort(Protocol):
@@ -32,7 +32,7 @@ class RefreshStaleQuestionsUseCase:
         self._notifier = notifier
 
     async def execute(self, threshold_days: int) -> RefreshReport:
-        all_questions = await self._questions.find_all()
+        all_questions = self._questions.find_all()
         changed: list[Question] = []
         failed: list[tuple[EntityId, str]] = []
         now = datetime.utcnow()
@@ -54,7 +54,7 @@ class RefreshStaleQuestionsUseCase:
         for question in changed:
             self._notifier.notify(
                 f"Question '{question._specification._description._title.value}' "
-                f"has new data available"
+                f"has new data available",
             )
 
         return RefreshReport(

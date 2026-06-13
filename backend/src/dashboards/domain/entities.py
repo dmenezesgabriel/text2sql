@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from uuid import UUID, uuid4
+from uuid import uuid4
 
-from src.shared.domain.base import Entity, EntityId, ValueObject, AuditRecord
-
-from src.dashboards.exceptions.tile_overlap_error import TileOverlapError
-from src.dashboards.exceptions.tile_not_found_error import TileNotFoundError
+from src.dashboards.domain.value_objects import DashboardTitle, FilterBinding, TilePosition
 from src.dashboards.exceptions.self_filter_error import SelfFilterError
-
-from src.dashboards.domain.value_objects import DashboardTitle, TilePosition, FilterBinding
-from src.questions.domain.entities import Question, QuestionTitle
+from src.dashboards.exceptions.tile_not_found_error import TileNotFoundError
+from src.dashboards.exceptions.tile_overlap_error import TileOverlapError
+from src.questions.domain.entities import Question
+from src.shared.domain.base import AuditRecord, Entity, EntityId, ValueObject
 
 
 @dataclass(frozen=True)
@@ -33,7 +31,8 @@ class DashboardTile(Entity):
 
 class Tiles:
     def __init__(
-        self, items: list[DashboardTile] | None = None
+        self,
+        items: list[DashboardTile] | None = None,
     ) -> None:
         self._items: list[DashboardTile] = items or []
 
@@ -41,9 +40,7 @@ class Tiles:
         self._items.append(tile)
 
     def remove(self, tile_id: EntityId) -> None:
-        self._items = [
-            t for t in self._items if t._identity._id != tile_id
-        ]
+        self._items = [t for t in self._items if t._identity._id != tile_id]
 
     def contains(self, tile_id: EntityId) -> bool:
         return any(t._identity._id == tile_id for t in self._items)
@@ -73,7 +70,7 @@ class DashboardLayout:
     def add_tile(self, tile: DashboardTile) -> None:
         if self._tile_overlaps(tile):
             raise TileOverlapError(
-                f"Tile {tile._identity._id.value} overlaps existing tile"
+                f"Tile {tile._identity._id.value} overlaps existing tile",
             )
         self._tiles.add(tile)
 
@@ -81,14 +78,13 @@ class DashboardLayout:
         self._tiles.remove(tile_id)
         self._filters.pop(tile_id, None)
         for source_id, bindings in self._filters.items():
-            cleaned = tuple(
-                b for b in bindings
-                if tile_id not in b._target_tiles
-            )
+            cleaned = tuple(b for b in bindings if tile_id not in b._target_tiles)
             self._filters[source_id] = cleaned
 
     def move_tile(
-        self, tile_id: EntityId, new_position: TilePosition
+        self,
+        tile_id: EntityId,
+        new_position: TilePosition,
     ) -> None:
         tile = self._tiles.find(tile_id)
         if tile is None:
@@ -110,12 +106,12 @@ class DashboardLayout:
     ) -> None:
         if not self._tiles.contains(source_tile_id):
             raise TileNotFoundError(
-                f"Source tile {source_tile_id.value} not found"
+                f"Source tile {source_tile_id.value} not found",
             )
         for target_id in target_tile_ids:
             if not self._tiles.contains(target_id):
                 raise TileNotFoundError(
-                    f"Target tile {target_id.value} not found"
+                    f"Target tile {target_id.value} not found",
                 )
             if target_id == source_tile_id:
                 raise SelfFilterError("A tile cannot filter itself")
@@ -129,17 +125,16 @@ class DashboardLayout:
         self._filters[source_tile_id] = existing + (binding,)
 
     def tiles_affected_by(
-        self, source_tile_id: EntityId, column: str
+        self,
+        source_tile_id: EntityId,
+        column: str,
     ) -> list[DashboardTile]:
         bindings = self._filters.get(source_tile_id, ())
         targets: set[EntityId] = set()
         for binding in bindings:
             if binding._column == column:
                 targets.update(binding._target_tiles)
-        return [
-            t for t in self._tiles.to_list()
-            if t._identity._id in targets
-        ]
+        return [t for t in self._tiles.to_list() if t._identity._id in targets]
 
     def _tile_overlaps(self, tile: DashboardTile) -> bool:
         pos = tile._identity._position
@@ -165,11 +160,14 @@ class Dashboard(Entity):
         self._layout = layout
 
     def add_tile_from_question(
-        self, question: Question, position: TilePosition
+        self,
+        question: Question,
+        position: TilePosition,
     ) -> DashboardTile:
         tile = DashboardTile(
             identity=TileIdentity(
-                _id=EntityId(uuid4()), _position=position
+                _id=EntityId(uuid4()),
+                _position=position,
             ),
             source=question,
         )

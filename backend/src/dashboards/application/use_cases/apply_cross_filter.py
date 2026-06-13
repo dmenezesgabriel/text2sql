@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from src.shared.domain.base import EntityId
+from src.agent.domain.value_objects import QueryResult
 from src.dashboards.application.ports.i_dashboard_repository import (
     IDashboardRepository,
 )
@@ -10,7 +10,7 @@ from src.dashboards.application.ports.i_query_executor import IQueryExecutor
 from src.dashboards.exceptions.dashboard_not_found_error import (
     DashboardNotFoundError,
 )
-from src.agent.domain.value_objects import QueryResult
+from src.shared.domain.base import EntityId
 
 
 @dataclass(frozen=True)
@@ -39,12 +39,13 @@ class ApplyCrossFilterUseCase:
         self._executor = executor
 
     async def execute(
-        self, request: CrossFilterRequest
+        self,
+        request: CrossFilterRequest,
     ) -> CrossFilterResult:
-        dashboard = await self._dashboards.load(request._dashboard_id)
+        dashboard = self._dashboards.load(request._dashboard_id)
         if dashboard is None:
             raise DashboardNotFoundError(
-                f"Dashboard {request._dashboard_id.value} not found"
+                f"Dashboard {request._dashboard_id.value} not found",
             )
 
         affected = dashboard._layout.tiles_affected_by(
