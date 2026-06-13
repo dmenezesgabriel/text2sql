@@ -16,11 +16,23 @@ import type {
   RegisterDatasetApiV1DatasetsPostBody,
 } from './schemas';
 
+/**
+ *
+ * @param base
+ */
+function mergeContentTypeHeaders(base: HeadersInit | undefined): Headers {
+  const merged = new Headers(base);
+  merged.set('Content-Type', 'application/json');
+  return merged;
+}
+
 export const getChatApiV1ChatPostUrl = () => {
   return `/api/v1/chat`;
 };
 
 /**
+ * @param chatApiV1ChatPostBody
+ * @param options
  * @summary Chat
  */
 export const chatApiV1ChatPost = async (
@@ -30,7 +42,7 @@ export const chatApiV1ChatPost = async (
   const res = await fetch(getChatApiV1ChatPostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(chatApiV1ChatPostBody),
   });
 
@@ -45,6 +57,7 @@ export const getListQuestionsApiV1QuestionsGetUrl = () => {
 };
 
 /**
+ * @param options
  * @summary List Questions
  */
 export const listQuestionsApiV1QuestionsGet = async (options?: RequestInit): Promise<unknown> => {
@@ -64,6 +77,8 @@ export const getCreateQuestionApiV1QuestionsPostUrl = () => {
 };
 
 /**
+ * @param createQuestionApiV1QuestionsPostBody
+ * @param options
  * @summary Create Question
  */
 export const createQuestionApiV1QuestionsPost = async (
@@ -73,7 +88,7 @@ export const createQuestionApiV1QuestionsPost = async (
   const res = await fetch(getCreateQuestionApiV1QuestionsPostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(createQuestionApiV1QuestionsPostBody),
   });
 
@@ -88,6 +103,8 @@ export const getGetQuestionApiV1QuestionsQuestionIdGetUrl = (questionId: string)
 };
 
 /**
+ * @param questionId
+ * @param options
  * @summary Get Question
  */
 export const getQuestionApiV1QuestionsQuestionIdGet = async (
@@ -110,6 +127,8 @@ export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteUrl = (questionId: s
 };
 
 /**
+ * @param questionId
+ * @param options
  * @summary Delete Question
  */
 export const deleteQuestionApiV1QuestionsQuestionIdDelete = async (
@@ -132,6 +151,9 @@ export const getDrillQuestionApiV1QuestionsQuestionIdDrillPostUrl = (questionId:
 };
 
 /**
+ * @param questionId
+ * @param drillQuestionApiV1QuestionsQuestionIdDrillPostBody
+ * @param options
  * @summary Drill Question
  */
 export const drillQuestionApiV1QuestionsQuestionIdDrillPost = async (
@@ -142,7 +164,7 @@ export const drillQuestionApiV1QuestionsQuestionIdDrillPost = async (
   const res = await fetch(getDrillQuestionApiV1QuestionsQuestionIdDrillPostUrl(questionId), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(drillQuestionApiV1QuestionsQuestionIdDrillPostBody),
   });
 
@@ -157,6 +179,8 @@ export const getCompareQuestionsApiV1QuestionsComparePostUrl = () => {
 };
 
 /**
+ * @param compareQuestionsApiV1QuestionsComparePostBody
+ * @param options
  * @summary Compare Questions
  */
 export const compareQuestionsApiV1QuestionsComparePost = async (
@@ -166,7 +190,7 @@ export const compareQuestionsApiV1QuestionsComparePost = async (
   const res = await fetch(getCompareQuestionsApiV1QuestionsComparePostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(compareQuestionsApiV1QuestionsComparePostBody),
   });
 
@@ -181,6 +205,7 @@ export const getListDashboardsApiV1DashboardsGetUrl = () => {
 };
 
 /**
+ * @param options
  * @summary List Dashboards
  */
 export const listDashboardsApiV1DashboardsGet = async (options?: RequestInit): Promise<unknown> => {
@@ -200,6 +225,8 @@ export const getCreateDashboardApiV1DashboardsPostUrl = () => {
 };
 
 /**
+ * @param createDashboardApiV1DashboardsPostBody
+ * @param options
  * @summary Create Dashboard
  */
 export const createDashboardApiV1DashboardsPost = async (
@@ -209,7 +236,7 @@ export const createDashboardApiV1DashboardsPost = async (
   const res = await fetch(getCreateDashboardApiV1DashboardsPostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(createDashboardApiV1DashboardsPostBody),
   });
 
@@ -224,6 +251,8 @@ export const getGetDashboardApiV1DashboardsDashboardIdGetUrl = (dashboardId: str
 };
 
 /**
+ * @param dashboardId
+ * @param options
  * @summary Get Dashboard
  */
 export const getDashboardApiV1DashboardsDashboardIdGet = async (
@@ -246,6 +275,8 @@ export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteUrl = (dashboardI
 };
 
 /**
+ * @param dashboardId
+ * @param options
  * @summary Delete Dashboard
  */
 export const deleteDashboardApiV1DashboardsDashboardIdDelete = async (
@@ -268,6 +299,9 @@ export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostUrl = (dashbo
 };
 
 /**
+ * @param dashboardId
+ * @param filterDashboardApiV1DashboardsDashboardIdFilterPostBody
+ * @param options
  * @summary Filter Dashboard
  */
 export const filterDashboardApiV1DashboardsDashboardIdFilterPost = async (
@@ -278,7 +312,7 @@ export const filterDashboardApiV1DashboardsDashboardIdFilterPost = async (
   const res = await fetch(getFilterDashboardApiV1DashboardsDashboardIdFilterPostUrl(dashboardId), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(filterDashboardApiV1DashboardsDashboardIdFilterPostBody),
   });
 
@@ -293,6 +327,7 @@ export const getListDatasetsApiV1DatasetsGetUrl = () => {
 };
 
 /**
+ * @param options
  * @summary List Datasets
  */
 export const listDatasetsApiV1DatasetsGet = async (options?: RequestInit): Promise<unknown> => {
@@ -312,6 +347,8 @@ export const getRegisterDatasetApiV1DatasetsPostUrl = () => {
 };
 
 /**
+ * @param registerDatasetApiV1DatasetsPostBody
+ * @param options
  * @summary Register Dataset
  */
 export const registerDatasetApiV1DatasetsPost = async (
@@ -321,7 +358,7 @@ export const registerDatasetApiV1DatasetsPost = async (
   const res = await fetch(getRegisterDatasetApiV1DatasetsPostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(registerDatasetApiV1DatasetsPostBody),
   });
 
@@ -336,6 +373,8 @@ export const getIngestFileApiV1DatasetsIngestPostUrl = () => {
 };
 
 /**
+ * @param ingestFileApiV1DatasetsIngestPostBody
+ * @param options
  * @summary Ingest File
  */
 export const ingestFileApiV1DatasetsIngestPost = async (
@@ -345,7 +384,7 @@ export const ingestFileApiV1DatasetsIngestPost = async (
   const res = await fetch(getIngestFileApiV1DatasetsIngestPostUrl(), {
     ...options,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    headers: mergeContentTypeHeaders(options?.headers),
     body: JSON.stringify(ingestFileApiV1DatasetsIngestPostBody),
   });
 
@@ -360,6 +399,8 @@ export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetUrl = (datasetId: 
 };
 
 /**
+ * @param datasetId
+ * @param options
  * @summary Preview Dataset
  */
 export const previewDatasetApiV1DatasetsDatasetIdPreviewGet = async (
@@ -382,6 +423,8 @@ export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteUrl = (datasetId: strin
 };
 
 /**
+ * @param datasetId
+ * @param options
  * @summary Delete Dataset
  */
 export const deleteDatasetApiV1DatasetsDatasetIdDelete = async (
@@ -404,6 +447,7 @@ export const getHealthHealthGetUrl = () => {
 };
 
 /**
+ * @param options
  * @summary Health
  */
 export const healthHealthGet = async (options?: RequestInit): Promise<unknown> => {

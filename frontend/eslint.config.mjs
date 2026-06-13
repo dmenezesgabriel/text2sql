@@ -25,7 +25,7 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        project: './tsconfig.eslint.json',
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -65,9 +65,12 @@ export default tseslint.config(
     },
   },
   {
+    // Generated files have different constraints — disable rules that clash with orval output.
     files: ['**/generated/**'],
     rules: {
       'unicorn/filename-case': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
     },
   },
 );

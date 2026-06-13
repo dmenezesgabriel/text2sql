@@ -4,7 +4,7 @@ import { getText2sqlMock } from '@/shared/api/generated/endpoints.msw';
 
 export const handlers = [
   ...getText2sqlMock(),
-  http.post('/api/v1/chat', async () => {
+  http.post('/api/v1/chat', () => {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {

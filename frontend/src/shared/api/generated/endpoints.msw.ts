@@ -5,19 +5,16 @@
  * Generative Business Intelligence Chat Tool
  * OpenAPI spec version: 0.1.0
  */
-import { HttpResponse, http } from 'msw';
-import type { RequestHandlerOptions } from 'msw';
+import { http, HttpResponse, type RequestHandlerOptions } from 'msw';
 
 export const getChatApiV1ChatPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/chat',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -28,15 +25,13 @@ export const getChatApiV1ChatPostMockHandler = (
 };
 
 export const getListQuestionsApiV1QuestionsGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/questions',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -47,15 +42,13 @@ export const getListQuestionsApiV1QuestionsGetMockHandler = (
 };
 
 export const getCreateQuestionApiV1QuestionsPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/questions',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -66,15 +59,13 @@ export const getCreateQuestionApiV1QuestionsPostMockHandler = (
 };
 
 export const getGetQuestionApiV1QuestionsQuestionIdGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/questions/:questionId',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -85,15 +76,13 @@ export const getGetQuestionApiV1QuestionsQuestionIdGetMockHandler = (
 };
 
 export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/questions/:questionId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -104,15 +93,13 @@ export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteMockHandler = (
 };
 
 export const getDrillQuestionApiV1QuestionsQuestionIdDrillPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/questions/:questionId/drill',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -123,15 +110,13 @@ export const getDrillQuestionApiV1QuestionsQuestionIdDrillPostMockHandler = (
 };
 
 export const getCompareQuestionsApiV1QuestionsComparePostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/questions/compare',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -142,15 +127,13 @@ export const getCompareQuestionsApiV1QuestionsComparePostMockHandler = (
 };
 
 export const getListDashboardsApiV1DashboardsGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/dashboards',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -161,15 +144,13 @@ export const getListDashboardsApiV1DashboardsGetMockHandler = (
 };
 
 export const getCreateDashboardApiV1DashboardsPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/dashboards',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -180,15 +161,13 @@ export const getCreateDashboardApiV1DashboardsPostMockHandler = (
 };
 
 export const getGetDashboardApiV1DashboardsDashboardIdGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/dashboards/:dashboardId',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -199,15 +178,13 @@ export const getGetDashboardApiV1DashboardsDashboardIdGetMockHandler = (
 };
 
 export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/dashboards/:dashboardId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -218,15 +195,13 @@ export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteMockHandler = (
 };
 
 export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/dashboards/:dashboardId/filter',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -237,15 +212,13 @@ export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostMockHandler =
 };
 
 export const getListDatasetsApiV1DatasetsGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/datasets',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -256,15 +229,13 @@ export const getListDatasetsApiV1DatasetsGetMockHandler = (
 };
 
 export const getRegisterDatasetApiV1DatasetsPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/datasets',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -275,15 +246,13 @@ export const getRegisterDatasetApiV1DatasetsPostMockHandler = (
 };
 
 export const getIngestFileApiV1DatasetsIngestPostMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/datasets/ingest',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -294,15 +263,13 @@ export const getIngestFileApiV1DatasetsIngestPostMockHandler = (
 };
 
 export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/datasets/:datasetId/preview',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -313,15 +280,13 @@ export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetMockHandler = (
 };
 
 export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/datasets/:datasetId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 
@@ -332,15 +297,13 @@ export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteMockHandler = (
 };
 
 export const getHealthHealthGetMockHandler = (
-  overrideResponse?:
-    | unknown
-    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/health',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (typeof overrideResponse === 'function') {
+      if (overrideResponse !== undefined) {
         await overrideResponse(info);
       }
 

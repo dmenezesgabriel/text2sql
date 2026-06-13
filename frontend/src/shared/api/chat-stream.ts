@@ -1,3 +1,12 @@
+/**
+ *
+ * @param body
+ * @param body.message
+ * @param body.conversation_id
+ * @param onEvent
+ * @param onError
+ * @param onClose
+ */
 export function chatStream(
   body: { message: string; conversation_id?: string },
   onEvent: (event: MessageEvent) => void,
@@ -24,7 +33,7 @@ export function chatStream(
       const decoder = new TextDecoder();
       let buffer = '';
 
-      while (true) {
+      for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -35,7 +44,7 @@ export function chatStream(
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
-              const data = JSON.parse(line.slice(6));
+              const data: unknown = JSON.parse(line.slice(6)) as unknown;
               onEvent(new MessageEvent('message', { data: JSON.stringify(data) }));
             } catch {
               onEvent(new MessageEvent('message', { data: line.slice(6) }));
