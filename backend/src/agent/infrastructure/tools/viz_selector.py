@@ -4,9 +4,17 @@ from src.agent.application.ports.i_tool_executor import IToolExecutor
 from src.agent.domain.value_objects import (
     Parameters,
     QueryResult,
-    ResponseKind,
     ToolName,
 )
+from src.shared.domain.base import ResponseKind
+
+
+def _select_kind(row_count: int) -> ResponseKind:
+    if row_count == 0:
+        return ResponseKind.TEXT
+    if row_count > 10:
+        return ResponseKind.TABLE
+    return ResponseKind.CHART
 
 
 class VizSelectorTool(IToolExecutor):
@@ -18,22 +26,8 @@ class VizSelectorTool(IToolExecutor):
         return True
 
     async def execute(self, parameters: Parameters) -> QueryResult:
-        columns = parameters.value.get("columns", [])
         row_count = parameters.value.get("row_count", 0)
-
-        has_numeric = any(
-            isinstance(col.get("type"), str) and "int" in col.get("type", "") for col in columns
-        )
-
-        if row_count == 1 and has_numeric:
-            kind = ResponseKind.CHART
-        elif row_count > 10:
-            kind = ResponseKind.TABLE
-        elif row_count > 0:
-            kind = ResponseKind.CHART
-        else:
-            kind = ResponseKind.TEXT
-
+        kind = _select_kind(row_count)
         return QueryResult(
             _columns=("kind",),
             _rows=({"kind": kind.name.lower()},),

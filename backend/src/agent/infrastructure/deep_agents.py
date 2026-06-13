@@ -123,7 +123,8 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
                 if tool_call._name == "generate_sql":
                     async for event in self._handle_sql(tool_call, messages, toolkit):
                         yield event
-                elif tool_call._name == "build_visualization":
+                    continue
+                if tool_call._name == "build_visualization":
                     yield SpecFragmentEvent(_payload=tool_call._arguments.get("spec", {}))
                     return
 
