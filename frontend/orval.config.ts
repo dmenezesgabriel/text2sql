@@ -13,8 +13,9 @@ export default defineConfig({
       mode: 'split',
       clean: true,
       override: {
-        fetch: {
-          includeHttpResponseReturnType: false,
+        mutator: {
+          path: './src/shared/api/mutator.ts',
+          name: 'customFetch',
         },
       },
       mock: {
@@ -22,7 +23,8 @@ export default defineConfig({
       },
     },
     hooks: {
-      afterAllFilesWrite: 'prettier --write',
+      afterAllFilesWrite:
+        'prettier --write && eslint --fix src/shared/api/generated/ --no-warn-ignored',
     },
   },
 });
