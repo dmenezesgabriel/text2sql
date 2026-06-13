@@ -68,7 +68,7 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
     # ── Repositories ──
     question_repo = DynamoQuestionRepository()
     dataset_repo = DynamoDatasetRepository()
-    dashboard_repo = DynamoDashboardRepository()
+    dashboard_repo = DynamoDashboardRepository(questions=question_repo)
     conversation_repo = DynamoConversationRepository()
 
     # ── Query engine ──
