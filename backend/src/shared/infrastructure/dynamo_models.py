@@ -33,6 +33,9 @@ class QuestionModel(BaseModel):
     sql = UnicodeAttribute()
     dataset_id = UnicodeAttribute()
     viz_component = UnicodeAttribute()
+    viz_format = UnicodeAttribute(null=True)  # ResponseKind.name
+    viz_props = UnicodeAttribute(null=True)  # JSON dict
+    viz_children = UnicodeAttribute(null=True)  # JSON list
     created_at = UnicodeAttribute()
     updated_at = UnicodeAttribute()
 
@@ -56,5 +59,7 @@ class DashboardModel(BaseModel):
 
     id = UnicodeAttribute(hash_key=True)
     title = UnicodeAttribute()
+    tiles = UnicodeAttribute(null=True)  # JSON list of tile snapshots
+    filters = UnicodeAttribute(null=True)  # JSON list of filter binding snapshots
     created_at = UnicodeAttribute()
     updated_at = UnicodeAttribute()
