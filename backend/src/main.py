@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
+import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.composition_root import ComposeConfig, compose
 from src.datasets.infrastructure.duckdb_executor import DuckDBExecutor
@@ -16,8 +19,24 @@ from src.shared.infrastructure.dynamo_models import (
     DatasetModel,
     QuestionModel,
 )
+from src.shared.infrastructure.logging import REQUEST_ID, setup_logging
+
+setup_logging(level=os.getenv("LOG_LEVEL", "INFO"))
+_logger = logging.getLogger(__name__)
 
 _DYNAMO_MODELS = [ConversationModel, QuestionModel, DatasetModel, DashboardModel]
+
+
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next: object) -> Response:
+        rid = request.headers.get("X-Request-Id") or str(uuid.uuid4())
+        token = REQUEST_ID.set(rid)
+        try:
+            response = await call_next(request)  # type: ignore[arg-type]
+            response.headers["X-Request-Id"] = rid
+            return response
+        finally:
+            REQUEST_ID.reset(token)
 
 
 async def _ensure_dynamo_tables(retries: int = 15, delay: float = 2.0) -> None:
@@ -35,6 +54,7 @@ async def _ensure_dynamo_tables(retries: int = 15, delay: float = 2.0) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    _logger.info("startup.begin")
     await _ensure_dynamo_tables()
 
     pool = DuckDBPool(database_path=os.getenv("DUCKDB_PATH", ":memory:"))
@@ -55,8 +75,8 @@ async def lifespan(app: FastAPI):
                     ds._identity._id,
                     ds._configuration._location.value,
                 )
-    except Exception as exc:
-        print(f"[startup] Could not recreate dataset views: {exc}")
+    except Exception:
+        _logger.warning("startup.views_skipped", exc_info=True)
 
     composition = compose(
         pool=pool,
@@ -72,9 +92,11 @@ async def lifespan(app: FastAPI):
     app.include_router(composition.dashboards_router)
     app.include_router(composition.datasets_router)
 
+    _logger.info("startup.complete")
     yield
 
     pool.disconnect()
+    _logger.info("shutdown.complete")
 
 
 app = FastAPI(
@@ -83,6 +105,7 @@ app = FastAPI(
     description="Generative Business Intelligence Chat Tool",
     lifespan=lifespan,
 )
+app.add_middleware(RequestIdMiddleware)
 
 
 @app.get("/health")

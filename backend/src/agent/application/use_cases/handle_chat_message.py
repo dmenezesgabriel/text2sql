@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from uuid import UUID
@@ -18,6 +19,8 @@ from src.agent.domain.value_objects import (
     ThinkingEvent,
     TokenCount,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 class ProcessMessageRequest:
@@ -49,16 +52,14 @@ class HandleChatMessageUseCase:
         self._agent = agent
 
     async def execute(self, request: ProcessMessageRequest) -> AsyncIterator[AgentEvent]:
+        conv_id = str(request._conversation_id.value)
+        _logger.info("chat.start", extra={"conversation_id": conv_id})
         conversation = self._load_or_create(request._conversation_id)
-
         message = conversation.add_user_message(request._content.value)
         yield ThinkingEvent("Processing your question...")
 
-        if conversation.should_summarize(self._agent._token_limit):
-            recent = conversation.recent_messages(window=10)
-            summary = await self._agent._summarizer.summarize(conversation.history_text())
-            conversation.apply_summary(summary, recent)
-            yield ThinkingEvent("Summarizing conversation context...")
+        async for event in self._maybe_summarize(conversation):
+            yield event
 
         final_spec: dict[str, object] | None = None
         async for event in self._agent._orchestrator.run(
@@ -70,6 +71,22 @@ class HandleChatMessageUseCase:
                 final_spec = event._payload
             yield event
 
+        self._finalize(conversation, final_spec)
+        _logger.info("chat.complete", extra={"conversation_id": conv_id})
+
+    async def _maybe_summarize(self, conversation: Conversation) -> AsyncIterator[AgentEvent]:
+        if not conversation.should_summarize(self._agent._token_limit):
+            return
+        recent = conversation.recent_messages(window=10)
+        summary = await self._agent._summarizer.summarize(conversation.history_text())
+        conversation.apply_summary(summary, recent)
+        yield ThinkingEvent("Summarizing conversation context...")
+
+    def _finalize(
+        self,
+        conversation: Conversation,
+        final_spec: dict[str, object] | None,
+    ) -> None:
         content = json.dumps(final_spec) if final_spec else "(no result)"
         conversation.add_assistant_response(content=content, tool_call=None)
         self._conversations.save(conversation)

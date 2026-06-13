@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import cast
 
 from litellm import ModelResponse, acompletion
@@ -9,12 +10,15 @@ from src.agent.application.ports.i_language_model_provider import ILanguageModel
 from src.agent.domain.entities import AgentConfiguration, Message
 from src.agent.domain.value_objects import LLMToolCall, LLMToolResponse
 
+_logger = logging.getLogger(__name__)
+
 
 class LiteLLMProvider(ILanguageModelProvider):
     def __init__(self, model_name: str = "gpt-4o") -> None:
         self._model_name = model_name
 
     async def generate(self, messages: list[Message], config: AgentConfiguration) -> str:
+        _logger.debug("llm.generate", extra={"model": self._model_name, "messages": len(messages)})
         formatted = [
             {"role": m._identity._role.name.lower(), "content": m._body._content.value}
             for m in messages
@@ -34,6 +38,10 @@ class LiteLLMProvider(ILanguageModelProvider):
         messages: list[dict[str, object]],
         tools: list[dict[str, object]],
     ) -> LLMToolResponse:
+        _logger.debug(
+            "llm.call_with_tools",
+            extra={"model": self._model_name, "tools": len(tools)},
+        )
         response = cast(
             ModelResponse,
             await acompletion(
