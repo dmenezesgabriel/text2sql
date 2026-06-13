@@ -1,0 +1,38 @@
+rules:
+  - id: no-else
+    message: >
+      Object Calisthenics rule 2: no `else` keyword. Use an early return,
+      guard clause, or polymorphism instead.
+    severity: WARNING
+    languages: [python]
+    pattern: |
+      if ...:
+          ...
+      else:
+          ...
+    path-exclude:
+      - "**/__init__.py"
+      - "**/conftest.py"
+    metadata:
+      category: design
+      technology: python
+      reference: https://williamdurand.fr/2013/06/03/object-calisthenics/#2-dont-use-the-else-keyword
+
+  - id: no-elif
+    message: >
+      Object Calisthenics rule 2: no `elif` keyword. Use guard clauses or
+      polymorphism instead of branching chains.
+    severity: WARNING
+    languages: [python]
+    pattern: |
+      if ...:
+          ...
+      elif ...:
+          ...
+    path-exclude:
+      - "**/__init__.py"
+      - "**/conftest.py"
+    metadata:
+      category: design
+      technology: python
+      reference: https://williamdurand.fr/2013/06/03/object-calisthenics/#2-dont-use-the-else-keyword
