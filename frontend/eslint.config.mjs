@@ -37,8 +37,8 @@ export default tseslint.config(
       'unicorn/filename-case': [
         'error',
         {
-          cases: { camelCase: true, pascalCase: true },
-          ignore: ['^\\[[a-z]+\\]', '^\\.'],
+          cases: { kebabCase: true },
+          ignore: ['^\\[[a-z]+\\]', '^\\.', '/generated/'],
         },
       ],
       'unicorn/prevent-abbreviations': 'off',
@@ -61,6 +61,13 @@ export default tseslint.config(
       'sonarjs/no-duplicate-string': 'off',
       'unicorn/filename-case': 'off',
       'max-lines': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+    },
+  },
+  {
+    files: ['**/generated/**'],
+    rules: {
+      'unicorn/filename-case': 'off',
     },
   },
 );
