@@ -20,6 +20,7 @@ export default defineConfig({
     },
   },
   test: {
+    reporters: ['dot'],
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/shared/lib/test/setup.ts'],

@@ -16,7 +16,7 @@ check:
 	pnpm fallow
 
 test:
-	pnpm test
+	pnpm test:coverage
 
 e2e:
 	pnpm e2e
