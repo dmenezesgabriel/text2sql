@@ -6,8 +6,10 @@ import { wrapLitComponent } from '@/shared/lib/wrap-lit-component';
 import { biCatalog } from './catalog';
 import { BarChartElement } from './components/bar-chart/bar-chart';
 import { DataTableElement } from './components/data-table/data-table';
+import { LineChartElement } from './components/line-chart/line-chart';
 import { MetricElement } from './components/metric/metric';
 import { NarrativeTextElement } from './components/narrative-text/narrative-text';
+import { PieChartElement } from './components/pie-chart/pie-chart';
 
 // @json-render/react ComponentFn receives { props, ... } (a ComponentContext),
 // not the raw props object. We wrap each Lit component so it extracts props
@@ -25,6 +27,8 @@ function asComponentFn(tagName: string, elementClass: CustomElementConstructor) 
 
 const components = {
   BarChart: asComponentFn('bi-bar-chart', BarChartElement),
+  LineChart: asComponentFn('bi-line-chart', LineChartElement),
+  PieChart: asComponentFn('bi-pie-chart', PieChartElement),
   DataTable: asComponentFn('bi-data-table', DataTableElement),
   Metric: asComponentFn('bi-metric', MetricElement),
   NarrativeText: asComponentFn('bi-narrative-text', NarrativeTextElement),

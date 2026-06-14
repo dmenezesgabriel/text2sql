@@ -1,74 +1,15 @@
-import { Chart, registerables } from 'chart.js';
-import { css, html, LitElement } from 'lit';
-import { property } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
+import type { ChartConfiguration } from 'chart.js';
 
-Chart.register(...registerables);
+import { CartesianChartElement } from '../cartesian-chart';
 
-export class BarChartElement extends LitElement {
-  static readonly styles = css`
-    :host {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-  `;
-
-  @property({ type: String }) title = '';
-  @property({ type: String }) xAxis = '';
-  @property({ type: String }) yAxis = '';
-  @property({ type: Array }) data: { label: string; value: number }[] = [];
-  @property({ type: String }) color = '#2563eb';
-
-  private _chart: Chart | null = null;
-  private _canvasRef = createRef<HTMLCanvasElement>();
-
-  updated() {
-    this._renderChart();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._chart?.destroy();
-  }
-
-  private _renderChart() {
-    const canvas = this._canvasRef.value;
-    if (!canvas) return;
-    this._chart?.destroy();
-
-    this._chart = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: this.data.map((d) => d.label),
-        datasets: [
-          {
-            label: this.title,
-            data: this.data.map((d) => d.value),
-            backgroundColor: this.color,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: !!this.title },
-        },
-        scales: {
-          x: { title: { display: true, text: this.xAxis } },
-          y: { title: { display: true, text: this.yAxis } },
-        },
-      },
+export class BarChartElement extends CartesianChartElement {
+  protected buildConfig(): ChartConfiguration {
+    const series = this.seriesColor();
+    return this.cartesianConfig('bar', {
+      backgroundColor: series,
+      borderRadius: 3,
+      maxBarThickness: 48,
     });
-  }
-
-  render() {
-    return html`<canvas ${ref(this._canvasRef)}></canvas>`;
   }
 }
 
