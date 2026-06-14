@@ -1,85 +1,70 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import type { Dataset } from '@/entities/dataset/types';
 import { useDatasetStore } from '@/features/dataset/model/store';
 import { RegisterDatasetForm } from '@/features/dataset/ui/register-dataset-form';
-import { Card } from '@/shared/components/card';
-
-const pageStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 'var(--spacing-lg)',
-};
-
-const tableStyle: React.CSSProperties = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  fontSize: '0.9rem',
-};
-
-const thStyle: React.CSSProperties = {
-  textAlign: 'left',
-  padding: 'var(--spacing-sm)',
-  borderBottom: '2px solid var(--color-border)',
-  color: 'var(--color-text-secondary)',
-  fontWeight: 600,
-};
-
-const tdStyle: React.CSSProperties = {
-  padding: 'var(--spacing-sm)',
-  borderBottom: '1px solid var(--color-border)',
-};
 
 /**
  *
  * @param datasets
  * @param isLoading
- * @param td
- * @param th
- * @param table
  */
-function renderDatasetList(
-  datasets: Dataset[],
-  isLoading: boolean,
-  td: React.CSSProperties,
-  th: React.CSSProperties,
-  table: React.CSSProperties,
-) {
+function renderDatasetList(datasets: Dataset[], isLoading: boolean) {
   if (isLoading && datasets.length === 0) {
-    return <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>;
+    return <bi-spinner />;
   }
   if (datasets.length === 0) {
     return (
-      <p style={{ color: 'var(--color-text-secondary)' }}>
-        No datasets registered. Use the form above or run the seed script.
-      </p>
+      <bi-empty-state
+        heading="No datasets yet"
+        description="Register an S3 dataset to get started."
+      />
     );
   }
   return (
-    <table style={table}>
-      <thead>
-        <tr>
-          <th style={th}>Name</th>
-          <th style={th}>View</th>
-          <th style={th}>Location</th>
-          <th style={th}>Columns</th>
-        </tr>
-      </thead>
-      <tbody>
-        {datasets.map((ds) => (
-          <tr key={ds.id}>
-            <td style={td}>{ds.name}</td>
-            <td style={{ ...td, fontFamily: 'monospace', fontSize: '0.8rem' }}>
-              ds_{ds.id.replaceAll('-', '')}
-            </td>
-            <td style={{ ...td, fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-              {ds.location ?? '—'}
-            </td>
-            <td style={td}>{String(ds.columns.length)}</td>
+    <div className="overflow-x-auto">
+      <table role="table" aria-label="Registered datasets" className="w-full border-collapse">
+        <thead>
+          <tr>
+            <th scope="col" className="th-base">
+              Name
+            </th>
+            <th scope="col" className="th-base">
+              Kind
+            </th>
+            <th scope="col" className="th-base">
+              Location
+            </th>
+            <th scope="col" className="th-base">
+              Columns
+            </th>
+            <th scope="col" className="th-base">
+              Actions
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {datasets.map((ds) => (
+            <tr key={ds.id}>
+              <td className="td-base font-semibold">
+                <Link to={`/datasets/${ds.id}`}>{ds.name}</Link>
+              </td>
+              <td className="td-base">
+                <bi-badge variant="default">{ds.kind}</bi-badge>
+              </td>
+              <td className="td-base text-secondary text-sm font-mono">{ds.location ?? '—'}</td>
+              <td className="td-base tabular-nums">{ds.columns.length}</td>
+              <td className="td-base">
+                <Link to={`/datasets/${ds.id}`} className="text-accent text-sm">
+                  Preview →
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -94,14 +79,19 @@ export function DatasetsPage() {
   }, [fetchDatasets]);
 
   return (
-    <div style={pageStyle}>
-      <h2>Datasets</h2>
-      <Card title="Register a Dataset">
+    <div className="flex flex-col gap-lg">
+      <bi-page-header
+        heading="Datasets"
+        description="Register and browse data sources for your queries"
+      />
+
+      <bi-card heading="Register a Dataset">
         <RegisterDatasetForm />
-      </Card>
-      <Card title={`Registered Datasets (${String(datasets.length)})`}>
-        {renderDatasetList(datasets, isLoading, tdStyle, thStyle, tableStyle)}
-      </Card>
+      </bi-card>
+
+      <bi-card heading={`Registered Datasets (${String(datasets.length)})`}>
+        {renderDatasetList(datasets, isLoading)}
+      </bi-card>
     </div>
   );
 }
