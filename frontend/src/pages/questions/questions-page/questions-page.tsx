@@ -1,43 +1,79 @@
-import React from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { useChatStore } from '@/features/chat/model/store';
-import { Card } from '@/shared/components/card';
-
-const pageStyle: React.CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 'var(--spacing-lg)',
-};
-
-const gridStyle: React.CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-  gap: 'var(--spacing-md)',
-};
+import { useQuestionStore } from '@/features/question/model/store';
+import { BiQuestionCardReact } from '@/features/question/ui/question-card';
 
 /**
  *
  */
 export function QuestionsPage() {
-  const messages = useChatStore((s) => s.messages);
+  const { questions, isLoading, error, fetchQuestions, deleteQuestion } = useQuestionStore();
+  const navigate = useNavigate();
 
-  const savedQuestions = messages
-    .filter((m) => m.role === 'assistant' && m.content.length > 0)
-    .slice(-6);
+  useEffect(() => {
+    void fetchQuestions();
+  }, [fetchQuestions]);
+
+  const handleDelete = (e: Event) => {
+    void deleteQuestion((e as CustomEvent<string>).detail);
+  };
 
   return (
-    <div style={pageStyle}>
-      <h2>Questions</h2>
-      {savedQuestions.length === 0 ? (
-        <Card title="No saved questions yet">
-          <p>Ask a question in the chat to get started.</p>
-        </Card>
-      ) : (
-        <div style={gridStyle}>
-          {savedQuestions.map((q) => (
-            <Card key={q.id} title="Saved Response">
-              <p>{q.content.slice(0, 120)}...</p>
-            </Card>
+    <div className="flex flex-col gap-lg">
+      <bi-page-header
+        heading="Questions"
+        description="Saved analytical queries and their visualizations"
+      >
+        <bi-button
+          slot="actions"
+          variant="primary"
+          onClick={() => {
+            void navigate('/chat');
+          }}
+        >
+          Go to Chat
+        </bi-button>
+      </bi-page-header>
+
+      {isLoading && questions.length === 0 && <bi-spinner />}
+
+      {error && (
+        <p role="alert" aria-live="assertive" className="text-error text-sm">
+          {error}
+        </p>
+      )}
+
+      {!isLoading && !error && questions.length === 0 && (
+        <bi-empty-state
+          heading="No questions yet"
+          description="Ask a question in the chat, then save it here."
+        >
+          <bi-button
+            slot="action"
+            variant="primary"
+            onClick={() => {
+              void navigate('/chat');
+            }}
+          >
+            Go to Chat
+          </bi-button>
+        </bi-empty-state>
+      )}
+
+      {questions.length > 0 && (
+        <div className="grid-auto-fill-340">
+          {questions.map((q) => (
+            <BiQuestionCardReact
+              key={q.id}
+              questionId={q.id}
+              title={q.title}
+              vizFormat={q.vizFormat}
+              sql={q.sql}
+              createdAt={q.createdAt}
+              showDelete={true}
+              onBiQuestionDelete={handleDelete}
+            />
           ))}
         </div>
       )}
