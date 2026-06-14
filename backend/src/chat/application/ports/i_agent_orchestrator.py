@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from typing import Protocol
 
-from src.agent.application.ports.i_tool_kit import IToolKit
-from src.agent.domain.entities import Conversation, Message
-from src.agent.domain.value_objects import AgentEvent
+from src.chat.application.ports.i_tool_kit import IToolKit
+from src.chat.domain.entities import Conversation, Message
+from src.chat.domain.value_objects import AgentEvent
 
 
 class IAgentOrchestrator(Protocol):

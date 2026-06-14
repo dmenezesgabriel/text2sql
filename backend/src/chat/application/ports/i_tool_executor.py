@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from src.agent.domain.value_objects import Parameters, QueryResult, ToolName
+from src.chat.domain.value_objects import Parameters, QueryResult, ToolName
 
 
 class IToolExecutor(Protocol):

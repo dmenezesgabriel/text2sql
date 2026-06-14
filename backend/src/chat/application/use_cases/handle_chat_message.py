@@ -6,12 +6,12 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from uuid import UUID
 
-from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
-from src.agent.application.ports.i_conversation_repository import IConversationRepository
-from src.agent.application.ports.i_summarizer import ISummarizer
-from src.agent.application.ports.i_tool_kit import IToolKit
-from src.agent.domain.entities import Conversation, EntityId, Messages
-from src.agent.domain.value_objects import (
+from src.chat.application.ports.i_agent_orchestrator import IAgentOrchestrator
+from src.chat.application.ports.i_conversation_repository import IConversationRepository
+from src.chat.application.ports.i_summarizer import ISummarizer
+from src.chat.application.ports.i_tool_kit import IToolKit
+from src.chat.domain.entities import Conversation, EntityId, Messages
+from src.chat.domain.value_objects import (
     AgentEvent,
     ConversationId,
     MessageContent,

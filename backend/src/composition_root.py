@@ -4,19 +4,19 @@ from dataclasses import dataclass
 
 from fastapi import APIRouter
 
-from src.agent.application.use_cases.handle_chat_message import (
+from src.chat.application.use_cases.handle_chat_message import (
     AgentConfig,
     HandleChatMessageUseCase,
 )
-from src.agent.domain.value_objects import TokenCount
-from src.agent.infrastructure.chat_model import build_chat_model
-from src.agent.infrastructure.deep_agents import DeepAgentsOrchestrator
-from src.agent.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
-from src.agent.infrastructure.fastapi.router import create_chat_router
-from src.agent.infrastructure.litellm_provider import LiteLLMProvider
-from src.agent.infrastructure.summarizer import LiteLLMSummarizer
-from src.agent.infrastructure.tool_kit import ToolKit
-from src.agent.infrastructure.tools.sql_generator import SQLGeneratorTool
+from src.chat.domain.value_objects import TokenCount
+from src.chat.infrastructure.chat_model import build_chat_model
+from src.chat.infrastructure.deep_agents import DeepAgentsOrchestrator
+from src.chat.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
+from src.chat.infrastructure.fastapi.router import create_chat_router
+from src.chat.infrastructure.litellm_provider import LiteLLMProvider
+from src.chat.infrastructure.summarizer import LiteLLMSummarizer
+from src.chat.infrastructure.tool_kit import ToolKit
+from src.chat.infrastructure.tools.sql_generator import SQLGeneratorTool
 from src.dashboards.application.use_cases.apply_cross_filter import ApplyCrossFilterUseCase
 from src.dashboards.application.use_cases.compose_dashboard import (
     ComposeDashboardFromQuestionsUseCase,

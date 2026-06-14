@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from src.agent.domain.entities import AgentConfiguration, Message
-from src.agent.domain.value_objects import LLMToolResponse
+from src.chat.domain.entities import AgentConfiguration, Message
+from src.chat.domain.value_objects import LLMToolResponse
 
 
 class ILanguageModelProvider(Protocol):

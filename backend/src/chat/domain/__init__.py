@@ -1,4 +1,4 @@
-from src.agent.domain.value_objects import (
+from src.chat.domain.value_objects import (
     ConversationId,
     MessageContent,
     ToolName,
@@ -17,7 +17,7 @@ from src.agent.domain.value_objects import (
     ErrorEvent,
     MessageRole,
 )
-from src.agent.domain.entities import (
+from src.chat.domain.entities import (
     ModelConfig,
     AgentDirectives,
     AgentConfiguration,

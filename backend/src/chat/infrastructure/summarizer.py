@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from src.agent.application.ports.i_language_model_provider import (
+from src.chat.application.ports.i_language_model_provider import (
     ILanguageModelProvider,
 )
-from src.agent.application.ports.i_summarizer import ISummarizer
-from src.agent.domain.entities import (
+from src.chat.application.ports.i_summarizer import ISummarizer
+from src.chat.domain.entities import (
     AgentConfiguration,
     AgentDirectives,
     Message,
@@ -15,7 +15,7 @@ from src.agent.domain.entities import (
     MessageIdentity,
     ModelConfig,
 )
-from src.agent.domain.value_objects import (
+from src.chat.domain.value_objects import (
     MessageContent,
     MessageRole,
     ModelProvider,

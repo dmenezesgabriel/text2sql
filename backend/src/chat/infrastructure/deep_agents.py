@@ -10,11 +10,11 @@ from deepagents import create_deep_agent
 from langchain_core.language_models import BaseChatModel
 from langgraph.config import get_stream_writer
 
-from src.agent.application.ports.i_agent_orchestrator import IAgentOrchestrator
-from src.agent.application.ports.i_tool_executor import IToolExecutor
-from src.agent.application.ports.i_tool_kit import IToolKit
-from src.agent.domain.entities import Conversation, Message
-from src.agent.domain.value_objects import (
+from src.chat.application.ports.i_agent_orchestrator import IAgentOrchestrator
+from src.chat.application.ports.i_tool_executor import IToolExecutor
+from src.chat.application.ports.i_tool_kit import IToolKit
+from src.chat.domain.entities import Conversation, Message
+from src.chat.domain.value_objects import (
     AgentEvent,
     ErrorEvent,
     MessageRole,

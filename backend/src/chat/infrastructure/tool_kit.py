@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from src.agent.application.ports.i_tool_executor import IToolExecutor
-from src.agent.application.ports.i_tool_kit import IToolKit
-from src.agent.domain.value_objects import ToolName
+from src.chat.application.ports.i_tool_executor import IToolExecutor
+from src.chat.application.ports.i_tool_kit import IToolKit
+from src.chat.domain.value_objects import ToolName
 
 
 class ToolKit(IToolKit):

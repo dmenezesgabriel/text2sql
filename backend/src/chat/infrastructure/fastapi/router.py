@@ -6,11 +6,11 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from src.agent.application.use_cases.handle_chat_message import (
+from src.chat.application.use_cases.handle_chat_message import (
     HandleChatMessageUseCase,
     ProcessMessageRequest,
 )
-from src.agent.domain.value_objects import (
+from src.chat.domain.value_objects import (
     AgentEvent,
     ErrorEvent,
     SpecFragmentEvent,

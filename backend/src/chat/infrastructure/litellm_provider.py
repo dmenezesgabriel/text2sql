@@ -6,9 +6,9 @@ from typing import cast
 
 from litellm import ModelResponse, acompletion
 
-from src.agent.application.ports.i_language_model_provider import ILanguageModelProvider
-from src.agent.domain.entities import AgentConfiguration, Message
-from src.agent.domain.value_objects import LLMToolCall, LLMToolResponse
+from src.chat.application.ports.i_language_model_provider import ILanguageModelProvider
+from src.chat.domain.entities import AgentConfiguration, Message
+from src.chat.domain.value_objects import LLMToolCall, LLMToolResponse
 
 _logger = logging.getLogger(__name__)
 

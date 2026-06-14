@@ -1,4 +1,4 @@
-from src.agent.application.ports import (
+from src.chat.application.ports import (
     IConversationRepository,
     ILanguageModelProvider,
     IToolExecutor,
@@ -6,7 +6,7 @@ from src.agent.application.ports import (
     IAgentOrchestrator,
     ISummarizer,
 )
-from src.agent.application.use_cases import (
+from src.chat.application.use_cases import (
     ProcessMessageRequest,
     HandleChatMessageUseCase,
     ReplayConversationUseCase,

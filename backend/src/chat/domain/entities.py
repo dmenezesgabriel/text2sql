@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from enum import Enum, auto
 from uuid import uuid4
 
-from src.agent.domain.value_objects import (
+from src.chat.domain.value_objects import (
     MessageContent,
     MessageRole,
     ModelProvider,
@@ -14,8 +14,8 @@ from src.agent.domain.value_objects import (
     TokenCount,
     ToolCallEvent,
 )
-from src.agent.exceptions.closed_conversation_error import ClosedConversationError
-from src.agent.exceptions.conversation_order_error import ConversationOrderError
+from src.chat.exceptions.closed_conversation_error import ClosedConversationError
+from src.chat.exceptions.conversation_order_error import ConversationOrderError
 from src.shared.domain.base import CreatedAt, Entity, EntityId, ValueObject
 
 

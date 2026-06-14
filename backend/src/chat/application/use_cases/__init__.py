@@ -1,8 +1,8 @@
-from src.agent.application.use_cases.handle_chat_message import (
+from src.chat.application.use_cases.handle_chat_message import (
     ProcessMessageRequest,
     HandleChatMessageUseCase,
 )
-from src.agent.application.use_cases.replay_conversation import (
+from src.chat.application.use_cases.replay_conversation import (
     ReplayConversationUseCase,
 )
 

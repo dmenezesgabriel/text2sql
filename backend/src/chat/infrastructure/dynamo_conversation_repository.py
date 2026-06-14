@@ -4,17 +4,17 @@ import json
 from datetime import UTC, datetime
 from uuid import UUID
 
-from src.agent.application.ports.i_conversation_repository import (
+from src.chat.application.ports.i_conversation_repository import (
     IConversationRepository,
 )
-from src.agent.domain.entities import (
+from src.chat.domain.entities import (
     Conversation,
     Message,
     MessageBody,
     MessageIdentity,
     Messages,
 )
-from src.agent.domain.value_objects import (
+from src.chat.domain.value_objects import (
     ConversationId,
     MessageContent,
     MessageRole,

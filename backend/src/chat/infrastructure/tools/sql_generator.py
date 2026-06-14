@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from src.agent.application.ports.i_tool_executor import IToolExecutor
-from src.agent.domain.value_objects import Parameters, QueryResult, ToolName
+from src.chat.application.ports.i_tool_executor import IToolExecutor
+from src.chat.domain.value_objects import Parameters, QueryResult, ToolName
 from src.datasets.application.ports.i_query_engine import IQueryEngine
 
 
