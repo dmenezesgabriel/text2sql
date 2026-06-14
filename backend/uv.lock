@@ -7,6 +7,9 @@ resolution-markers = [
     "python_full_version < '3.13'",
 ]
 
+[options]
+exclude-newer = "2026-06-07T00:00:00Z"
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.2"
@@ -1353,6 +1356,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/54/52/de168715eb092c920531d418b8b9aafdff9e37ee80e5fc88106211ccbd47/langchain_google_genai-4.2.4.tar.gz", hash = "sha256:2f5de7a8a6552ffb64b907aca7503fd5e34d1a3240e280abcdc5f7eef480edd5", size = 270054, upload-time = "2026-05-28T21:23:00.503Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/a2/5feaf21cfe6fac80eae944f3ac5348d9e5e986813256f74f8dd104617474/langchain_google_genai-4.2.4-py3-none-any.whl", hash = "sha256:0e2c1021a15c91e60b68d813bb3e793bd1d9396b3f8639b943ab4e56e5652e04", size = 68832, upload-time = "2026-05-28T21:22:59.291Z" },
+]
+
+[[package]]
+name = "langchain-litellm"
+version = "0.6.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "httpx" },
+    { name = "langchain-core" },
+    { name = "litellm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/17/70/e1f42ceccd5fdad78ed7fd1a150c12661b63b92647d768168cd9efcdcf15/langchain_litellm-0.6.6.tar.gz", hash = "sha256:fb4399ae4c239b5bb85c19574a5bb4c17988433d48ec716e62144f0dad4a63af", size = 346225, upload-time = "2026-05-21T11:27:56.869Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/d0/adda5508115c28d78b408cc8f6b1e3fa3b2cc83a551b62cd613bb705535c/langchain_litellm-0.6.6-py3-none-any.whl", hash = "sha256:d49d0353254e10e38c351d7eae3d7b34128a0d31a3a22928ac289a8987c21a30", size = 26393, upload-time = "2026-05-21T11:27:55.709Z" },
 ]
 
 [[package]]
@@ -3201,6 +3219,9 @@ dependencies = [
     { name = "deepagents" },
     { name = "duckdb" },
     { name = "fastapi" },
+    { name = "langchain-core" },
+    { name = "langchain-litellm" },
+    { name = "langgraph" },
     { name = "litellm" },
     { name = "pydantic" },
     { name = "pynamodb" },
@@ -3237,6 +3258,9 @@ requires-dist = [
     { name = "duckdb", specifier = "==1.5.3" },
     { name = "fastapi", specifier = "==0.136.3" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = "==2.11" },
+    { name = "langchain-core", specifier = "==1.4.0" },
+    { name = "langchain-litellm", specifier = "==0.6.6" },
+    { name = "langgraph", specifier = "==1.2.4" },
     { name = "litellm", specifier = "==1.87.1" },
     { name = "moto", extras = ["dynamodb"], marker = "extra == 'dev'", specifier = "==5.1.4" },
     { name = "mutmut", marker = "extra == 'dev'", specifier = "==3.5.0" },
