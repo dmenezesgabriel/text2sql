@@ -9,6 +9,7 @@ from src.agent.application.use_cases.handle_chat_message import (
     HandleChatMessageUseCase,
 )
 from src.agent.domain.value_objects import TokenCount
+from src.agent.infrastructure.chat_model import build_chat_model
 from src.agent.infrastructure.deep_agents import DeepAgentsOrchestrator
 from src.agent.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
 from src.agent.infrastructure.fastapi.router import create_chat_router
@@ -16,7 +17,6 @@ from src.agent.infrastructure.litellm_provider import LiteLLMProvider
 from src.agent.infrastructure.summarizer import LiteLLMSummarizer
 from src.agent.infrastructure.tool_kit import ToolKit
 from src.agent.infrastructure.tools.sql_generator import SQLGeneratorTool
-from src.agent.infrastructure.tools.viz_selector import VizSelectorTool
 from src.dashboards.application.use_cases.apply_cross_filter import ApplyCrossFilterUseCase
 from src.dashboards.application.use_cases.compose_dashboard import (
     ComposeDashboardFromQuestionsUseCase,
@@ -77,14 +77,15 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
 
     # ── Tools ──
     sql_tool = SQLGeneratorTool(engine)
-    viz_tool = VizSelectorTool()
     toolkit = ToolKit()
     toolkit.register(sql_tool)
-    toolkit.register(viz_tool)
 
     # ── LLM / Agent ──
-    llm = LiteLLMProvider(cfg.llm_model_name)
-    orchestrator = DeepAgentsOrchestrator(llm=llm, datasets=dataset_repo)
+    llm = LiteLLMProvider(cfg.summarizer_model_name)
+    orchestrator = DeepAgentsOrchestrator(
+        model=build_chat_model(cfg.llm_model_name),
+        datasets=dataset_repo,
+    )
     summarizer = LiteLLMSummarizer(llm, cfg.summarizer_model_name)
 
     # ── Use Cases: Agent ──
