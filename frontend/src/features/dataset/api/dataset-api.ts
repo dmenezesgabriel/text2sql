@@ -42,3 +42,12 @@ export async function previewDataset(
   if (!res.ok) throw new Error(`previewDataset failed: ${res.statusText}`);
   return res.json() as Promise<{ columns: string[]; rows: Record<string, unknown>[] }>;
 }
+
+/**
+ *
+ * @param id
+ */
+export async function deleteDataset(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`deleteDataset ${id} failed: ${res.statusText}`);
+}
