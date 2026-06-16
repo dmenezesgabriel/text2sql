@@ -7,20 +7,20 @@ export interface Dashboard {
   updatedAt: string;
 }
 
-export interface DashboardTile {
+interface DashboardTile {
   id: string;
   questionId: string;
   position: TilePosition;
 }
 
-export interface TilePosition {
+interface TilePosition {
   row: number;
   col: number;
   width: number;
   height: number;
 }
 
-export interface CrossFilterBinding {
+interface CrossFilterBinding {
   sourceTileId: string;
   column: string;
   targetTileIds: string[];

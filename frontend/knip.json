@@ -1,17 +1,15 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": ["src/main.tsx"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["**/*.d.ts"],
-  "ignoreDependencies": [
-    "@storybook/blocks",
-    "@storybook/test",
-    "@storybook/experimental-addon-test",
-    "@testing-library/react",
-    "@testing-library/user-event",
-    "husky",
-    "lint-staged"
+  "ignore": ["src/shared/api/generated/**"],
+  "ignoreBinaries": ["dot"],
+  "ignoreUnresolved": [
+    "^html:reports/cucumber-report\\.html$",
+    "^progress-bar$",
+    "^e2e/step-definitions/"
   ],
+  "tags": ["-public"],
+  "ignoreDependencies": ["@storybook/blocks", "@storybook/test", "husky", "fallow"],
   "vitest": {
     "config": "vite.config.ts"
   },

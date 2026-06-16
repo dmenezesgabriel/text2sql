@@ -10,14 +10,3 @@ export interface Question {
   createdAt: string;
   updatedAt: string;
 }
-
-export interface QueryResult {
-  columns: string[];
-  rows: Record<string, unknown>[];
-}
-
-export interface VizDecision {
-  format: string;
-  component: string;
-  props: Record<string, unknown>;
-}

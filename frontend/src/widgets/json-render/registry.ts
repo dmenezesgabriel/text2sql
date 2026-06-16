@@ -45,5 +45,3 @@ const { registry } = defineRegistry(biCatalog, {
 });
 
 export { registry };
-
-export { biCatalog } from './catalog';

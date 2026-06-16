@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": ["src/shared/lib/test/setup.ts"],
+  "ignorePatterns": [
+    "src/shared/api/generated/**",
+    "src/shared/api/mutator.ts",
+    "orval.config.ts",
+    "public/mockServiceWorker.js"
+  ],
+  "ignoreDependencies": ["@storybook/blocks", "@storybook/test", "husky", "fallow"],
+  "ignoreExports": [
+    { "file": "src/features/dashboard/ui/dashboard-grid/index.ts", "exports": ["BiDashboardGrid"] },
+    { "file": "src/features/dashboard/ui/dashboard-tile/index.ts", "exports": ["BiDashboardTile"] },
+    { "file": "src/features/question/ui/question-card/index.ts", "exports": ["BiQuestionCard"] },
+    { "file": "src/shared/components/input/index.ts", "exports": ["BiInput"] },
+    {
+      "file": "src/widgets/json-render/components/bar-chart/index.ts",
+      "exports": ["BarChartElement"]
+    },
+    {
+      "file": "src/widgets/json-render/components/data-table/index.ts",
+      "exports": ["DataTableElement"]
+    },
+    {
+      "file": "src/widgets/json-render/components/line-chart/index.ts",
+      "exports": ["LineChartElement"]
+    },
+    { "file": "src/widgets/json-render/components/metric/index.ts", "exports": ["MetricElement"] },
+    {
+      "file": "src/widgets/json-render/components/narrative-text/index.ts",
+      "exports": ["NarrativeTextElement"]
+    },
+    {
+      "file": "src/widgets/json-render/components/pie-chart/index.ts",
+      "exports": ["PieChartElement"]
+    }
+  ],
+  "duplicates": {
+    "minLines": 5,
+    "threshold": 10.0,
+    "ignore": ["src/**/*.test.*", "src/**/*.spec.*", "src/**/*.stories.*", "**/node_modules/**"]
+  },
+  "health": {
+    "ignore": ["public/mockServiceWorker.js"]
+  }
+}

@@ -143,14 +143,16 @@ export class BiQuestionCard extends LitElement {
         <div class="actions">
           <a class="view-link" href="/questions/${this.questionId}">View</a>
           ${this.showDelete
-            ? html`<button
-                class="delete-btn"
-                @click=${() => {
-                  this._onDelete();
-                }}
-              >
-                Delete
-              </button>`
+            ? html`
+                <button
+                  class="delete-btn"
+                  @click=${() => {
+                    this._onDelete();
+                  }}
+                >
+                  Delete
+                </button>
+              `
             : nothing}
         </div>
       </article>

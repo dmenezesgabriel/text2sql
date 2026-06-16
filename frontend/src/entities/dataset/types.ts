@@ -8,10 +8,8 @@ export interface Dataset {
   updatedAt?: string;
 }
 
-export interface ColumnDefinition {
+interface ColumnDefinition {
   name: string;
   dtype: string;
   nullable: boolean;
 }
-
-export type FileFormat = 'csv' | 'parquet' | 'json';

@@ -1,6 +1,4 @@
-export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
-
-export type ResponseKind = 'chart' | 'table' | 'text' | 'dashboard';
+type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
 export interface AgentMessage {
   id: string;
@@ -12,7 +10,7 @@ export interface AgentMessage {
   error?: boolean;
 }
 
-export interface ToolCall {
+interface ToolCall {
   name: string;
   parameters: Record<string, unknown>;
 }
@@ -20,26 +18,4 @@ export interface ToolCall {
 export interface AgentEvent {
   type: string;
   payload: string | Record<string, unknown>;
-}
-
-export interface ThinkingEvent extends AgentEvent {
-  type: 'ThinkingEvent';
-  payload: string;
-}
-
-export interface SpecFragmentEvent extends AgentEvent {
-  type: 'SpecFragmentEvent';
-  payload: Record<string, unknown>;
-}
-
-export interface ErrorEvent extends AgentEvent {
-  type: 'ErrorEvent';
-  payload: string;
-}
-
-export interface Conversation {
-  id: string;
-  messages: AgentMessage[];
-  createdAt: string;
-  updatedAt: string;
 }

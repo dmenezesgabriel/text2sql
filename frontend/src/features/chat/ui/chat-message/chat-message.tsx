@@ -2,6 +2,7 @@ import { JSONUIProvider, Renderer } from '@json-render/react';
 import { useState } from 'react';
 
 import type { AgentMessage } from '@/entities/agent/types';
+import { specToQuestionPayload } from '@/features/question/lib/spec-to-question-payload';
 import { useQuestionStore } from '@/features/question/model/store';
 import { registry } from '@/widgets/json-render/registry';
 
@@ -48,25 +49,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
     if (!message.spec) return;
     setIsSaving(true);
     try {
-      const spec = message.spec;
-      const meta = (spec['meta'] as Record<string, unknown> | undefined) ?? {};
-      const rootKey = (spec['root'] as string | undefined) ?? 'main';
-      const elements = (spec['elements'] as Record<string, unknown> | undefined) ?? {};
-      const rootEl = (elements[rootKey] as Record<string, unknown> | undefined) ?? {};
-      const vizFormat = (meta['format'] as string | undefined)?.toUpperCase() as
-        | 'CHART'
-        | 'TABLE'
-        | 'TEXT'
-        | 'DASHBOARD'
-        | undefined;
-      await useQuestionStore.getState().createQuestion({
-        title: (meta['title'] as string | undefined) ?? 'Untitled question',
-        sql: (meta['sql'] as string | undefined) ?? '',
-        dataset_id: (meta['dataset_id'] as string | undefined) ?? '',
-        viz_component: (rootEl['type'] as string | undefined) ?? '',
-        viz_format: vizFormat ?? 'CHART',
-        viz_props: (rootEl['props'] as Record<string, unknown> | undefined) ?? {},
-      });
+      await useQuestionStore.getState().createQuestion(specToQuestionPayload(message.spec));
       setSaved(true);
     } finally {
       setIsSaving(false);

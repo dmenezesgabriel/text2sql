@@ -67,7 +67,10 @@ export default {
       severity: 'error',
       comment:
         'Production modules should not import dev dependencies.',
-      from: { path: '^src/', pathNot: ['\\.(test|spec|stories)\\.(ts|tsx)$', '/test/', '/__tests__/'] },
+      from: {
+        path: '^src/',
+        pathNot: ['\\.(test|spec|stories|msw)\\.(ts|tsx)$', '/test/', '/__tests__/'],
+      },
       to: { dependencyTypes: ['npm-dev'] },
     },
   ],

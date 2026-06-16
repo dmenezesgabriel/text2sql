@@ -43,6 +43,9 @@ export default tseslint.config(
       ],
       'unicorn/prevent-abbreviations': 'off',
       'unicorn/no-null': 'off',
+      // Prettier already formats embedded html``/css`` templates; this rule's
+      // fixer disagrees with Prettier's output and the two fight forever.
+      'unicorn/template-indent': 'off',
       'sonarjs/no-duplicate-string': ['warn', { threshold: 5 }],
     },
   },

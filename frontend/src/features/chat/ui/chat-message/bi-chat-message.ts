@@ -3,9 +3,8 @@ import { property, state } from 'lit/decorators.js';
 
 import type { AgentMessage } from '@/entities/agent/types';
 import { createQuestion } from '@/features/question/api/question-api';
+import { specToQuestionPayload } from '@/features/question/lib/spec-to-question-payload';
 import { renderViz } from '@/widgets/json-render/render-viz';
-
-type VizFormat = 'CHART' | 'TABLE' | 'TEXT' | 'DASHBOARD';
 
 /**
  *
@@ -82,21 +81,8 @@ export class BiChatMessage extends LitElement {
   private async _saveAsQuestion() {
     if (!this.message.spec || this._saved || this._saving) return;
     this._saving = true;
-    const spec = this.message.spec;
     try {
-      const meta = (spec['meta'] as Record<string, unknown> | undefined) ?? {};
-      const rootKey = (spec['root'] as string | undefined) ?? 'main';
-      const elements = (spec['elements'] as Record<string, unknown> | undefined) ?? {};
-      const rootEl = (elements[rootKey] as Record<string, unknown> | undefined) ?? {};
-      const rawFormat = (meta['format'] as string | undefined)?.toUpperCase();
-      const q = await createQuestion({
-        title: (meta['title'] as string | undefined) ?? 'Untitled question',
-        sql: (meta['sql'] as string | undefined) ?? '',
-        dataset_id: (meta['dataset_id'] as string | undefined) ?? '',
-        viz_component: (rootEl['type'] as string | undefined) ?? '',
-        viz_format: (rawFormat as VizFormat | undefined) ?? 'CHART',
-        viz_props: (rootEl['props'] as Record<string, unknown> | undefined) ?? {},
-      });
+      const q = await createQuestion(specToQuestionPayload(this.message.spec));
       this._saved = true;
       this.dispatchEvent(
         new CustomEvent('question-saved', { detail: q, bubbles: true, composed: true }),
