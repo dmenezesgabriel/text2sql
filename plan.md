@@ -460,25 +460,3 @@ POST /api/v1/chat  ──SSE──→  HandleChatMessageUseCase
 4. **DuckDB accessed through one component only** — `datasets` owns all query execution; questions/agent call through ports
 5. **No anemic domain** — entities have behavior: `Question.derive_drill_down()`, `Conversation.should_summarize()`, `DashboardLayout.tiles_affected_by()`
 6. **Streaming is first-class** — chat responses stream via SSE as json-render SpecStream fragments; frontend renders progressively
-
----
-
-## Implementation Order
-
-| Step | What | Why First |
-|------|------|-----------|
-| 1 | Scaffold: monorepo, tsconfig, vite, pyproject, directory tree | Foundation |
-| 2 | Backend shared: base.py, dynamo_models, duckdb_pool | Everything depends on these |
-| 3 | Backend datasets: domain → use cases → infra → routes | Data must exist before questions |
-| 4 | Backend agent: domain → use cases → infra (deep_agents + tools) → routes | Core AI pipeline |
-| 5 | Backend questions: domain → use cases → infra → routes | Persist chat results |
-| 6 | Backend dashboards: domain → use cases → infra → routes | Composite artifacts |
-| 7 | Backend collections: domain → use cases → infra → routes | Cross-component grouping |
-| 8 | Frontend shared: design tokens, UI primitives, API client, Layout | App skeleton |
-| 9 | Frontend Lit components: BarChart, LineChart, DataTable, Metric, Text | Core viz building blocks |
-| 10 | Frontend json-render: wrapLitComponent → catalog → registry | Bridge Lit → json-render |
-| 11 | Frontend chat: ChatPage with SSE streaming + Zustand store | Main user interaction |
-| 12 | Frontend questions: list + detail pages | Artifact browsing |
-| 13 | Frontend dashboards: grid layout + cross-filtering | Composite artifacts |
-| 14 | Frontend datasets: registration + schema browsing | Data management |
-| 15 | Frontend collections: organize artifacts | Final feature |
