@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import datetime as dt
+import json
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import UUID, uuid4
 
 import pytest
@@ -16,8 +19,8 @@ from src.chat.domain.value_objects import (
     ToolCallEvent,
     ToolName,
 )
-from src.chat.infrastructure.deep_agents import (
-    DeepAgentsOrchestrator,
+from src.chat.infrastructure.langgraph_orchestrator import (
+    LangGraphOrchestrator,
     _BuildError,
     _chart_props,
     _default_title,
@@ -26,6 +29,7 @@ from src.chat.infrastructure.deep_agents import (
     _narrative_spec,
     _number,
     _require_column,
+    _rows_to_json,
     _RunState,
     _schema_context,
     _spec_from_result,
@@ -56,6 +60,28 @@ def _request(
     content: str = "",
 ) -> _VizRequest:
     return _VizRequest(component, title, label_column, value_column, content)
+
+
+class TestRowsToJson:
+    def test_plain_row_serializes(self) -> None:
+        rows = [{"region": "East", "revenue": 100.0}]
+        result = json.loads(_rows_to_json(rows))
+        assert result[0]["revenue"] == 100.0
+
+    def test_date_column_becomes_iso_string(self) -> None:
+        rows = [{"month": dt.date(2015, 1, 1), "total": 1234.5}]
+        result = json.loads(_rows_to_json(rows))
+        assert result[0]["month"] == "2015-01-01"
+
+    def test_datetime_column_becomes_iso_string(self) -> None:
+        rows = [{"ts": dt.datetime(2015, 1, 1, 0, 0, 0), "amt": 5.0}]
+        result = json.loads(_rows_to_json(rows))
+        assert result[0]["ts"] == "2015-01-01T00:00:00"
+
+    def test_decimal_becomes_float(self) -> None:
+        rows = [{"val": Decimal("1234.56")}]
+        result = json.loads(_rows_to_json(rows))
+        assert result[0]["val"] == pytest.approx(1234.56)
 
 
 class TestNumberCoercion:
@@ -214,7 +240,7 @@ class TestNarrativeSpec:
 
 class TestOrchestratorGuards:
     async def test_errors_when_sql_tool_missing(self) -> None:
-        orchestrator = DeepAgentsOrchestrator(model=object(), datasets=_FakeDatasetRepo())
+        orchestrator = LangGraphOrchestrator(model=object(), datasets=_FakeDatasetRepo())
         events = await _collect(orchestrator.run(_message(), _conversation(), _ToolKitWithout()))
         assert any(isinstance(e, ErrorEvent) for e in events)
 

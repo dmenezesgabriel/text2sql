@@ -7,7 +7,6 @@ dependencies = [
     "fastapi==0.136.3",
     "uvicorn==0.49.0",
     "litellm==1.87.1",
-    "deepagents==0.6.0",
     "langchain-litellm==0.6.6",
     "langchain-core==1.4.0",
     "langgraph==1.2.4",
@@ -131,6 +130,9 @@ reportUnknownParameterType = false
 reportUnknownArgumentType = false
 # pynamodb generates DoesNotExist dynamically — no valid type annotation possible
 reportGeneralTypeIssues = false
+# langgraph.prebuilt.create_react_agent type stubs incorrectly flag it as deprecated;
+# it remains the correct public API in langgraph 1.x (pinned to 1.2.4)
+reportDeprecated = false
 
 [tool.mutmut]
 paths_to_mutate = "src/"
@@ -146,7 +148,7 @@ pythonpath = ["."]
 [tool.deptry]
 # CLI-only and runtime deps not imported directly in Python source.
 per_rule_ignores = { DEP002 = [
-    "uvicorn", "deepagents", "pydantic", "sse-starlette", "boto3",
+    "uvicorn", "pydantic", "sse-starlette", "boto3",
     "pytest", "pytest-asyncio", "pytest-cov", "pytest-bdd",
     "ruff", "semgrep", "deptry", "vulture", "radon",
     "import-linter", "mutmut", "pre-commit",

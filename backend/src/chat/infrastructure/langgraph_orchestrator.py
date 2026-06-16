@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+import datetime
 import json
+import logging
 import re
 from collections.abc import AsyncIterator, Callable, Sequence
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
-from deepagents import create_deep_agent
 from langchain_core.language_models import BaseChatModel
 from langgraph.config import get_stream_writer
+from langgraph.prebuilt import create_react_agent
 
 from src.chat.application.ports.i_agent_orchestrator import IAgentOrchestrator
 from src.chat.application.ports.i_tool_executor import IToolExecutor
@@ -28,9 +31,12 @@ from src.datasets.application.ports.i_dataset_repository import IDatasetReposito
 from src.datasets.domain.entities import Dataset
 from src.shared.domain.base import QueryResult, ResponseKind
 
+_log = logging.getLogger(__name__)
+
 _CHART_COMPONENTS = ("BarChart", "LineChart", "PieChart")
 _VALID_COMPONENTS = (*_CHART_COMPONENTS, "DataTable", "Metric", "NarrativeText")
 _SAMPLE_ROW_LIMIT = 50
+_MAX_SQL_RETRIES = 3
 
 _SYSTEM_TEMPLATE = """\
 You are a senior BI analyst. Answer the user's question about their data by \
@@ -40,11 +46,18 @@ querying it with DuckDB SQL and choosing the clearest visualization.
 {schemas}
 
 ## Workflow
-1. Call `run_sql` with a single DuckDB SELECT against the views above. Aggregate \
+1. If the question is too vague (no clear metric or dataset), call \
+`request_clarification` with one short question — do NOT run SQL.
+2. Call `run_sql` with a single DuckDB SELECT against the views above. Aggregate \
 in SQL (GROUP BY, SUM, AVG, COUNT) so the result is already chart-ready. Keep \
 chart results small (roughly 25 rows or fewer); add ORDER BY and LIMIT.
-2. Inspect the returned columns and rows, then present the answer with exactly \
+3. Inspect the returned columns and rows, then present the answer with exactly \
 one of `build_visualization` or `write_narrative`.
+
+## SQL repair
+If `run_sql` returns an error, fix the SQL based on the repair hint and retry. \
+After {max_retries} failed attempts call `request_clarification` explaining \
+what you cannot determine.
 
 ## Choosing a visualization
 - BarChart: compare a numeric measure across categories.
@@ -61,8 +74,6 @@ result. For charts pass `label_column` (the category/time column) and \
 EXACT column names from the run_sql result, including any AS aliases. If a \
 column name is rejected, re-read the result columns and call the tool again \
 with a correct name.
-
-Ignore any filesystem or shell tools; they are not relevant to this task.
 """
 
 
@@ -89,9 +100,14 @@ class _RunState:
     def __init__(self, dataset_views: dict[str, str]) -> None:
         self._dataset_views = dataset_views
         self._last: _LastQuery | None = None
+        self._sql_failures: int = 0
 
     def record(self, sql: str, result: QueryResult) -> None:
         self._last = _LastQuery(sql, result)
+
+    def record_failure(self) -> int:
+        self._sql_failures += 1
+        return self._sql_failures
 
     def latest(self) -> _LastQuery | None:
         return self._last
@@ -108,7 +124,7 @@ class _BuildError(Exception):
     """Raised when a visualization cannot be built from the current result."""
 
 
-class DeepAgentsOrchestrator(IAgentOrchestrator):
+class LangGraphOrchestrator(IAgentOrchestrator):
     def __init__(self, model: BaseChatModel, datasets: IDatasetRepository) -> None:
         self._model = model
         self._datasets = datasets
@@ -128,15 +144,26 @@ class DeepAgentsOrchestrator(IAgentOrchestrator):
         state = _RunState(
             {f"ds_{d._identity._id.value.hex}": str(d._identity._id.value) for d in datasets},
         )
-        agent = create_deep_agent(
-            model=self._model,
+        agent = create_react_agent(
+            self._model,
             tools=_build_tools(sql_tool, state),
-            system_prompt=_SYSTEM_TEMPLATE.format(schemas=_schema_context(datasets)),
+            prompt=_SYSTEM_TEMPLATE.format(
+                schemas=_schema_context(datasets),
+                max_retries=_MAX_SQL_RETRIES,
+            ),
         )
 
         yield ThinkingEvent("Analyzing your question...")
         async for event in _stream_agent(agent, _history(conversation)):
             yield event
+
+
+def _agent_error_message(exc: Exception) -> str:
+    exc_type = type(exc).__name__
+    _log.error("agent.error", extra={"exc_type": exc_type, "exc": str(exc)}, exc_info=True)
+    if "RateLimitError" in exc_type or "rate_limit" in str(exc).lower():
+        return "Rate limit reached. Please wait a moment and try again."
+    return f"The agent could not complete the request: {exc_type}"
 
 
 async def _stream_agent(
@@ -159,7 +186,7 @@ async def _stream_agent(
             produced_spec = produced_spec or isinstance(event, SpecFragmentEvent)
             yield event
     except Exception as exc:
-        yield ErrorEvent(_message=f"The agent could not complete the request: {exc}")
+        yield ErrorEvent(_message=_agent_error_message(exc))
         return
     if not produced_spec:
         fallback = final_text or "I wasn't able to produce a result for that question."
@@ -167,25 +194,44 @@ async def _stream_agent(
 
 
 def _build_tools(sql_tool: IToolExecutor, state: _RunState) -> Sequence[Callable[..., Any]]:
+    def request_clarification(question: str) -> str:
+        """Ask the user for more information when their question is too vague.
+
+        Call this INSTEAD of run_sql when you cannot determine what to query.
+        Example: request_clarification("Which product category are you asking about?")
+        """
+        get_stream_writer()({"kind": "spec", "payload": _narrative_spec(question)})
+        return "Clarification sent to user."
+
     async def run_sql(sql: str, reasoning: str = "") -> str:
         """Execute a DuckDB SELECT against the dataset views and return the result.
 
         Returns JSON with `columns`, sample `rows`, and `row_count`. Example:
         run_sql(sql="SELECT region, SUM(amount) AS revenue FROM ds_x GROUP BY region").
         """
+        _log.info("run_sql.attempt", extra={"sql": sql})
         get_stream_writer()({"kind": "tool_call", "name": "run_sql", "sql": sql})
         try:
             result = await sql_tool.execute(Parameters({"sql": sql}))
+            rows = [dict(r) for r in result._rows[:_SAMPLE_ROW_LIMIT]]
+            state.record(sql, result)
+            return json.dumps(
+                {"columns": list(result._columns), "rows": rows, "row_count": result.row_count()},
+                default=_json_default,
+            )
         except Exception as exc:
-            return f"SQL error: {exc}"
-        state.record(sql, result)
-        return json.dumps(
-            {
-                "columns": list(result._columns),
-                "rows": [dict(r) for r in result._rows[:_SAMPLE_ROW_LIMIT]],
-                "row_count": result.row_count(),
-            },
-        )
+            failures = state.record_failure()
+            hint = _sql_repair_hint(str(exc))
+            _log.warning(
+                "run_sql.error",
+                extra={"sql": sql, "error": str(exc), "attempt": failures},
+            )
+            if failures >= _MAX_SQL_RETRIES:
+                return (
+                    f"SQL error (attempt {failures}/{_MAX_SQL_RETRIES}): {exc}\n"
+                    "Maximum retries reached. Call request_clarification to ask the user."
+                )
+            return f"SQL error (attempt {failures}/{_MAX_SQL_RETRIES}): {exc}\nRepair hint: {hint}"
 
     def build_visualization(component: str, label_column: str = "", value_column: str = "") -> str:
         """Present the last run_sql result as a chart, metric, or table.
@@ -209,7 +255,25 @@ def _build_tools(sql_tool: IToolExecutor, state: _RunState) -> Sequence[Callable
         request = _VizRequest("NarrativeText", "", "", "", content)
         return _emit_spec(state, request)
 
-    return [run_sql, build_visualization, write_narrative]
+    return [request_clarification, run_sql, build_visualization, write_narrative]
+
+
+_SQL_ERROR_HINTS: list[tuple[tuple[str, ...], str]] = [
+    (("column", "not found"), "Column name is wrong; use exact names from the schema."),
+    (("table", "not found"), "View name is wrong; use only ds_XXXX names from the schema."),
+    (("table", "does not exist"), "View name is wrong; use only ds_XXXX names from the schema."),
+    (("syntax error",), "Syntax error; check commas, keywords, or unsupported functions."),
+    (("ambiguous",), "Ambiguous column; qualify with ds_xxx.column_name."),
+    (("type", "cast"), "Type mismatch; use CAST(col AS DOUBLE) or TRY_CAST."),
+]
+_SQL_HINT_FALLBACK = "Review the SQL for typos or unsupported DuckDB syntax and retry."
+
+
+def _sql_repair_hint(error: str) -> str:
+    """Return a targeted fix hint based on common DuckDB SQL errors."""
+    err = error.lower()
+    hint = next((h for patterns, h in _SQL_ERROR_HINTS if all(p in err for p in patterns)), None)
+    return hint or _SQL_HINT_FALLBACK
 
 
 def _emit_spec(state: _RunState, request: _VizRequest) -> str:
@@ -288,6 +352,21 @@ def _format_number(value: float) -> str:
     if value == int(value):
         return f"{int(value):,}"
     return f"{value:,.2f}"
+
+
+def _json_default(obj: object) -> object:
+    """Serialize DuckDB native types that json.dumps can't handle by default."""
+    if isinstance(obj, (datetime.date, datetime.datetime)):
+        return obj.isoformat()
+    if isinstance(obj, Decimal):
+        return float(obj)
+    msg = f"Object of type {type(obj).__name__} is not JSON serializable"
+    raise TypeError(msg)
+
+
+def _rows_to_json(rows: list[dict[str, object]]) -> str:
+    """Serialize result rows, converting date/Decimal values to JSON-safe types."""
+    return json.dumps(rows, default=_json_default)
 
 
 def _default_title(component: str, label_column: str, value_column: str) -> str:

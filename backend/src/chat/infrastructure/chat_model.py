@@ -4,10 +4,9 @@ from langchain_litellm import ChatLiteLLM
 
 
 def build_chat_model(model_name: str, temperature: float = 0.0) -> ChatLiteLLM:
-    """Build a LangChain chat model backed by LiteLLM for the deep agent.
+    """Build a LangChain chat model backed by LiteLLM.
 
-    Keeps the project on its LiteLLM model strings (e.g.
-    "openrouter/openai/gpt-oss-120b:free") while exposing the BaseChatModel
-    interface that deepagents' create_deep_agent expects.
+    Accepts LiteLLM model strings (e.g. "openrouter/openai/gpt-oss-120b:free")
+    and exposes the BaseChatModel interface expected by create_react_agent.
     """
     return ChatLiteLLM(model=model_name, temperature=temperature)

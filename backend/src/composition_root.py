@@ -10,9 +10,9 @@ from src.chat.application.use_cases.handle_chat_message import (
 )
 from src.chat.domain.value_objects import TokenCount
 from src.chat.infrastructure.chat_model import build_chat_model
-from src.chat.infrastructure.deep_agents import DeepAgentsOrchestrator
 from src.chat.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
 from src.chat.infrastructure.fastapi.router import create_chat_router
+from src.chat.infrastructure.langgraph_orchestrator import LangGraphOrchestrator
 from src.chat.infrastructure.litellm_provider import LiteLLMProvider
 from src.chat.infrastructure.summarizer import LiteLLMSummarizer
 from src.chat.infrastructure.tool_kit import ToolKit
@@ -82,7 +82,7 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
 
     # ── LLM / Agent ──
     llm = LiteLLMProvider(cfg.summarizer_model_name)
-    orchestrator = DeepAgentsOrchestrator(
+    orchestrator = LangGraphOrchestrator(
         model=build_chat_model(cfg.llm_model_name),
         datasets=dataset_repo,
     )
