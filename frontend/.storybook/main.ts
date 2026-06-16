@@ -7,6 +7,9 @@ const config: StorybookConfig = {
     '@storybook/addon-a11y',
     '@storybook/experimental-addon-test',
     'msw-storybook-addon',
+    // Serves an MCP endpoint at http://localhost:6006/mcp so agents can query
+    // the component catalog. Consumed via .mcp.json at the repo root.
+    '@storybook/addon-mcp',
   ],
   framework: {
     name: '@storybook/web-components-vite',

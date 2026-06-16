@@ -50,6 +50,7 @@
     "@playwright/test": "1.60.0",
     "@storybook/addon-a11y": "10.4.4",
     "@storybook/addon-docs": "10.4.4",
+    "@storybook/addon-mcp": "0.6.0",
     "@storybook/blocks": "8.6.14",
     "@storybook/experimental-addon-test": "8.6.14",
     "@storybook/test": "8.6.15",
