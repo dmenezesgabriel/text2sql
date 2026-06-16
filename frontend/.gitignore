@@ -145,3 +145,6 @@ playwright-report
 test-results
 report
 reports
+
+# playwright-cli scratch output (snapshots, console logs, screenshots)
+.playwright-cli/
