@@ -6,7 +6,7 @@
     "vite.config.ts",
     "playwright.config.ts",
     "orval.config.ts",
-    ".storybook"
+    ".storybook/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
