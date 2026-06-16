@@ -18,9 +18,23 @@ const inputStyle: React.CSSProperties = {
   padding: 'var(--spacing-sm) var(--spacing-md)',
   borderRadius: 'var(--radius-sm)',
   border: '1px solid var(--color-border)',
-  fontSize: '14px',
+  background: 'var(--color-surface)',
+  color: 'var(--color-text)',
+  fontSize: 'var(--text-base)',
   outline: 'none',
   fontFamily: 'inherit',
+};
+
+const sendButtonStyle: React.CSSProperties = {
+  padding: 'var(--spacing-sm) var(--spacing-md)',
+  borderRadius: 'var(--radius-sm)',
+  border: 'none',
+  background: 'var(--color-primary)',
+  color: '#ffffff',
+  fontSize: 'var(--text-base)',
+  fontWeight: 500,
+  fontFamily: 'inherit',
+  cursor: 'pointer',
 };
 
 /**
@@ -51,7 +65,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         placeholder="Ask a question about your data..."
         disabled={disabled}
       />
-      <button type="submit" disabled={disabled || !value.trim()}>
+      <button type="submit" style={sendButtonStyle} disabled={disabled || !value.trim()}>
         Send
       </button>
     </form>

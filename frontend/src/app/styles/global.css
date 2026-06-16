@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './utilities.css';
 
 *,
 *::before,
@@ -13,8 +14,19 @@ body,
 #root {
   height: 100%;
   font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
   color: var(--color-text);
   background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Ease the light <-> dark swap without animating layout. */
+body {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 a {
@@ -24,4 +36,15 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }

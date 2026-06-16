@@ -1,18 +1,20 @@
+import './narrative-text';
+
 import type { Meta, StoryObj } from '@storybook/web-components';
+import { html } from 'lit';
 
-import { NarrativeTextElement } from './narrative-text';
-
-const meta = {
+const meta: Meta = {
   title: 'Text/NarrativeText',
-  component: NarrativeTextElement,
+  component: 'bi-narrative-text',
   tags: ['autodocs'],
-  args: {
-    content: 'Your sales have increased by 15% this quarter, driven primarily by the APAC region.',
-    tone: 'analytical',
-  },
-} satisfies Meta<NarrativeTextElement>;
-
+};
 export default meta;
-type Story = StoryObj<NarrativeTextElement>;
 
-export const Default: Story = {};
+export const Default: StoryObj = {
+  render: () => html`
+    <bi-narrative-text
+      content="Your sales have increased by 15% this quarter, driven primarily by the APAC region."
+      tone="analytical"
+    ></bi-narrative-text>
+  `,
+};

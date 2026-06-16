@@ -1,24 +1,26 @@
+import './bar-chart';
+
 import type { Meta, StoryObj } from '@storybook/web-components';
+import { html } from 'lit';
 
-import { BarChartElement } from './bar-chart';
-
-const meta = {
+const meta: Meta = {
   title: 'Charts/BarChart',
-  component: BarChartElement,
+  component: 'bi-bar-chart',
   tags: ['autodocs'],
-  args: {
-    title: 'Sales by Month',
-    xAxis: 'Month',
-    yAxis: 'Revenue',
-    data: [
-      { label: 'Jan', value: 100 },
-      { label: 'Feb', value: 200 },
-      { label: 'Mar', value: 150 },
-    ],
-  },
-} satisfies Meta<BarChartElement>;
-
+};
 export default meta;
-type Story = StoryObj<BarChartElement>;
 
-export const Default: Story = {};
+export const Default: StoryObj = {
+  render: () => html`
+    <bi-bar-chart
+      title="Sales by Month"
+      .xAxis=${'Month'}
+      .yAxis=${'Revenue'}
+      .data=${[
+        { label: 'Jan', value: 100 },
+        { label: 'Feb', value: 200 },
+        { label: 'Mar', value: 150 },
+      ]}
+    ></bi-bar-chart>
+  `,
+};

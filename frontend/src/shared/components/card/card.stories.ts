@@ -1,20 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import './bi-card';
 
-import { Card } from './card';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import { html } from 'lit';
 
-const meta = {
+const meta: Meta = {
   title: 'Card',
-  component: Card,
+  component: 'bi-card',
   tags: ['autodocs'],
-} satisfies Meta<typeof Card>;
-
+};
 export default meta;
-type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: { children: 'Card content goes here' },
+export const Default: StoryObj = {
+  render: () => html`<bi-card>Card content goes here</bi-card>`,
 };
 
-export const WithTitle: Story = {
-  args: { title: 'Section Title', children: 'Content with a title' },
+export const WithTitle: StoryObj = {
+  render: () => html`<bi-card heading="Section Title">Content with a title</bi-card>`,
 };

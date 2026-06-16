@@ -5,23 +5,28 @@ export class NarrativeTextElement extends LitElement {
   static readonly styles = css`
     :host {
       display: block;
-      line-height: 1.6;
-      font-size: 15px;
-      color: var(--color-text, #1a1a1a);
+      line-height: var(--leading-relaxed);
+      font-size: var(--text-base);
+      font-family: var(--font-sans);
+      color: var(--color-text);
     }
     p {
-      margin: 0 0 12px 0;
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+    p:last-child {
+      margin-bottom: 0;
     }
     .analytical {
-      font-family: var(--font-mono, monospace);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
     }
     .conversational {
-      font-size: 16px;
+      font-size: var(--text-md);
     }
     .executive {
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.01em;
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-tight);
     }
   `;
 

@@ -11,7 +11,11 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "useDefineForClassFields": true,
+    // Lit's @property/@state install prototype accessors; with
+    // useDefineForClassFields:true the class-field initializers shadow them
+    // (https://lit.dev/msg/class-field-shadowing). false is Lit's recommended
+    // setting alongside experimentalDecorators.
+    "useDefineForClassFields": false,
     "paths": {
       "@/*": ["./src/*"]
     },

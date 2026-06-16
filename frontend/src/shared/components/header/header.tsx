@@ -1,27 +1,28 @@
 import React from 'react';
 
-const headerStyle: React.CSSProperties = {
-  height: 'var(--header-height)',
-  borderBottom: '1px solid var(--color-border)',
-  display: 'flex',
-  alignItems: 'center',
-  padding: '0 var(--spacing-lg)',
-  background: 'var(--color-bg)',
-};
-
-const titleStyle: React.CSSProperties = {
-  fontSize: '16px',
-  fontWeight: 600,
-  color: 'var(--color-text)',
-};
+interface HeaderProps {
+  readonly children?: React.ReactNode;
+}
 
 /**
  *
+ * @param root0
+ * @param root0.children
  */
-export function Header() {
+export function Header({ children }: HeaderProps) {
   return (
-    <header style={headerStyle}>
-      <span style={titleStyle}>Generative Business Intelligence</span>
+    <header
+      role="banner"
+      className="flex items-center justify-between px-md border-top surface"
+      style={{ height: 'var(--header-height)', flexShrink: 0 }}
+    >
+      <span
+        className="text-sm text-secondary tracking-wide uppercase"
+        style={{ letterSpacing: '0.08em' }}
+      >
+        Generative BI
+      </span>
+      {children && <div className="flex items-center gap-sm">{children}</div>}
     </header>
   );
 }

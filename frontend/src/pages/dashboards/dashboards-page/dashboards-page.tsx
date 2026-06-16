@@ -69,7 +69,7 @@ export function DashboardsPage() {
       )}
 
       {dashboards.length > 0 && (
-        <div className="grid-auto-fill-340">
+        <div className="grid-auto-fill-lg">
           {dashboards.map((db) => (
             <bi-card key={db.id}>
               <div className="flex flex-col gap-sm">

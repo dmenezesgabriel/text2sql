@@ -1,42 +1,41 @@
 import React from 'react';
 
-import { Header } from '../header';
+import { ThemeToggle } from '@/shared/theme/theme-toggle';
+
 import { Sidebar } from '../sidebar';
 
 interface LayoutProps {
   readonly children: React.ReactNode;
+  readonly headerActions?: React.ReactNode;
 }
-
-const layoutStyle: React.CSSProperties = {
-  display: 'flex',
-  height: '100vh',
-};
-
-const mainStyle: React.CSSProperties = {
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-};
-
-const contentStyle: React.CSSProperties = {
-  flex: 1,
-  overflow: 'auto',
-  padding: 'var(--spacing-lg)',
-};
 
 /**
  *
  * @param root0
  * @param root0.children
+ * @param root0.headerActions
  */
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, headerActions }: LayoutProps) {
   return (
-    <div style={layoutStyle}>
+    <div className="flex h-full" style={{ height: '100vh' }}>
+      <a href="#main-content" className="skip-nav">
+        Skip to content
+      </a>
       <Sidebar />
-      <div style={mainStyle}>
-        <Header />
-        <main style={contentStyle}>{children}</main>
+      <div className="flex flex-col grow" style={{ overflow: 'hidden' }}>
+        <bi-header>
+          <div slot="actions" className="flex items-center gap-sm">
+            {headerActions}
+            <ThemeToggle />
+          </div>
+        </bi-header>
+        <main
+          id="main-content"
+          className="grow overflow-auto"
+          style={{ padding: 'var(--spacing-lg)' }}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

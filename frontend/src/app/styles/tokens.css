@@ -1,32 +1,170 @@
-:root {
-  --color-bg: #ffffff;
-  --color-bg-secondary: #f5f5f5;
-  --color-text: #1a1a1a;
-  --color-text-secondary: #666666;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-border: #e0e0e0;
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-error: #dc2626;
+/*
+ * Design tokens — structured as primitives -> semantic -> per-theme remap.
+ *
+ * Primitives are raw, theme-agnostic values. Components never reference them
+ * directly; they reference the semantic tokens (--color-bg, --color-text, ...).
+ * Switching themes only remaps the semantic layer, so the whole app (incl. Lit
+ * shadow DOM, which custom properties pierce) re-tones from one attribute.
+ *
+ * Direction: Tufte data-ink discipline x Linear cool-neutral monochrome.
+ * Boldness is spent on the data (see data-table / metric); chrome stays quiet.
+ */
 
+:root {
+  /* ---- Primitives: cool (blue-tinted) gray ramp ---- */
+  --gray-0: #ffffff;
+  --gray-25: #fbfbfc;
+  --gray-50: #f6f7f8;
+  --gray-100: #eceef1;
+  --gray-200: #e2e5ea;
+  --gray-300: #ccd1d9;
+  --gray-400: #a3abb6;
+  --gray-500: #79818d;
+  --gray-600: #5a626d;
+  --gray-700: #3d434c;
+  --gray-800: #23272e;
+  --gray-900: #15181d;
+  --gray-950: #0c0e12;
+
+  /* ---- Primitives: muted indigo accent ---- */
+  --indigo-300: #9aa0ec;
+  --indigo-400: #7c84e3;
+  --indigo-500: #5b63d3;
+  --indigo-600: #4a51bd;
+  --indigo-subtle-light: #eef0fb;
+  --indigo-subtle-dark: rgba(91, 99, 211, 0.18);
+
+  /* ---- Primitives: status (light / dark-bright pairs) ---- */
+  --green-500: #15803d;
+  --green-400: #4ade80;
+  --amber-500: #b45309;
+  --amber-400: #fbbf24;
+  --red-500: #b91c1c;
+  --red-400: #f87171;
+
+  /* ---- Primitives: categorical chart series (muted, theme-stable) ---- */
+  --viz-1: #5b63d3;
+  --viz-2: #3a9bb5;
+  --viz-3: #6a994e;
+  --viz-4: #bc6c25;
+  --viz-5: #9b5de5;
+  --viz-6: #c1495a;
+
+  /* ---- Typography ---- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --tracking-tight: -0.01em;
+  --tracking-caps: 0.06em;
+
+  /* ---- Spacing ---- */
+  --spacing-2xs: 2px;
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
+  --spacing-2xl: 48px;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* ---- Radius (tightened: Linear/Tufte restraint) ---- */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  /* ---- Layout ---- */
+  --sidebar-width: 220px;
+  --header-height: 52px;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  /* ======================================================================
+   * Semantic layer — default (light) mapping.
+   * [data-theme="dark"] below overrides only these.
+   * ====================================================================== */
+  color-scheme: light;
 
-  --sidebar-width: 240px;
-  --header-height: 56px;
+  --color-bg: var(--gray-25);
+  --color-surface: var(--gray-0);
+  --color-bg-secondary: var(--gray-50);
+
+  --color-text: var(--gray-900);
+  --color-text-secondary: var(--gray-500);
+  --color-text-tertiary: var(--gray-400);
+
+  --color-border: var(--gray-200);
+  --color-border-strong: var(--gray-300);
+  --color-grid-line: var(--gray-100);
+
+  --color-primary: var(--indigo-500);
+  --color-primary-hover: var(--indigo-600);
+  --color-primary-subtle: var(--indigo-subtle-light);
+
+  --color-success: var(--green-500);
+  --color-warning: var(--amber-500);
+  --color-error: var(--red-500);
+
+  /* Sidebar follows the theme (no longer a special dark slab). */
+  --color-bg-sidebar: var(--gray-50);
+  --color-bg-sidebar-hover: var(--gray-100);
+  --color-bg-sidebar-active: var(--indigo-subtle-light);
+  --color-text-sidebar: var(--gray-600);
+  --color-text-sidebar-active: var(--indigo-600);
+  --color-border-sidebar: var(--gray-200);
+
+  /* Elevation — flat; hairline borders carry separation, shadows barely whisper. */
+  --shadow-sm: 0 1px 2px rgba(12, 14, 18, 0.05);
+  --shadow-md: 0 2px 8px rgba(12, 14, 18, 0.07);
+  --shadow-lg: 0 8px 24px rgba(12, 14, 18, 0.1);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: var(--gray-950);
+  --color-surface: var(--gray-900);
+  --color-bg-secondary: var(--gray-800);
+
+  --color-text: var(--gray-50);
+  --color-text-secondary: var(--gray-400);
+  --color-text-tertiary: var(--gray-500);
+
+  --color-border: var(--gray-800);
+  --color-border-strong: var(--gray-700);
+  --color-grid-line: var(--gray-800);
+
+  --color-primary: var(--indigo-400);
+  --color-primary-hover: var(--indigo-300);
+  --color-primary-subtle: var(--indigo-subtle-dark);
+
+  --color-success: var(--green-400);
+  --color-warning: var(--amber-400);
+  --color-error: var(--red-400);
+
+  --color-bg-sidebar: var(--gray-900);
+  --color-bg-sidebar-hover: var(--gray-800);
+  --color-bg-sidebar-active: var(--indigo-subtle-dark);
+  --color-text-sidebar: var(--gray-400);
+  --color-text-sidebar-active: var(--indigo-300);
+  --color-border-sidebar: var(--gray-800);
+
+  /* On dark, drop shadows are near-invisible: lean on borders, keep depth subtle. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.55);
 }

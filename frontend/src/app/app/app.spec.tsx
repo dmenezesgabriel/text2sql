@@ -5,12 +5,13 @@ import { describe, expect, it } from 'vitest';
 import { App } from './app';
 
 describe('App', () => {
-  it('renders the app shell', () => {
-    render(
+  it('renders the app shell with skip-nav and header element', () => {
+    const { container } = render(
       <BrowserRouter>
         <App />
       </BrowserRouter>,
     );
-    expect(screen.getByText('Generative Business Intelligence')).toBeInTheDocument();
+    expect(screen.getByText('Skip to content')).toBeInTheDocument();
+    expect(container.querySelector('bi-header')).toBeTruthy();
   });
 });

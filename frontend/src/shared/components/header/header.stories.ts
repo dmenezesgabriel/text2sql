@@ -1,14 +1,23 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import './bi-header';
 
-import { Header } from './header';
+import type { Meta, StoryObj } from '@storybook/web-components';
+import { html } from 'lit';
 
-const meta = {
+const meta: Meta = {
   title: 'Header',
-  component: Header,
+  component: 'bi-header',
   tags: ['autodocs'],
-} satisfies Meta<typeof Header>;
-
+};
 export default meta;
-type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: StoryObj = {
+  render: () => html`<bi-header></bi-header>`,
+};
+
+export const WithActions: StoryObj = {
+  render: () => html`
+    <bi-header>
+      <button slot="actions">Settings</button>
+    </bi-header>
+  `,
+};

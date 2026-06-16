@@ -62,7 +62,7 @@ export function QuestionsPage() {
       )}
 
       {questions.length > 0 && (
-        <div className="grid-auto-fill-340">
+        <div className="grid-auto-fill-lg">
           {questions.map((q) => (
             <BiQuestionCardReact
               key={q.id}
