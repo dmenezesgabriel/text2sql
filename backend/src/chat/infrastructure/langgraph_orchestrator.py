@@ -94,26 +94,33 @@ class _LastQuery:
     result: QueryResult
 
 
+@dataclass
+class _ExecutionScratch:
+    """Bundles mutable per-request SQL execution state."""
+
+    _last: _LastQuery | None = None
+    _sql_failures: int = 0
+
+
 class _RunState:
     """Per-request scratch shared between the agent tools."""
 
     def __init__(self, dataset_views: dict[str, str]) -> None:
         self._dataset_views = dataset_views
-        self._last: _LastQuery | None = None
-        self._sql_failures: int = 0
+        self._scratch = _ExecutionScratch()
 
     def record(self, sql: str, result: QueryResult) -> None:
-        self._last = _LastQuery(sql, result)
+        self._scratch._last = _LastQuery(sql, result)
 
     def record_failure(self) -> int:
-        self._sql_failures += 1
-        return self._sql_failures
+        self._scratch._sql_failures += 1
+        return self._scratch._sql_failures
 
     def latest(self) -> _LastQuery | None:
-        return self._last
+        return self._scratch._last
 
     def dataset_id(self) -> str:
-        sql = self._last.sql if self._last else ""
+        sql = self._scratch._last.sql if self._scratch._last else ""
         for view, dataset_id in self._dataset_views.items():
             if view in sql:
                 return dataset_id
@@ -362,11 +369,6 @@ def _json_default(obj: object) -> object:
         return float(obj)
     msg = f"Object of type {type(obj).__name__} is not JSON serializable"
     raise TypeError(msg)
-
-
-def _rows_to_json(rows: list[dict[str, object]]) -> str:
-    """Serialize result rows, converting date/Decimal values to JSON-safe types."""
-    return json.dumps(rows, default=_json_default)
 
 
 def _default_title(component: str, label_column: str, value_column: str) -> str:

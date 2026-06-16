@@ -1,4 +1,4 @@
-from src.questions.application.ports import IQuestionRepository, IQueryExecutor, IVizSpecBuilder
+from src.questions.application.ports import IQuestionRepository, IQueryExecutor
 from src.questions.application.use_cases import (
     SaveQuestionFromChatRequest,
     SaveQuestionFromChatUseCase,
@@ -15,7 +15,6 @@ from src.questions.application.use_cases import (
 __all__ = [
     "IQuestionRepository",
     "IQueryExecutor",
-    "IVizSpecBuilder",
     "SaveQuestionFromChatRequest",
     "SaveQuestionFromChatUseCase",
     "DrillDownRequest",

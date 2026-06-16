@@ -7,11 +7,11 @@ rules:
     severity: WARNING
     languages: [python]
     patterns:
-      - pattern: "def get_$NAME(...): ..."
+      - pattern: "def $FUNC(self, ...): ..."
       - metavariable-pattern:
-          metavariable: $NAME
+          metavariable: $FUNC
           patterns:
-            - pattern-not: "$_"
+            - pattern-regex: "^get_.+"
     metadata:
       category: design
       technology: python
@@ -24,7 +24,11 @@ rules:
     severity: WARNING
     languages: [python]
     patterns:
-      - pattern: "def set_$NAME(...): ..."
+      - pattern: "def $FUNC(self, ...): ..."
+      - metavariable-pattern:
+          metavariable: $FUNC
+          patterns:
+            - pattern-regex: "^set_.+"
     metadata:
       category: design
       technology: python

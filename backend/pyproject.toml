@@ -14,6 +14,7 @@ dependencies = [
     "pynamodb==6.0.2",
     "pydantic==2.13.4",
     "sse-starlette==3.4.4",
+    "starlette==1.2.1",
 ]
 
 [project.optional-dependencies]
@@ -151,7 +152,7 @@ per_rule_ignores = { DEP002 = [
     "uvicorn", "pydantic", "sse-starlette", "boto3",
     "pytest", "pytest-asyncio", "pytest-cov", "pytest-bdd",
     "ruff", "semgrep", "deptry", "vulture", "radon",
-    "import-linter", "mutmut", "pre-commit",
+    "import-linter", "mutmut", "pre-commit", "moto", "pyright",
 ] }
 
 [tool.uv]

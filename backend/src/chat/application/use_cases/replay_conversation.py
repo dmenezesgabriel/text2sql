@@ -8,10 +8,7 @@ from src.chat.application.ports.i_conversation_repository import (
     IConversationRepository,
 )
 from src.chat.application.ports.i_tool_kit import IToolKit
-from src.chat.domain.entities import (
-    AgentConfiguration,
-    MessageRole,
-)
+from src.chat.domain.entities import MessageRole
 from src.chat.domain.value_objects import (
     AgentEvent,
     ConversationId,
@@ -39,7 +36,6 @@ class ReplayConversationUseCase:
     async def execute(
         self,
         conversation_id: ConversationId,
-        new_config: AgentConfiguration,
     ) -> AsyncIterator[AgentEvent]:
         conversation = self._conversations.load(conversation_id)
         if conversation is None:

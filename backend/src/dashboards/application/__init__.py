@@ -1,4 +1,4 @@
-from src.dashboards.application.ports import IDashboardRepository, ICrossFilterService
+from src.dashboards.application.ports import IDashboardRepository
 from src.dashboards.application.use_cases import (
     CrossFilterRequest,
     CrossFilterResult,
@@ -9,7 +9,6 @@ from src.dashboards.application.use_cases import (
 
 __all__ = [
     "IDashboardRepository",
-    "ICrossFilterService",
     "CrossFilterRequest",
     "CrossFilterResult",
     "ApplyCrossFilterUseCase",

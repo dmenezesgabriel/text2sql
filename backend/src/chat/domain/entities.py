@@ -76,7 +76,7 @@ class AgentConfiguration(Entity):
             directives=self._profile._directives,
         )
 
-    def supports_tool(self, tool_name: str) -> bool:
+    def supports_tool(self, _tool_name: str) -> bool:
         return self._profile._model.supports_tool_calling()
 
     def context_limit_is(self, limit: TokenCount) -> bool:
@@ -107,9 +107,6 @@ class Message(Entity):
     def is_from(self, role: MessageRole) -> bool:
         return self._identity._role is role
 
-    def has_tool_call(self) -> bool:
-        return self._body._tool_call is not None
-
 
 class Messages:
     def __init__(self) -> None:
@@ -123,15 +120,6 @@ class Messages:
             )
             raise ConversationOrderError(msg)
         self._items.append(message)
-
-    def trim_to_token_limit(self, limit: TokenCount) -> None:
-        system = [m for m in self._items if m.is_from(MessageRole.SYSTEM)]
-        non_system = [m for m in self._items if not m.is_from(MessageRole.SYSTEM)]
-        total = sum(len(m._body._content.value) for m in non_system)
-        while total > limit.value and non_system:
-            dropped = non_system.pop(0)
-            total -= len(dropped._body._content.value)
-        self._items = system + non_system
 
     def recent_context(self, window: int) -> list[Message]:
         system = [m for m in self._items if m.is_from(MessageRole.SYSTEM)]

@@ -21,24 +21,11 @@ from src.shared.domain.base import (
     ValueObject,
 )
 
-_SAFE_IDENTIFIER = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
-
-
-def _validated_identifier(value: str) -> str:
-    """Reject values that cannot safely appear as SQL identifiers."""
-    if not _SAFE_IDENTIFIER.match(value):
-        msg = f"Unsafe SQL identifier: {value!r}"
-        raise ValueError(msg)
-    return value
-
 
 @dataclass(frozen=True)
 class DatasetReference(ValueObject):
     _id: EntityId
     _alias: str | None
-
-    def qualified_name(self) -> str:
-        return self._alias or str(self._id.value)
 
 
 @dataclass(frozen=True)
@@ -61,34 +48,6 @@ class QueryDefinition(ValueObject):
             f"{self._sql.value.rstrip(';')} WHERE {column} {operator} '{value}'",
         )
         return QueryDefinition(_sql=filtered_sql, _source=self._source)
-
-    def with_grouping(
-        self,
-        group_column: str,
-        agg_column: str,
-        agg_func: str,
-    ) -> QueryDefinition:
-        safe_group = _validated_identifier(group_column)
-        safe_col = _validated_identifier(agg_column)
-        safe_func = _validated_identifier(agg_func)
-        base = self._sql.value.rstrip(";")
-        sql = " ".join(
-            [
-                "SELECT",
-                f"{safe_group}, {safe_func}({safe_col})",
-                "FROM",
-                f"({base}) AS _drill",
-                "GROUP BY",
-                safe_group,
-            ],
-        )
-        return QueryDefinition(_sql=SqlQuery(sql), _source=self._source)
-
-    def with_limit(self, limit: int) -> QueryDefinition:
-        limited_sql = SqlQuery(
-            f"{self._sql.value.rstrip(';')} LIMIT {limit}",
-        )
-        return QueryDefinition(_sql=limited_sql, _source=self._source)
 
     def is_equivalent_to(self, other: QueryDefinition) -> bool:
         return self._normalize() == other._normalize()
@@ -179,24 +138,6 @@ class Question(Entity):
                 ),
             ),
             specification=drill_spec,
-        )
-
-    def duplicate(self, new_title: QuestionTitle) -> Question:
-        return Question(
-            identity=QuestionIdentity(
-                entity_id=EntityId(uuid4()),
-                audit=AuditRecord(
-                    _created=CreatedAt(datetime.now(UTC)),
-                    _updated=UpdatedAt(datetime.now(UTC)),
-                ),
-            ),
-            specification=QuestionSpecification(
-                description=QuestionDescription(
-                    _title=new_title,
-                    _query=self._specification._description._query,
-                ),
-                rendering=self._specification._rendering,
-            ),
         )
 
     def is_compatible_with(self, other: Question) -> bool:

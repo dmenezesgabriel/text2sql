@@ -100,7 +100,7 @@ class TestReplayConversationUseCase:
         use_case = self._make_use_case({}, [])
         missing_id = ConversationId(uuid4())
         with pytest.raises(ValueError, match="not found"):
-            async for _ in use_case.execute(missing_id, None):
+            async for _ in use_case.execute(missing_id):
                 pass
 
     async def test_replays_user_messages(self) -> None:
@@ -108,5 +108,5 @@ class TestReplayConversationUseCase:
         conv = _make_conversation_with_user_message(conv_id)
         thinking = ThinkingEvent("Replaying...")
         use_case = self._make_use_case({str(conv_id.value): conv}, [thinking])
-        events = [e async for e in use_case.execute(conv_id, None)]
+        events = [e async for e in use_case.execute(conv_id)]
         assert thinking in events

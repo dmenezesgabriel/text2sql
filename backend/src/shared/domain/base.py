@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum, auto
@@ -86,17 +85,3 @@ class QueryResult(ValueObject):
         return any(
             isinstance(row.get(col), (int, float)) for col in self._columns for row in self._rows
         )
-
-
-class EntityCollection[T: Entity](ABC):
-    @abstractmethod
-    def add(self, entity: T) -> None: ...
-
-    @abstractmethod
-    def remove(self, entity_id: EntityId) -> None: ...
-
-    @abstractmethod
-    def contains(self, entity_id: EntityId) -> bool: ...
-
-    @abstractmethod
-    def to_list(self) -> list[T]: ...

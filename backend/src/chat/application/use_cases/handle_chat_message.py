@@ -28,9 +28,6 @@ class ProcessMessageRequest:
         self._content = MessageContent(content)
         self._conversation_id = ConversationId(conversation_id)
 
-    def is_valid(self) -> bool:
-        return not self._content.is_empty()
-
 
 @dataclass
 class AgentConfig:

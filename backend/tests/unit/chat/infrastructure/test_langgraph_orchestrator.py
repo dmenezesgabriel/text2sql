@@ -26,10 +26,10 @@ from src.chat.infrastructure.langgraph_orchestrator import (
     _default_title,
     _format_kind,
     _format_number,
+    _json_default,
     _narrative_spec,
     _number,
     _require_column,
-    _rows_to_json,
     _RunState,
     _schema_context,
     _spec_from_result,
@@ -62,25 +62,25 @@ def _request(
     return _VizRequest(component, title, label_column, value_column, content)
 
 
-class TestRowsToJson:
+class TestJsonDefault:
     def test_plain_row_serializes(self) -> None:
         rows = [{"region": "East", "revenue": 100.0}]
-        result = json.loads(_rows_to_json(rows))
+        result = json.loads(json.dumps(rows, default=_json_default))
         assert result[0]["revenue"] == 100.0
 
     def test_date_column_becomes_iso_string(self) -> None:
         rows = [{"month": dt.date(2015, 1, 1), "total": 1234.5}]
-        result = json.loads(_rows_to_json(rows))
+        result = json.loads(json.dumps(rows, default=_json_default))
         assert result[0]["month"] == "2015-01-01"
 
     def test_datetime_column_becomes_iso_string(self) -> None:
         rows = [{"ts": dt.datetime(2015, 1, 1, 0, 0, 0), "amt": 5.0}]
-        result = json.loads(_rows_to_json(rows))
+        result = json.loads(json.dumps(rows, default=_json_default))
         assert result[0]["ts"] == "2015-01-01T00:00:00"
 
     def test_decimal_becomes_float(self) -> None:
         rows = [{"val": Decimal("1234.56")}]
-        result = json.loads(_rows_to_json(rows))
+        result = json.loads(json.dumps(rows, default=_json_default))
         assert result[0]["val"] == pytest.approx(1234.56)
 
 

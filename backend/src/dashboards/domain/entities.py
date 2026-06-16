@@ -22,9 +22,6 @@ class DashboardTile(Entity):
         self._identity = identity
         self._source = source
 
-    def source_question(self) -> Question:
-        return self._source
-
     def position(self) -> TilePosition:
         return self._identity._position
 
@@ -94,25 +91,6 @@ class DashboardLayout:
         for source_id, bindings in self._filters.items():
             cleaned = tuple(b for b in bindings if tile_id not in b._target_tiles)
             self._filters[source_id] = cleaned
-
-    def move_tile(
-        self,
-        tile_id: EntityId,
-        new_position: TilePosition,
-    ) -> None:
-        tile = self._content._tiles.find(tile_id)
-        if tile is None:
-            msg = f"Tile {tile_id.value} not found"
-            raise TileNotFoundError(msg)
-        moved = DashboardTile(
-            identity=TileIdentity(_id=tile_id, _position=new_position),
-            source=tile._source,
-        )
-        if self._tile_overlaps(moved):
-            msg = "Cannot move tile: position occupied"
-            raise TileOverlapError(msg)
-        self._content._tiles.remove(tile_id)
-        self._content._tiles.add(moved)
 
     def bind_filter(
         self,

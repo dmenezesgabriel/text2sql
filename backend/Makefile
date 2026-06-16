@@ -9,7 +9,7 @@ check:
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run ruff format --check src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run pyright src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run deptry .
-	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run vulture src/
+	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run vulture src/ vulture_whitelist.py --ignore-decorators "@router.*,@app.*"
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run radon cc src/ -a
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run radon mi src/
 	UV_EXCLUDE_NEWER=$(UV_EXCLUDE_NEWER) uv run semgrep --config=semgrep_rules/ src/ tests/
