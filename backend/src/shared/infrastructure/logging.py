@@ -54,8 +54,16 @@ class _JsonFormatter(logging.Formatter):
         return json.dumps(payload)
 
 
+class _HealthCheckFilter(logging.Filter):
+    """Drop uvicorn access-log entries for GET /health (Docker healthcheck noise)."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "GET /health" not in record.getMessage()
+
+
 def setup_logging(level: str = "INFO") -> None:
     """Configure root logger to emit one JSON object per line to stdout."""
     handler = logging.StreamHandler()
     handler.setFormatter(_JsonFormatter())
     logging.basicConfig(level=level, handlers=[handler], force=True)
+    logging.getLogger("uvicorn.access").addFilter(_HealthCheckFilter())

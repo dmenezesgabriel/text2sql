@@ -42,25 +42,32 @@ services:
       - SUMMARIZER_MODEL=${SUMMARIZER_MODEL:-gemini/gemini-2.0-flash}
       - TOKEN_LIMIT=${TOKEN_LIMIT:-100000}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - S3_ENDPOINT=http://minio:9000
       - S3_ACCESS_KEY_ID=minioadmin
       - S3_SECRET_ACCESS_KEY=minioadmin
       - S3_BUCKET=bi-data
     volumes:
       - duckdb-data:/data
+      - ${HOME}/.config/litellm/github_copilot:/root/.config/litellm/github_copilot
     depends_on:
       dynamodb-local:
         condition: service_healthy
       minio:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
 
   frontend:
     build: ./frontend
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   duckdb-data:

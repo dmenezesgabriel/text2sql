@@ -14,15 +14,21 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env['VITE_API_TARGET'] ?? 'http://localhost:8000',
         changeOrigin: true,
       },
+    },
+    // Docker bind-mounts don't always propagate inotify events; polling ensures HMR works.
+    watch: {
+      usePolling: true,
+      interval: 300,
     },
   },
   test: {
     reporters: ['dot'],
     globals: true,
     environment: 'jsdom',
+    include: ['src/**/*.spec.{ts,tsx}'],
     setupFiles: ['./src/shared/lib/test/setup.ts'],
     css: true,
     coverage: {

@@ -6,6 +6,7 @@ import os
 import uuid
 from contextlib import asynccontextmanager
 
+import litellm
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -23,6 +24,10 @@ from src.shared.infrastructure.logging import REQUEST_ID, setup_logging
 
 setup_logging(level=os.getenv("LOG_LEVEL", "INFO"))
 _logger = logging.getLogger(__name__)
+
+# LiteLLM prints "Provider List" banners to stderr on every rate-limit retry;
+# the retries succeed internally so these are noise.
+litellm.suppress_debug_info = True
 
 _DYNAMO_MODELS = [ConversationModel, QuestionModel, DatasetModel, DashboardModel]
 
