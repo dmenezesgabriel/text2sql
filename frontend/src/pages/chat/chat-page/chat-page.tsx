@@ -37,6 +37,7 @@ export function ChatPage() {
     conversationId,
     addMessage,
     handleEvent,
+    setErrorOnLastAssistant,
     setStreaming,
     setConversationId,
   } = useChatStore();
@@ -69,14 +70,22 @@ export function ChatPage() {
           handleEvent(event);
         },
         (error) => {
-          console.error(error);
+          setErrorOnLastAssistant(`Request failed: ${error.message}. Please try again.`);
+          setStreaming(false);
         },
         () => {
           setStreaming(false);
         },
       );
     },
-    [conversationId, addMessage, handleEvent, setStreaming, setConversationId],
+    [
+      conversationId,
+      addMessage,
+      handleEvent,
+      setErrorOnLastAssistant,
+      setStreaming,
+      setConversationId,
+    ],
   );
 
   return (

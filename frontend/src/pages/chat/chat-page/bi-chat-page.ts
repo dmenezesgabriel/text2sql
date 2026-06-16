@@ -54,11 +54,30 @@ export class BiChatPage extends LitElement {
     this._messages = msgs;
   }
 
+  private _setErrorOnLast(message: string) {
+    const msgs = [...this._messages];
+    const last = msgs.at(-1);
+    if (last?.role === 'assistant') {
+      msgs[msgs.length - 1] = { ...last, content: message, error: true };
+    }
+    this._messages = msgs;
+  }
+
   private _handleEvent(event: AgentEvent) {
-    if (event.type === 'ThinkingEvent') {
-      this._appendToLast(event.payload as string);
-    } else if (event.type === 'SpecFragmentEvent') {
-      this._setSpecOnLast(event.payload as Record<string, unknown>);
+    switch (event.type) {
+      case 'ThinkingEvent': {
+        this._appendToLast(event.payload as string);
+        break;
+      }
+      case 'SpecFragmentEvent': {
+        this._setSpecOnLast(event.payload as Record<string, unknown>);
+        break;
+      }
+      case 'ErrorEvent': {
+        this._setErrorOnLast(event.payload as string);
+        break;
+      }
+      // No default
     }
   }
 
@@ -87,7 +106,8 @@ export class BiChatPage extends LitElement {
       (event) => {
         this._handleEvent(event);
       },
-      () => {
+      (err) => {
+        this._setErrorOnLast(`Request failed: ${err.message}. Please try again.`);
         this._isStreaming = false;
       },
       () => {
