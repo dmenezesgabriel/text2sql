@@ -5,16 +5,38 @@
  * Generative Business Intelligence Chat Tool
  * OpenAPI spec version: 0.1.0
  */
-import { http, HttpResponse, type RequestHandlerOptions } from 'msw';
+import type { RequestHandlerOptions } from 'msw';
+import { http, HttpResponse } from 'msw';
+
+export const getHealthHealthGetMockHandler = (
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    '*/health',
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      if (typeof overrideResponse === 'function') {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
 
 export const getChatApiV1ChatPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/chat',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -25,13 +47,15 @@ export const getChatApiV1ChatPostMockHandler = (
 };
 
 export const getListQuestionsApiV1QuestionsGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/questions',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -42,13 +66,15 @@ export const getListQuestionsApiV1QuestionsGetMockHandler = (
 };
 
 export const getCreateQuestionApiV1QuestionsPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/questions',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -59,13 +85,15 @@ export const getCreateQuestionApiV1QuestionsPostMockHandler = (
 };
 
 export const getGetQuestionApiV1QuestionsQuestionIdGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/questions/:questionId',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -76,13 +104,15 @@ export const getGetQuestionApiV1QuestionsQuestionIdGetMockHandler = (
 };
 
 export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/questions/:questionId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -93,30 +123,15 @@ export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteMockHandler = (
 };
 
 export const getDrillQuestionApiV1QuestionsQuestionIdDrillPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/questions/:questionId/drill',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
-        await overrideResponse(info);
-      }
-
-      return new HttpResponse(null, { status: 200 });
-    },
-    options,
-  );
-};
-
-export const getCompareQuestionsApiV1QuestionsComparePostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    '*/api/v1/questions/compare',
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -127,13 +142,15 @@ export const getCompareQuestionsApiV1QuestionsComparePostMockHandler = (
 };
 
 export const getListDashboardsApiV1DashboardsGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/dashboards',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -144,13 +161,15 @@ export const getListDashboardsApiV1DashboardsGetMockHandler = (
 };
 
 export const getCreateDashboardApiV1DashboardsPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/dashboards',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -161,13 +180,15 @@ export const getCreateDashboardApiV1DashboardsPostMockHandler = (
 };
 
 export const getGetDashboardApiV1DashboardsDashboardIdGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/dashboards/:dashboardId',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -178,13 +199,15 @@ export const getGetDashboardApiV1DashboardsDashboardIdGetMockHandler = (
 };
 
 export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/dashboards/:dashboardId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -195,13 +218,15 @@ export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteMockHandler = (
 };
 
 export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
     '*/api/v1/dashboards/:dashboardId/filter',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -212,13 +237,15 @@ export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostMockHandler =
 };
 
 export const getListDatasetsApiV1DatasetsGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/datasets',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -228,48 +255,35 @@ export const getListDatasetsApiV1DatasetsGetMockHandler = (
   );
 };
 
-export const getRegisterDatasetApiV1DatasetsPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
+export const getRegisterS3DatasetApiV1DatasetsRegisterS3PostMockHandler = (
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
-    '*/api/v1/datasets',
+    '*/api/v1/datasets/register-s3',
     async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
-      return new HttpResponse(null, { status: 200 });
-    },
-    options,
-  );
-};
-
-export const getIngestFileApiV1DatasetsIngestPostMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<unknown>,
-  options?: RequestHandlerOptions,
-) => {
-  return http.post(
-    '*/api/v1/datasets/ingest',
-    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
-        await overrideResponse(info);
-      }
-
-      return new HttpResponse(null, { status: 200 });
+      return new HttpResponse(null, { status: 201 });
     },
     options,
   );
 };
 
 export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | unknown
+    | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown> | unknown),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
     '*/api/v1/datasets/:datasetId/preview',
     async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
@@ -280,55 +294,38 @@ export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetMockHandler = (
 };
 
 export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<unknown>,
+  overrideResponse?:
+    | void
+    | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
   return http.delete(
     '*/api/v1/datasets/:datasetId',
     async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
+      if (typeof overrideResponse === 'function') {
         await overrideResponse(info);
       }
 
-      return new HttpResponse(null, { status: 200 });
-    },
-    options,
-  );
-};
-
-export const getHealthHealthGetMockHandler = (
-  overrideResponse?: (info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<unknown>,
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    '*/health',
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      if (overrideResponse !== undefined) {
-        await overrideResponse(info);
-      }
-
-      return new HttpResponse(null, { status: 200 });
+      return new HttpResponse(null, { status: 204 });
     },
     options,
   );
 };
 export const getText2sqlMock = () => [
+  getHealthHealthGetMockHandler(),
   getChatApiV1ChatPostMockHandler(),
   getListQuestionsApiV1QuestionsGetMockHandler(),
   getCreateQuestionApiV1QuestionsPostMockHandler(),
   getGetQuestionApiV1QuestionsQuestionIdGetMockHandler(),
   getDeleteQuestionApiV1QuestionsQuestionIdDeleteMockHandler(),
   getDrillQuestionApiV1QuestionsQuestionIdDrillPostMockHandler(),
-  getCompareQuestionsApiV1QuestionsComparePostMockHandler(),
   getListDashboardsApiV1DashboardsGetMockHandler(),
   getCreateDashboardApiV1DashboardsPostMockHandler(),
   getGetDashboardApiV1DashboardsDashboardIdGetMockHandler(),
   getDeleteDashboardApiV1DashboardsDashboardIdDeleteMockHandler(),
   getFilterDashboardApiV1DashboardsDashboardIdFilterPostMockHandler(),
   getListDatasetsApiV1DatasetsGetMockHandler(),
-  getRegisterDatasetApiV1DatasetsPostMockHandler(),
-  getIngestFileApiV1DatasetsIngestPostMockHandler(),
+  getRegisterS3DatasetApiV1DatasetsRegisterS3PostMockHandler(),
   getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetMockHandler(),
   getDeleteDatasetApiV1DatasetsDatasetIdDeleteMockHandler(),
-  getHealthHealthGetMockHandler(),
 ];

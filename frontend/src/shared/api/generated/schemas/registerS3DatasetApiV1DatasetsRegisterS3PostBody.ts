@@ -6,4 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type IngestFileApiV1DatasetsIngestPostBody = { [key: string]: unknown };
+export type RegisterS3DatasetApiV1DatasetsRegisterS3PostBody = { [key: string]: unknown };

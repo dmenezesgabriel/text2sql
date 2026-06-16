@@ -71,6 +71,12 @@ export default tseslint.config(
       'unicorn/filename-case': 'off',
       '@typescript-eslint/no-redundant-type-constituents': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+      // orval's fetch client always merges options?.headers (typed HeadersInit, which
+      // includes an array form) into the request headers object.
+      '@typescript-eslint/no-misused-spread': 'off',
+      // orval passes `customFetch<void>(...)` for 204 responses. The rule hard-disallows
+      // void in call-expression generics (vs. type references) regardless of options.
+      '@typescript-eslint/no-invalid-void-type': 'off',
     },
   },
 );

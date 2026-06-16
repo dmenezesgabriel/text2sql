@@ -17,6 +17,9 @@ export default defineConfig({
           path: './src/shared/api/mutator.ts',
           name: 'customFetch',
         },
+        fetch: {
+          includeHttpResponseReturnType: false,
+        },
       },
       mock: {
         generators: [{ type: 'msw', delay: false }],

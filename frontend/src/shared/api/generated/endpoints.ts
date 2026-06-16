@@ -5,26 +5,30 @@
  * Generative Business Intelligence Chat Tool
  * OpenAPI spec version: 0.1.0
  */
+import { customFetch } from '../mutator';
 import type {
   ChatApiV1ChatPostBody,
-  CompareQuestionsApiV1QuestionsComparePostBody,
   CreateDashboardApiV1DashboardsPostBody,
   CreateQuestionApiV1QuestionsPostBody,
   DrillQuestionApiV1QuestionsQuestionIdDrillPostBody,
   FilterDashboardApiV1DashboardsDashboardIdFilterPostBody,
-  IngestFileApiV1DatasetsIngestPostBody,
-  RegisterDatasetApiV1DatasetsPostBody,
+  RegisterS3DatasetApiV1DatasetsRegisterS3PostBody,
 } from './schemas';
 
+export const getHealthHealthGetUrl = () => {
+  return `/health`;
+};
+
 /**
- *
- * @param base
+ * @param options
+ * @summary Health
  */
-function mergeContentTypeHeaders(base: HeadersInit | undefined): Headers {
-  const merged = new Headers(base);
-  merged.set('Content-Type', 'application/json');
-  return merged;
-}
+export const healthHealthGet = async (options?: RequestInit): Promise<unknown> => {
+  return customFetch<unknown>(getHealthHealthGetUrl(), {
+    ...options,
+    method: 'GET',
+  });
+};
 
 export const getChatApiV1ChatPostUrl = () => {
   return `/api/v1/chat`;
@@ -39,17 +43,12 @@ export const chatApiV1ChatPost = async (
   chatApiV1ChatPostBody: ChatApiV1ChatPostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getChatApiV1ChatPostUrl(), {
+  return customFetch<unknown>(getChatApiV1ChatPostUrl(), {
     ...options,
     method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(chatApiV1ChatPostBody),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getListQuestionsApiV1QuestionsGetUrl = () => {
@@ -61,15 +60,10 @@ export const getListQuestionsApiV1QuestionsGetUrl = () => {
  * @summary List Questions
  */
 export const listQuestionsApiV1QuestionsGet = async (options?: RequestInit): Promise<unknown> => {
-  const res = await fetch(getListQuestionsApiV1QuestionsGetUrl(), {
+  return customFetch<unknown>(getListQuestionsApiV1QuestionsGetUrl(), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getCreateQuestionApiV1QuestionsPostUrl = () => {
@@ -85,17 +79,12 @@ export const createQuestionApiV1QuestionsPost = async (
   createQuestionApiV1QuestionsPostBody: CreateQuestionApiV1QuestionsPostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getCreateQuestionApiV1QuestionsPostUrl(), {
+  return customFetch<unknown>(getCreateQuestionApiV1QuestionsPostUrl(), {
     ...options,
     method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(createQuestionApiV1QuestionsPostBody),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getGetQuestionApiV1QuestionsQuestionIdGetUrl = (questionId: string) => {
@@ -111,15 +100,10 @@ export const getQuestionApiV1QuestionsQuestionIdGet = async (
   questionId: string,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getGetQuestionApiV1QuestionsQuestionIdGetUrl(questionId), {
+  return customFetch<unknown>(getGetQuestionApiV1QuestionsQuestionIdGetUrl(questionId), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getDeleteQuestionApiV1QuestionsQuestionIdDeleteUrl = (questionId: string) => {
@@ -135,15 +119,10 @@ export const deleteQuestionApiV1QuestionsQuestionIdDelete = async (
   questionId: string,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getDeleteQuestionApiV1QuestionsQuestionIdDeleteUrl(questionId), {
+  return customFetch<unknown>(getDeleteQuestionApiV1QuestionsQuestionIdDeleteUrl(questionId), {
     ...options,
     method: 'DELETE',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getDrillQuestionApiV1QuestionsQuestionIdDrillPostUrl = (questionId: string) => {
@@ -161,43 +140,12 @@ export const drillQuestionApiV1QuestionsQuestionIdDrillPost = async (
   drillQuestionApiV1QuestionsQuestionIdDrillPostBody: DrillQuestionApiV1QuestionsQuestionIdDrillPostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getDrillQuestionApiV1QuestionsQuestionIdDrillPostUrl(questionId), {
+  return customFetch<unknown>(getDrillQuestionApiV1QuestionsQuestionIdDrillPostUrl(questionId), {
     ...options,
     method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(drillQuestionApiV1QuestionsQuestionIdDrillPostBody),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
-};
-
-export const getCompareQuestionsApiV1QuestionsComparePostUrl = () => {
-  return `/api/v1/questions/compare`;
-};
-
-/**
- * @param compareQuestionsApiV1QuestionsComparePostBody
- * @param options
- * @summary Compare Questions
- */
-export const compareQuestionsApiV1QuestionsComparePost = async (
-  compareQuestionsApiV1QuestionsComparePostBody: CompareQuestionsApiV1QuestionsComparePostBody,
-  options?: RequestInit,
-): Promise<unknown> => {
-  const res = await fetch(getCompareQuestionsApiV1QuestionsComparePostUrl(), {
-    ...options,
-    method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
-    body: JSON.stringify(compareQuestionsApiV1QuestionsComparePostBody),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getListDashboardsApiV1DashboardsGetUrl = () => {
@@ -209,15 +157,10 @@ export const getListDashboardsApiV1DashboardsGetUrl = () => {
  * @summary List Dashboards
  */
 export const listDashboardsApiV1DashboardsGet = async (options?: RequestInit): Promise<unknown> => {
-  const res = await fetch(getListDashboardsApiV1DashboardsGetUrl(), {
+  return customFetch<unknown>(getListDashboardsApiV1DashboardsGetUrl(), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getCreateDashboardApiV1DashboardsPostUrl = () => {
@@ -233,17 +176,12 @@ export const createDashboardApiV1DashboardsPost = async (
   createDashboardApiV1DashboardsPostBody: CreateDashboardApiV1DashboardsPostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getCreateDashboardApiV1DashboardsPostUrl(), {
+  return customFetch<unknown>(getCreateDashboardApiV1DashboardsPostUrl(), {
     ...options,
     method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(createDashboardApiV1DashboardsPostBody),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getGetDashboardApiV1DashboardsDashboardIdGetUrl = (dashboardId: string) => {
@@ -259,15 +197,10 @@ export const getDashboardApiV1DashboardsDashboardIdGet = async (
   dashboardId: string,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getGetDashboardApiV1DashboardsDashboardIdGetUrl(dashboardId), {
+  return customFetch<unknown>(getGetDashboardApiV1DashboardsDashboardIdGetUrl(dashboardId), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getDeleteDashboardApiV1DashboardsDashboardIdDeleteUrl = (dashboardId: string) => {
@@ -283,15 +216,10 @@ export const deleteDashboardApiV1DashboardsDashboardIdDelete = async (
   dashboardId: string,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getDeleteDashboardApiV1DashboardsDashboardIdDeleteUrl(dashboardId), {
+  return customFetch<unknown>(getDeleteDashboardApiV1DashboardsDashboardIdDeleteUrl(dashboardId), {
     ...options,
     method: 'DELETE',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getFilterDashboardApiV1DashboardsDashboardIdFilterPostUrl = (dashboardId: string) => {
@@ -309,17 +237,15 @@ export const filterDashboardApiV1DashboardsDashboardIdFilterPost = async (
   filterDashboardApiV1DashboardsDashboardIdFilterPostBody: FilterDashboardApiV1DashboardsDashboardIdFilterPostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getFilterDashboardApiV1DashboardsDashboardIdFilterPostUrl(dashboardId), {
-    ...options,
-    method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
-    body: JSON.stringify(filterDashboardApiV1DashboardsDashboardIdFilterPostBody),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
+  return customFetch<unknown>(
+    getFilterDashboardApiV1DashboardsDashboardIdFilterPostUrl(dashboardId),
+    {
+      ...options,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      body: JSON.stringify(filterDashboardApiV1DashboardsDashboardIdFilterPostBody),
+    },
+  );
 };
 
 export const getListDatasetsApiV1DatasetsGetUrl = () => {
@@ -331,67 +257,31 @@ export const getListDatasetsApiV1DatasetsGetUrl = () => {
  * @summary List Datasets
  */
 export const listDatasetsApiV1DatasetsGet = async (options?: RequestInit): Promise<unknown> => {
-  const res = await fetch(getListDatasetsApiV1DatasetsGetUrl(), {
+  return customFetch<unknown>(getListDatasetsApiV1DatasetsGetUrl(), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
-export const getRegisterDatasetApiV1DatasetsPostUrl = () => {
-  return `/api/v1/datasets`;
+export const getRegisterS3DatasetApiV1DatasetsRegisterS3PostUrl = () => {
+  return `/api/v1/datasets/register-s3`;
 };
 
 /**
- * @param registerDatasetApiV1DatasetsPostBody
+ * @param registerS3DatasetApiV1DatasetsRegisterS3PostBody
  * @param options
- * @summary Register Dataset
+ * @summary Register S3 Dataset
  */
-export const registerDatasetApiV1DatasetsPost = async (
-  registerDatasetApiV1DatasetsPostBody: RegisterDatasetApiV1DatasetsPostBody,
+export const registerS3DatasetApiV1DatasetsRegisterS3Post = async (
+  registerS3DatasetApiV1DatasetsRegisterS3PostBody: RegisterS3DatasetApiV1DatasetsRegisterS3PostBody,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getRegisterDatasetApiV1DatasetsPostUrl(), {
+  return customFetch<unknown>(getRegisterS3DatasetApiV1DatasetsRegisterS3PostUrl(), {
     ...options,
     method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
-    body: JSON.stringify(registerDatasetApiV1DatasetsPostBody),
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(registerS3DatasetApiV1DatasetsRegisterS3PostBody),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
-};
-
-export const getIngestFileApiV1DatasetsIngestPostUrl = () => {
-  return `/api/v1/datasets/ingest`;
-};
-
-/**
- * @param ingestFileApiV1DatasetsIngestPostBody
- * @param options
- * @summary Ingest File
- */
-export const ingestFileApiV1DatasetsIngestPost = async (
-  ingestFileApiV1DatasetsIngestPostBody: IngestFileApiV1DatasetsIngestPostBody,
-  options?: RequestInit,
-): Promise<unknown> => {
-  const res = await fetch(getIngestFileApiV1DatasetsIngestPostUrl(), {
-    ...options,
-    method: 'POST',
-    headers: mergeContentTypeHeaders(options?.headers),
-    body: JSON.stringify(ingestFileApiV1DatasetsIngestPostBody),
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetUrl = (datasetId: string) => {
@@ -407,15 +297,10 @@ export const previewDatasetApiV1DatasetsDatasetIdPreviewGet = async (
   datasetId: string,
   options?: RequestInit,
 ): Promise<unknown> => {
-  const res = await fetch(getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetUrl(datasetId), {
+  return customFetch<unknown>(getPreviewDatasetApiV1DatasetsDatasetIdPreviewGetUrl(datasetId), {
     ...options,
     method: 'GET',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };
 
 export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteUrl = (datasetId: string) => {
@@ -430,34 +315,9 @@ export const getDeleteDatasetApiV1DatasetsDatasetIdDeleteUrl = (datasetId: strin
 export const deleteDatasetApiV1DatasetsDatasetIdDelete = async (
   datasetId: string,
   options?: RequestInit,
-): Promise<unknown> => {
-  const res = await fetch(getDeleteDatasetApiV1DatasetsDatasetIdDeleteUrl(datasetId), {
+): Promise<void> => {
+  return customFetch<void>(getDeleteDatasetApiV1DatasetsDatasetIdDeleteUrl(datasetId), {
     ...options,
     method: 'DELETE',
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
-};
-
-export const getHealthHealthGetUrl = () => {
-  return `/health`;
-};
-
-/**
- * @param options
- * @summary Health
- */
-export const healthHealthGet = async (options?: RequestInit): Promise<unknown> => {
-  const res = await fetch(getHealthHealthGetUrl(), {
-    ...options,
-    method: 'GET',
-  });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: unknown = body ? JSON.parse(body) : {};
-  return data;
 };

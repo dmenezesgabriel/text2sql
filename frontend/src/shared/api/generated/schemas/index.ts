@@ -7,13 +7,11 @@
  */
 
 export * from './chatApiV1ChatPostBody';
-export * from './compareQuestionsApiV1QuestionsComparePostBody';
 export * from './createDashboardApiV1DashboardsPostBody';
 export * from './createQuestionApiV1QuestionsPostBody';
 export * from './drillQuestionApiV1QuestionsQuestionIdDrillPostBody';
 export * from './filterDashboardApiV1DashboardsDashboardIdFilterPostBody';
 export * from './hTTPValidationError';
-export * from './ingestFileApiV1DatasetsIngestPostBody';
-export * from './registerDatasetApiV1DatasetsPostBody';
+export * from './registerS3DatasetApiV1DatasetsRegisterS3PostBody';
 export * from './validationError';
 export * from './validationErrorCtx';
