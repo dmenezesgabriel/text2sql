@@ -2,6 +2,7 @@ export interface Dashboard {
   id: string;
   title: string;
   tiles: DashboardTile[];
+  filters: CrossFilterBinding[];
   createdAt: string;
   updatedAt: string;
 }
