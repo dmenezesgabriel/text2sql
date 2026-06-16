@@ -33,9 +33,6 @@ class FakeQueryEngine:
     async def create_view_from_s3(self, dataset_id: EntityId, s3_uri: str) -> SchemaDefinition:
         return SchemaDefinition(_columns=())
 
-    async def register_schema(self, dataset_id: EntityId, schema: SchemaDefinition) -> None:
-        pass
-
     async def execute(self, sql: str) -> object:
         return None
 

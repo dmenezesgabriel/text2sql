@@ -7,13 +7,7 @@ from src.shared.domain.base import EntityId
 
 
 class IQueryRegistrar(Protocol):
-    """Port for registering dataset schemas and S3 views in the query engine."""
-
-    async def register_schema(
-        self,
-        dataset_id: EntityId,
-        schema: SchemaDefinition,
-    ) -> None: ...
+    """Port for registering S3 views in the query engine."""
 
     async def create_view_from_s3(
         self,

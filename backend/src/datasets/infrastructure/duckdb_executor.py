@@ -17,16 +17,6 @@ class DuckDBExecutor:
     def __init__(self, pool: DuckDBPool) -> None:
         self._pool = pool
 
-    async def register_schema(
-        self,
-        dataset_id: EntityId,
-        schema: SchemaDefinition,
-    ) -> None:
-        table_name = f"ds_{dataset_id.value.hex}"
-        columns_def = ", ".join(f'"{col._name}" {col._dtype}' for col in schema._columns)
-        with self._pool.connection() as conn:
-            conn.execute(f"CREATE OR REPLACE TABLE {table_name} ({columns_def})")
-
     async def create_view_from_s3(self, dataset_id: EntityId, s3_uri: str) -> SchemaDefinition:
         view_name = f"ds_{dataset_id.value.hex}"
         with self._pool.connection() as conn:
