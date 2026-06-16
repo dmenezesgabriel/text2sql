@@ -29,7 +29,6 @@ from src.datasets.infrastructure.duckdb_executor import DuckDBExecutor
 from src.datasets.infrastructure.dynamo_repository import DynamoDatasetRepository
 from src.datasets.infrastructure.fastapi.router import create_datasets_router
 from src.datasets.infrastructure.query_executor import DuckDBQueryExecutor
-from src.questions.application.use_cases.compare_questions import CompareQuestionsUseCase
 from src.questions.application.use_cases.drill_down_question import DrillDownQuestionUseCase
 from src.questions.application.use_cases.save_question_from_chat import SaveQuestionFromChatUseCase
 from src.questions.infrastructure.dynamo_repository import DynamoQuestionRepository
@@ -105,11 +104,6 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
         datasets=DatasetExistenceAdapter(dataset_repo),
     )
     drill_question_use_case = DrillDownQuestionUseCase(questions=question_repo)
-    compare_questions_use_case = CompareQuestionsUseCase(
-        questions=question_repo,
-        executor=query_executor,
-    )
-
     # ── Use Cases: Dashboards ──
     compose_dashboard_use_case = ComposeDashboardFromQuestionsUseCase(
         dashboards=dashboard_repo,
@@ -127,13 +121,14 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
     return Composition(
         chat_router=create_chat_router(chat_use_case),
         questions_router=create_questions_router(
+            question_repo=question_repo,
             save_use_case=save_question_use_case,
             drill_use_case=drill_question_use_case,
-            compare_use_case=compare_questions_use_case,
         ),
         dashboards_router=create_dashboards_router(
-            filter_use_case=apply_cross_filter_use_case,
+            dashboard_repo=dashboard_repo,
             compose_use_case=compose_dashboard_use_case,
+            filter_use_case=apply_cross_filter_use_case,
         ),
         datasets_router=create_datasets_router(
             register_use_case=register_s3_use_case,
