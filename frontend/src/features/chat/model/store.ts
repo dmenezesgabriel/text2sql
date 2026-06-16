@@ -10,6 +10,7 @@ interface ChatState {
   addMessage: (message: AgentMessage) => void;
   appendToLastAssistant: (fragment: string) => void;
   setSpecOnLastAssistant: (spec: Record<string, unknown>) => void;
+  setErrorOnLastAssistant: (message: string) => void;
   handleEvent: (event: AgentEvent) => void;
   setStreaming: (streaming: boolean) => void;
   setConversationId: (id: string) => void;
@@ -47,11 +48,35 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
+  setErrorOnLastAssistant: (message) => {
+    set((state) => {
+      const messages = [...state.messages];
+      const last = messages.at(-1);
+      if (last?.role === 'assistant') {
+        messages[messages.length - 1] = { ...last, content: message, error: true };
+      }
+      return { messages };
+    });
+  },
+
   handleEvent: (event) => {
-    if (event.type === 'ThinkingEvent') {
-      get().appendToLastAssistant(event.payload as string);
-    } else if (event.type === 'SpecFragmentEvent') {
-      get().setSpecOnLastAssistant(event.payload as Record<string, unknown>);
+    switch (event.type) {
+      case 'ThinkingEvent': {
+        get().appendToLastAssistant(event.payload as string);
+
+        break;
+      }
+      case 'SpecFragmentEvent': {
+        get().setSpecOnLastAssistant(event.payload as Record<string, unknown>);
+
+        break;
+      }
+      case 'ErrorEvent': {
+        get().setErrorOnLastAssistant(event.payload as string);
+
+        break;
+      }
+      // No default
     }
   },
 

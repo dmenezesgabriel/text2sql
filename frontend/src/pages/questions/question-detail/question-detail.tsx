@@ -13,9 +13,14 @@ import { registry } from '@/widgets/json-render/registry';
  */
 function buildVizSpec(q: Question): Record<string, unknown> {
   return {
-    component: q.vizComponent,
-    props: q.vizProps,
-    children: q.vizChildren ?? [],
+    root: 'main',
+    elements: {
+      main: {
+        type: q.vizComponent,
+        props: q.vizProps,
+        children: q.vizChildren ?? [],
+      },
+    },
   };
 }
 

@@ -48,6 +48,11 @@ export class BiChatMessage extends LitElement {
       font-style: italic;
       margin: 0;
     }
+    .error {
+      font-size: var(--text-sm);
+      color: var(--color-error, #d32f2f);
+      margin: 0;
+    }
     .viz-wrap {
       max-width: 100%;
       overflow: auto;
@@ -79,15 +84,18 @@ export class BiChatMessage extends LitElement {
     this._saving = true;
     const spec = this.message.spec;
     try {
-      const rawFormat = (spec['format'] as string | undefined)?.toUpperCase();
+      const meta = (spec['meta'] as Record<string, unknown> | undefined) ?? {};
+      const rootKey = (spec['root'] as string | undefined) ?? 'main';
+      const elements = (spec['elements'] as Record<string, unknown> | undefined) ?? {};
+      const rootEl = (elements[rootKey] as Record<string, unknown> | undefined) ?? {};
+      const rawFormat = (meta['format'] as string | undefined)?.toUpperCase();
       const q = await createQuestion({
-        title: (spec['title'] as string | undefined) ?? 'Untitled question',
-        sql: (spec['sql'] as string | undefined) ?? '',
-        dataset_id: (spec['dataset_id'] as string | undefined) ?? '',
-        viz_component: (spec['component'] as string | undefined) ?? '',
+        title: (meta['title'] as string | undefined) ?? 'Untitled question',
+        sql: (meta['sql'] as string | undefined) ?? '',
+        dataset_id: (meta['dataset_id'] as string | undefined) ?? '',
+        viz_component: (rootEl['type'] as string | undefined) ?? '',
         viz_format: (rawFormat as VizFormat | undefined) ?? 'CHART',
-        viz_props: (spec['props'] as Record<string, unknown> | undefined) ?? {},
-        viz_children: spec['children'] as unknown[] | undefined,
+        viz_props: (rootEl['props'] as Record<string, unknown> | undefined) ?? {},
       });
       this._saved = true;
       this.dispatchEvent(
@@ -106,10 +114,11 @@ export class BiChatMessage extends LitElement {
     const props = (spec?.['props'] as Record<string, unknown> | undefined) ?? {};
     const hasContent = this.message.content.length > 0;
     const buttonLabel = parseSaveLabel(this._saved, this._saving);
+    const contentClass = this.message.error ? 'error' : 'thinking';
 
     return html`
       <div class="assistant-col">
-        ${hasContent ? html`<p class="thinking">${this.message.content}</p>` : nothing}
+        ${hasContent ? html`<p class=${contentClass}>${this.message.content}</p>` : nothing}
         ${component
           ? html`
               <div class="viz-wrap">${renderViz(component, props)}</div>

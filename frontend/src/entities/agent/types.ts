@@ -9,6 +9,7 @@ export interface AgentMessage {
   spec?: Record<string, unknown>;
   toolCall?: ToolCall;
   createdAt: string;
+  error?: boolean;
 }
 
 export interface ToolCall {
