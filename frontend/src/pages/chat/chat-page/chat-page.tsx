@@ -91,9 +91,14 @@ export function ChatPage() {
   return (
     <div style={pageStyle}>
       <div style={messagesStyle}>
-        {messages.map((msg) => (
-          <ChatMessage key={msg.id} message={msg} />
-        ))}
+        {messages.length === 0 ? (
+          <bi-empty-state
+            heading="Generative Business Intelligence"
+            description="Ask a question about your data to get started."
+          />
+        ) : (
+          messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)
+        )}
       </div>
       <ChatInput onSend={handleSend} disabled={isStreaming} />
     </div>

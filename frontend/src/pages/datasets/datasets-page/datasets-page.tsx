@@ -6,6 +6,14 @@ import { useDatasetStore } from '@/features/dataset/model/store';
 import { RegisterDatasetForm } from '@/features/dataset/ui/register-dataset-form';
 
 /**
+ * Mirrors the backend's DuckDB view naming (langgraph_orchestrator.py): ds_<id without hyphens>.
+ * @param id
+ */
+function viewName(id: string): string {
+  return `ds_${id.replaceAll('-', '')}`;
+}
+
+/**
  *
  * @param datasets
  * @param isLoading
@@ -31,6 +39,9 @@ function renderDatasetList(datasets: Dataset[], isLoading: boolean) {
               Name
             </th>
             <th scope="col" className="th-base">
+              View
+            </th>
+            <th scope="col" className="th-base">
               Kind
             </th>
             <th scope="col" className="th-base">
@@ -50,6 +61,7 @@ function renderDatasetList(datasets: Dataset[], isLoading: boolean) {
               <td className="td-base font-semibold">
                 <Link to={`/datasets/${ds.id}`}>{ds.name}</Link>
               </td>
+              <td className="td-base text-secondary text-sm font-mono">{viewName(ds.id)}</td>
               <td className="td-base">
                 <bi-badge variant="default">{ds.kind}</bi-badge>
               </td>

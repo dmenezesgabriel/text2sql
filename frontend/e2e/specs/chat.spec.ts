@@ -49,14 +49,23 @@ test.describe('Chat flow', () => {
 test.describe('Chat SSE events', () => {
   test('receives SSE events from backend', async ({ page }) => {
     const sseEvents: string[] = [];
+    const bodyReads: Promise<void>[] = [];
 
-    // Intercept SSE stream
-    page.on('response', async (response) => {
+    // Intercept SSE stream. response.body() resolves once the stream closes, so
+    // we collect the promises and await them explicitly before asserting -
+    // the 'response' handler isn't awaited by Playwright before the test continues.
+    page.on('response', (response) => {
       if (response.url().includes('/api/v1/chat')) {
-        const body = await response.body().catch(() => Buffer.from(''));
-        const text = body.toString();
-        const events = text.split('\n').filter((l) => l.startsWith('data:'));
-        sseEvents.push(...events);
+        bodyReads.push(
+          response
+            .body()
+            .then((body) => {
+              const text = body.toString();
+              const events = text.split('\n').filter((l) => l.startsWith('data:'));
+              sseEvents.push(...events);
+            })
+            .catch(() => {}),
+        );
       }
     });
 
@@ -71,6 +80,8 @@ test.describe('Chat SSE events', () => {
       .first()
       .waitFor({ timeout: 90_000 })
       .catch(() => {});
+
+    await Promise.all(bodyReads);
 
     // Should have received ThinkingEvent and SpecFragmentEvent
     const hasThinking = sseEvents.some((e) => e.includes('ThinkingEvent'));
