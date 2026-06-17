@@ -10,6 +10,7 @@ import litellm
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from src.chat.infrastructure.dynamo_checkpointer import _CheckpointModel
 from src.composition_root import ComposeConfig, compose
 from src.datasets.infrastructure.duckdb_executor import DuckDBExecutor
 from src.datasets.infrastructure.dynamo_repository import DynamoDatasetRepository
@@ -29,7 +30,7 @@ _logger = logging.getLogger(__name__)
 # the retries succeed internally so these are noise.
 litellm.suppress_debug_info = True
 
-_DYNAMO_MODELS = [ConversationModel, QuestionModel, DatasetModel, DashboardModel]
+_DYNAMO_MODELS = [ConversationModel, QuestionModel, DatasetModel, DashboardModel, _CheckpointModel]
 
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
@@ -87,8 +88,7 @@ async def lifespan(app: FastAPI):
         pool=pool,
         config=ComposeConfig(
             llm_model_name=os.getenv("LLM_MODEL", "gpt-4o"),
-            summarizer_model_name=os.getenv("SUMMARIZER_MODEL", "gpt-4o-mini"),
-            token_limit=int(os.getenv("TOKEN_LIMIT", "100000")),
+            use_dynamo_checkpointer=os.getenv("DYNAMO_CHECKPOINTER", "false").lower() == "true",
         ),
     )
 

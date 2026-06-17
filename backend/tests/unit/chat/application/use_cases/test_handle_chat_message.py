@@ -14,8 +14,8 @@ from src.chat.domain.value_objects import (
     ConversationId,
     SpecFragmentEvent,
     ThinkingEvent,
-    TokenCount,
 )
+from src.shared.domain.base import EntityId
 
 
 class FakeConversationRepository:
@@ -38,49 +38,21 @@ class FakeOrchestrator:
 
     async def run(
         self,
-        message: object,
-        conversation: object,
-        toolkit: object,
+        content: str,
+        conversation_id: object,
     ) -> AsyncIterator[AgentEvent]:
         for event in self._events:
             yield event
 
 
-class FakeToolKit:
-    def register(self, tool: object) -> None:
-        pass
-
-    def find(self, name: object) -> None:
-        return None
-
-    def all(self) -> list[object]:
-        return []
-
-
-class FakeSummarizer:
-    async def summarize(self, text: str) -> str:
-        return f"Summary of: {text[:20]}"
-
-
 class TestHandleChatMessageUseCase:
     def setup_method(self) -> None:
         self.repo = FakeConversationRepository()
-        self.toolkit = FakeToolKit()
-        self.summarizer = FakeSummarizer()
 
-    def _make_use_case(
-        self,
-        events: list[AgentEvent],
-        token_limit: TokenCount = TokenCount(10000),
-    ) -> HandleChatMessageUseCase:
+    def _make_use_case(self, events: list[AgentEvent]) -> HandleChatMessageUseCase:
         return HandleChatMessageUseCase(
             conversations=self.repo,
-            agent=AgentConfig(
-                _orchestrator=FakeOrchestrator(events),
-                _toolkit=self.toolkit,
-                _summarizer=self.summarizer,
-                _token_limit=token_limit,
-            ),
+            agent=AgentConfig(_orchestrator=FakeOrchestrator(events)),
         )
 
     async def _collect(self, use_case: HandleChatMessageUseCase, content: str) -> list[AgentEvent]:
@@ -108,11 +80,12 @@ class TestHandleChatMessageUseCase:
         events = await self._collect(use_case, "Hello")
         assert len(events) > 0
 
-    async def test_summarizes_when_token_limit_exceeded(self) -> None:
-        # Token limit of 1 forces summarization on any non-empty message.
-        use_case = self._make_use_case([], token_limit=TokenCount(1))
-        await self._collect(use_case, "A message long enough to exceed the limit")
-        saved = next(iter(self.repo._store.values()))
-        # After summarization the history starts with a SYSTEM summary message.
-        first_msg = saved._history.to_list()[0]
-        assert "Summary of earlier conversation:" in first_msg._body._content.value
+    async def test_reuses_existing_conversation(self) -> None:
+        uid = uuid4()
+        existing = Conversation(identity=EntityId(uid))
+        self.repo._store[str(uid)] = existing
+        use_case = self._make_use_case([])
+        request = ProcessMessageRequest(content="Hi", conversation_id=uid)
+        [_ async for _ in use_case.execute(request)]
+        # Same conversation object is saved back (not a new one)
+        assert self.repo._store[str(uid)] is existing

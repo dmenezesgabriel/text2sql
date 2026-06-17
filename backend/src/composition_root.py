@@ -3,19 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from fastapi import APIRouter
+from langgraph.checkpoint.memory import InMemorySaver
 
 from src.chat.application.use_cases.handle_chat_message import (
     AgentConfig,
     HandleChatMessageUseCase,
 )
-from src.chat.domain.value_objects import TokenCount
+from src.chat.infrastructure.agent_graph.builder import build_agent_graph
 from src.chat.infrastructure.chat_model import build_chat_model
+from src.chat.infrastructure.dynamo_checkpointer import DynamoCheckpointer
 from src.chat.infrastructure.dynamo_conversation_repository import DynamoConversationRepository
 from src.chat.infrastructure.fastapi.router import create_chat_router
 from src.chat.infrastructure.langgraph_orchestrator import LangGraphOrchestrator
-from src.chat.infrastructure.litellm_provider import LiteLLMProvider
-from src.chat.infrastructure.summarizer import LiteLLMSummarizer
-from src.chat.infrastructure.tool_kit import ToolKit
 from src.chat.infrastructure.tools.sql_generator import SQLGeneratorTool
 from src.dashboards.application.use_cases.apply_cross_filter import ApplyCrossFilterUseCase
 from src.dashboards.application.use_cases.compose_dashboard import (
@@ -48,8 +47,7 @@ class DatasetExistenceAdapter:
 @dataclass
 class ComposeConfig:
     llm_model_name: str = "gpt-4o"
-    summarizer_model_name: str = "gpt-4o-mini"
-    token_limit: int = 100000
+    use_dynamo_checkpointer: bool = False
 
 
 @dataclass
@@ -74,28 +72,24 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
     engine = DuckDBExecutor(pool)
     query_executor = DuckDBQueryExecutor(engine)
 
-    # ── Tools ──
+    # ── SQL tool (injected into graph) ──
     sql_tool = SQLGeneratorTool(engine)
-    toolkit = ToolKit()
-    toolkit.register(sql_tool)
 
-    # ── LLM / Agent ──
-    llm = LiteLLMProvider(cfg.summarizer_model_name)
-    orchestrator = LangGraphOrchestrator(
+    # ── LangGraph checkpointer ──
+    checkpointer = DynamoCheckpointer() if cfg.use_dynamo_checkpointer else InMemorySaver()
+
+    # ── Agent graph (built once at startup) ──
+    graph = build_agent_graph(
         model=build_chat_model(cfg.llm_model_name),
-        datasets=dataset_repo,
+        executor=sql_tool,
+        checkpointer=checkpointer,
     )
-    summarizer = LiteLLMSummarizer(llm, cfg.summarizer_model_name)
+    orchestrator = LangGraphOrchestrator(graph=graph, datasets=dataset_repo)
 
     # ── Use Cases: Agent ──
     chat_use_case = HandleChatMessageUseCase(
         conversations=conversation_repo,
-        agent=AgentConfig(
-            _orchestrator=orchestrator,
-            _toolkit=toolkit,
-            _summarizer=summarizer,
-            _token_limit=TokenCount(cfg.token_limit),
-        ),
+        agent=AgentConfig(_orchestrator=orchestrator),
     )
 
     # ── Use Cases: Questions ──
@@ -104,6 +98,7 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
         datasets=DatasetExistenceAdapter(dataset_repo),
     )
     drill_question_use_case = DrillDownQuestionUseCase(questions=question_repo)
+
     # ── Use Cases: Dashboards ──
     compose_dashboard_use_case = ComposeDashboardFromQuestionsUseCase(
         dashboards=dashboard_repo,

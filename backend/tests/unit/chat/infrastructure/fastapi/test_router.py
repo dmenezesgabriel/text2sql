@@ -27,10 +27,14 @@ class TestSerializeEvent:
         assert result["payload"]["tool_name"] == "sql_generator"
 
     def test_spec_fragment_event(self) -> None:
-        event = SpecFragmentEvent(_payload={"chart": "bar"})
+        payload = {
+            "root": "answer",
+            "elements": {"answer": {"type": "NarrativeText", "props": {"content": "ok"}}},
+        }
+        event = SpecFragmentEvent(_payload=payload)
         result = _serialize_event(event)
         assert result["type"] == "SpecFragmentEvent"
-        assert result["payload"] == {"chart": "bar"}
+        assert result["payload"] == payload
 
     def test_error_event(self) -> None:
         event = ErrorEvent(_message="something failed")

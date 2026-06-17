@@ -87,9 +87,22 @@ class TestAgentEvents:
         )
         assert event._tool_name.value == "sql_generator"
 
-    def test_spec_fragment_event(self) -> None:
-        event = SpecFragmentEvent(_payload={"type": "chart"})
-        assert event._payload["type"] == "chart"
+    def test_spec_fragment_event_valid_payload(self) -> None:
+        spec = {
+            "root": "answer",
+            "elements": {"answer": {"type": "NarrativeText", "props": {"content": "hi"}}},
+        }
+        event = SpecFragmentEvent(_payload=spec)
+        assert event._payload["root"] == "answer"
+
+    def test_spec_fragment_event_invalid_payload_raises(self) -> None:
+        with pytest.raises(ValueError):
+            SpecFragmentEvent(
+                _payload={"root": "x", "elements": {"e": {"type": "ScatterPlot", "props": {}}}},
+            )
+
+    def test_spec_fragment_event_empty_elements_is_valid(self) -> None:
+        SpecFragmentEvent(_payload={"root": "x", "elements": {}})
 
 
 class TestMessageRole:

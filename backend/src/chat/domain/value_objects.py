@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from uuid import UUID
 
+from src.chat.domain.spec_validation import validate_spec
 from src.shared.domain.base import QueryResult, ResponseKind, ValueObject
 
 __all__ = ["QueryResult", "ResponseKind"]  # re-export so existing imports still work
@@ -87,6 +88,9 @@ class ToolCallEvent(AgentEvent):
 @dataclass(frozen=True)
 class SpecFragmentEvent(AgentEvent):
     _payload: dict[str, object]
+
+    def __post_init__(self) -> None:
+        validate_spec(self._payload)
 
 
 @dataclass(frozen=True)

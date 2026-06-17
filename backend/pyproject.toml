@@ -91,6 +91,8 @@ select = [
 "tests/*" = ["S101", "S106", "PLR", "RET", "E501", "EM101", "PLC0415"]
 "src/*/infrastructure/*" = ["S101"]
 "src/*/infrastructure/fastapi/*" = ["S101"]
+# DynamoCheckpointer overrides BaseCheckpointSaver protocol methods with fixed signatures
+"src/chat/infrastructure/dynamo_checkpointer.py" = ["PLR0913", "A002"]
 "src/main.py" = ["S101"]
 
 [tool.ruff.lint.pydocstyle]

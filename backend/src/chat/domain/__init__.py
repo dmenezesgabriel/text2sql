@@ -21,10 +21,6 @@ from src.chat.domain.entities import (
     ModelConfig,
     AgentDirectives,
     AgentConfiguration,
-    MessageIdentity,
-    MessageBody,
-    Message,
-    Messages,
     Conversation,
     ConversationState,
 )
@@ -50,10 +46,6 @@ __all__ = [
     "ModelConfig",
     "AgentDirectives",
     "AgentConfiguration",
-    "MessageIdentity",
-    "MessageBody",
-    "Message",
-    "Messages",
     "Conversation",
     "ConversationState",
 ]
