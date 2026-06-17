@@ -57,7 +57,7 @@ def _build_save_request(body: dict[str, object]) -> SaveQuestionFromChatRequest:
     dataset_ref = DatasetReference(_id=EntityId(dataset_uuid), _alias=None)
     sql = SqlQuery(str(body.get("sql", "")))
     query = QueryDefinition(_sql=sql, _source=dataset_ref)
-    title = QuestionTitle(str(body.get("title", "Untitled question")))
+    title = QuestionTitle(str(body.get("title") or "Untitled question"))
     description = QuestionDescription(_title=title, _query=query)
     viz_format = _parse_viz_format(body.get("viz_format"))
     props = body.get("viz_props") or {}
