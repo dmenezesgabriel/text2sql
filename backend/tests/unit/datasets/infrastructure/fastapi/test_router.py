@@ -50,16 +50,31 @@ class TestCreateDatasetsRouter:
         )
         assert router is not None
 
-    def test_router_prefix(self) -> None:
+    def _make_router(self):
         from src.datasets.application.use_cases.register_s3_dataset import RegisterS3DatasetUseCase
         from src.datasets.infrastructure.fastapi.router import create_datasets_router
 
         repo = FakeDatasetRepository()
         engine = FakeQueryEngine()
         use_case = RegisterS3DatasetUseCase(datasets=repo, engine=engine)  # type: ignore[arg-type]
-        router = create_datasets_router(
+        return create_datasets_router(
             register_use_case=use_case,
             dataset_repo=repo,  # type: ignore[arg-type]
             engine=engine,  # type: ignore[arg-type]
         )
-        assert router.prefix == "/api/v1/datasets"
+
+    def test_router_prefix(self) -> None:
+        assert self._make_router().prefix == "/api/v1/datasets"
+
+    def test_router_tags_contains_datasets(self) -> None:
+        router = self._make_router()
+        assert "datasets" in router.tags
+
+    def test_router_tags_no_xx(self) -> None:
+        router = self._make_router()
+        assert not any("XX" in str(t) for t in (router.tags or []))
+
+    def test_router_tags_lowercase(self) -> None:
+        router = self._make_router()
+        tags = router.tags or []
+        assert all(t == t.lower() for t in tags)

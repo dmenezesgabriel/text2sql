@@ -40,3 +40,9 @@ class TestRouteSqlResult:
     def test_error_above_limit_goes_to_clarification(self) -> None:
         state = _state(sql_error="still broken", sql_retries=10)
         assert route_sql_result(state) == "emit_clarification"  # type: ignore[arg-type]
+
+    def test_error_with_missing_retries_key_defaults_to_repair(self) -> None:
+        # sql_retries key absent → default 0 → 0 < 3 → repair_sql
+        # Kills mutmut default=None (None >= 3 → TypeError)
+        state = {"intent": "data_query", "sql_error": "oops"}
+        assert route_sql_result(state) == "repair_sql"  # type: ignore[arg-type]

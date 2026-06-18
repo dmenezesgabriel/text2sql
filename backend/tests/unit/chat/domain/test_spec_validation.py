@@ -291,3 +291,478 @@ class TestInvalidSpecsRaiseValueError:
             validate_spec(
                 {"root": "main", "elements": {"main": {"type": "NarrativeText", "props": "bad"}}},
             )
+
+
+class TestElementIdInErrorMessages:
+    """Kills mutants that pass None instead of element_id to internal validators."""
+
+    def test_non_dict_element_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec({"root": "my_tile", "elements": {"my_tile": "not_a_dict"}})
+        assert "my_tile" in str(exc.value)
+
+    def test_unknown_type_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {"root": "tile_x", "elements": {"tile_x": {"type": "ScatterPlot", "props": {}}}},
+            )
+        assert "tile_x" in str(exc.value)
+
+    def test_bar_chart_missing_title_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "chart_el",
+                    "elements": {
+                        "chart_el": {
+                            "type": "BarChart",
+                            "props": {"xAxis": "x", "yAxis": "y", "data": []},
+                        },
+                    },
+                },
+            )
+        assert "chart_el" in str(exc.value)
+
+    def test_pie_missing_title_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "pie_el",
+                    "elements": {
+                        "pie_el": {
+                            "type": "PieChart",
+                            "props": {"data": [{"label": "A", "value": 1.0}]},
+                        },
+                    },
+                },
+            )
+        assert "pie_el" in str(exc.value)
+
+    def test_metric_missing_label_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "metric_el",
+                    "elements": {
+                        "metric_el": {"type": "Metric", "props": {"value": "100"}},
+                    },
+                },
+            )
+        assert "metric_el" in str(exc.value)
+
+    def test_metric_missing_value_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "metric_el",
+                    "elements": {
+                        "metric_el": {"type": "Metric", "props": {"label": "Revenue"}},
+                    },
+                },
+            )
+        assert "metric_el" in str(exc.value)
+
+    def test_narrative_missing_content_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "narr_el",
+                    "elements": {"narr_el": {"type": "NarrativeText", "props": {}}},
+                },
+            )
+        assert "narr_el" in str(exc.value)
+
+    def test_data_table_non_list_columns_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "tbl_el",
+                    "elements": {
+                        "tbl_el": {
+                            "type": "DataTable",
+                            "props": {"columns": "not_a_list", "rows": []},
+                        },
+                    },
+                },
+            )
+        assert "tbl_el" in str(exc.value)
+
+    def test_data_table_non_list_rows_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "tbl_el",
+                    "elements": {
+                        "tbl_el": {
+                            "type": "DataTable",
+                            "props": {"columns": [], "rows": "not_a_list"},
+                        },
+                    },
+                },
+            )
+        assert "tbl_el" in str(exc.value)
+
+    def test_data_table_rows_list_of_non_dicts_error_contains_element_id(self) -> None:
+        # Kills mutant: `not isinstance(rows, list) and not all(...)` vs `or`
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "tbl_el",
+                    "elements": {
+                        "tbl_el": {
+                            "type": "DataTable",
+                            "props": {"columns": [], "rows": [1, 2, 3]},
+                        },
+                    },
+                },
+            )
+        assert "tbl_el" in str(exc.value)
+
+
+class TestOptionalKeyValidation:
+    """Kills mutants that use wrong key names (XXcolorXX, CHANGE, etc.) in _require_optional_str."""
+
+    def test_color_key_validated_as_string_in_bar_chart(self) -> None:
+        # "color" recognized — passes if string, fails if non-string
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "main",
+                    "elements": {
+                        "main": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [],
+                                "color": 123,
+                            },
+                        },
+                    },
+                },
+            )
+        assert "color" in str(exc.value)
+
+    def test_color_key_valid_when_string(self) -> None:
+        validate_spec(
+            {
+                "root": "main",
+                "elements": {
+                    "main": {
+                        "type": "LineChart",
+                        "props": {
+                            "title": "T",
+                            "xAxis": "x",
+                            "yAxis": "y",
+                            "data": [{"label": "A", "value": 1.0}],
+                            "color": "#00ff00",
+                        },
+                    },
+                },
+            },
+        )
+
+    def test_change_key_validated_as_string_in_metric(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "main",
+                    "elements": {
+                        "main": {
+                            "type": "Metric",
+                            "props": {"label": "L", "value": "100", "change": 5},
+                        },
+                    },
+                },
+            )
+        assert "change" in str(exc.value)
+
+    def test_change_key_valid_when_string(self) -> None:
+        validate_spec(
+            {
+                "root": "main",
+                "elements": {
+                    "main": {
+                        "type": "Metric",
+                        "props": {"label": "L", "value": "100", "change": "+5%"},
+                    },
+                },
+            },
+        )
+
+    def test_data_table_title_validated_as_string_when_present(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "main",
+                    "elements": {
+                        "main": {
+                            "type": "DataTable",
+                            "props": {
+                                "title": 123,
+                                "columns": [{"key": "a", "header": "A"}],
+                                "rows": [{"a": 1}],
+                            },
+                        },
+                    },
+                },
+            )
+        assert "title" in str(exc.value)
+
+    def test_data_table_title_valid_when_string(self) -> None:
+        validate_spec(
+            {
+                "root": "main",
+                "elements": {
+                    "main": {
+                        "type": "DataTable",
+                        "props": {
+                            "title": "My Table",
+                            "columns": [{"key": "a", "header": "A"}],
+                            "rows": [{"a": 1}],
+                        },
+                    },
+                },
+            },
+        )
+
+
+class TestElementIdInValidatorCalls:
+    """Kills mutants that pass None instead of element_id to sub-validators."""
+
+    def test_bar_chart_missing_xaxis_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {"title": "T", "xAxis": 0, "yAxis": "y", "data": []},
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_bar_chart_missing_yaxis_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {"title": "T", "xAxis": "x", "yAxis": 0, "data": []},
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_bar_chart_invalid_data_point_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [{"bad": 1}],
+                            },
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_pie_invalid_data_point_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "PieChart",
+                            "props": {"title": "T", "data": [{"bad": 1}]},
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_bar_chart_invalid_color_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [],
+                                "color": 123,
+                            },
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_metric_invalid_change_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "Metric",
+                            "props": {"label": "L", "value": "100", "change": 5},
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+    def test_data_table_non_str_title_error_contains_element_id(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "DataTable",
+                            "props": {"title": 999, "columns": [], "rows": []},
+                        },
+                    },
+                },
+            )
+        assert "'e'" in str(exc.value)
+
+
+class TestErrorMessageText:
+    """Kills mutants that change error message strings to uppercase/XX-wrapped variants."""
+
+    def test_chart_data_point_error_mentions_label_and_value(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "main",
+                    "elements": {
+                        "main": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [{"wrong_key": 1}],
+                            },
+                        },
+                    },
+                },
+            )
+        msg = str(exc.value)
+        assert "label" in msg.lower()
+        assert "value" in msg.lower()
+
+    def test_chart_data_point_error_lowercase_must_be(self) -> None:
+        # Kills mutmut_16: " MUST BE {LABEL...}" — uppercase doesn't match
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [{"wrong": 1}],
+                            },
+                        },
+                    },
+                },
+            )
+        assert " must be " in str(exc.value)
+
+    def test_chart_data_point_error_no_xx_markers(self) -> None:
+        # Kills mutmut_15: "XX must be {label...}XX" — XX not in legitimate message
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "BarChart",
+                            "props": {
+                                "title": "T",
+                                "xAxis": "x",
+                                "yAxis": "y",
+                                "data": [{"wrong": 1}],
+                            },
+                        },
+                    },
+                },
+            )
+        assert "XX" not in str(exc.value)
+
+    def test_data_table_column_error_lowercase_must_be(self) -> None:
+        # Kills mutmut_22: " MUST BE {KEY: STR...}" — uppercase doesn't match
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "DataTable",
+                            "props": {"columns": [{"wrong": "x"}], "rows": []},
+                        },
+                    },
+                },
+            )
+        assert " must be " in str(exc.value)
+
+    def test_data_table_column_error_no_xx_markers(self) -> None:
+        # Kills mutmut_21: "XX must be {key...}XX"
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "e",
+                    "elements": {
+                        "e": {
+                            "type": "DataTable",
+                            "props": {"columns": [{"wrong": "x"}], "rows": []},
+                        },
+                    },
+                },
+            )
+        assert "XX" not in str(exc.value)
+
+    def test_data_table_column_error_mentions_key_and_header(self) -> None:
+        with pytest.raises(ValueError) as exc:
+            validate_spec(
+                {
+                    "root": "main",
+                    "elements": {
+                        "main": {
+                            "type": "DataTable",
+                            "props": {
+                                "columns": [{"wrong": "x"}],
+                                "rows": [],
+                            },
+                        },
+                    },
+                },
+            )
+        msg = str(exc.value)
+        assert "key" in msg.lower()
+        assert "header" in msg.lower()

@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
+import pytest
+
 from src.dashboards.domain.entities import (
     Dashboard,
     DashboardIdentity,
@@ -312,3 +314,63 @@ class TestDynamoDashboardRepository:
         saved = mock_save.call_args[0][0]
         assert json.loads(saved.tiles) == []
         assert json.loads(saved.filters) == []
+
+    def test_doc_to_dashboard_restores_dashboard_id(self) -> None:
+        model = _make_dashboard_model()
+        dashboard = DynamoDashboardRepository(questions=FakeQuestionRepository())._doc_to_dashboard(
+            model,
+        )
+        assert str(dashboard._identity._id.value) == model.id
+
+    def test_doc_to_dashboard_restores_audit_timestamps(self) -> None:
+        created_ts = "2025-03-01T10:00:00+00:00"
+        updated_ts = "2025-03-02T12:00:00+00:00"
+        model = DashboardModel(
+            id=str(uuid4()),
+            title="T",
+            tiles="[]",
+            filters="[]",
+            created_at=created_ts,
+            updated_at=updated_ts,
+        )
+        dashboard = DynamoDashboardRepository(questions=FakeQuestionRepository())._doc_to_dashboard(
+            model,
+        )
+        assert dashboard._identity._audit._created.value.isoformat() == created_ts
+        assert dashboard._identity._audit._updated.value.isoformat() == updated_ts
+
+    def test_doc_to_dashboard_with_none_tiles_treated_as_empty(self) -> None:
+        model = DashboardModel(
+            id=str(uuid4()),
+            title="T",
+            tiles=None,
+            filters=None,
+            created_at="2026-01-01T00:00:00+00:00",
+            updated_at="2026-01-01T00:00:00+00:00",
+        )
+        dashboard = DynamoDashboardRepository(questions=FakeQuestionRepository())._doc_to_dashboard(
+            model,
+        )
+        assert dashboard._layout._tiles.to_list() == []
+
+    def test_deserialize_tile_error_message_contains_question_id(self) -> None:
+        from src.dashboards.exceptions.tile_not_found_error import TileNotFoundError
+
+        missing_qid = str(uuid4())
+        model = _make_dashboard_model(
+            tiles=json.dumps(
+                [
+                    {
+                        "tile_id": str(uuid4()),
+                        "question_id": missing_qid,
+                        "row": 0,
+                        "col": 0,
+                        "width": 4,
+                        "height": 2,
+                    },
+                ],
+            ),
+        )
+        with pytest.raises(TileNotFoundError) as exc_info:
+            DynamoDashboardRepository(questions=FakeQuestionRepository())._doc_to_dashboard(model)
+        assert missing_qid in str(exc_info.value)

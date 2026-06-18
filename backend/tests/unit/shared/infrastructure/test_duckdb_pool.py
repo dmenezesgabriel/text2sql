@@ -32,6 +32,10 @@ class TestDuckDBPool:
             assert conn is not None
         pool.disconnect()
 
+    def test_default_database_path_is_memory(self) -> None:
+        pool = DuckDBPool()
+        assert pool._database_path == ":memory:"
+
     def test_double_connect_is_idempotent(self) -> None:
         pool = DuckDBPool(":memory:")
         pool.connect()

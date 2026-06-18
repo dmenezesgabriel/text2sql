@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -136,3 +136,117 @@ class TestQuestions:
         questions = Questions([q])
         questions.remove(q._identity._id)
         assert questions.count() == 0
+
+    def test_add_appends_the_actual_question_not_none(self) -> None:
+        q = _make_question()
+        questions = Questions()
+        questions.add(q)
+        assert questions.to_list()[0] is q
+
+    def test_to_list_contains_all_items(self) -> None:
+        q1 = _make_question()
+        q2 = _make_question()
+        questions = Questions([q1, q2])
+        items = questions.to_list()
+        assert q1 in items
+        assert q2 in items
+
+
+class TestQuestionChangeDicision:
+    def test_change_decision_error_message_exact(self) -> None:
+        q = _make_question(fmt=ResponseKind.TABLE)
+        same_decision = VizDecision(
+            _format=ResponseKind.TABLE,
+            _spec=VizSpec(_component="Table", _props={}, _children=()),
+        )
+        with pytest.raises(SameVisualizationError) as exc_info:
+            q.change_decision(same_decision)
+        assert str(exc_info.value) == "New viz must differ from current"
+
+    def test_change_decision_preserves_description(self) -> None:
+        q = _make_question(fmt=ResponseKind.TABLE)
+        new_decision = VizDecision(
+            _format=ResponseKind.CHART,
+            _spec=VizSpec(_component="BarChart", _props={}, _children=()),
+        )
+        q.change_decision(new_decision)
+        assert q._specification._description is not None
+        assert q._specification._rendering is not None
+        assert q._specification._rendering._decision._format is ResponseKind.CHART
+
+
+class TestDerivedrillDown:
+    def test_drill_down_title_contains_column_and_value(self) -> None:
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "WEST")
+        assert "region=WEST" in drilled._specification._description._title.value
+
+    def test_drill_down_title_contains_em_dash(self) -> None:
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "WEST")
+        assert "—" in drilled._specification._description._title.value
+
+    def test_drill_down_has_non_none_identity(self) -> None:
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "WEST")
+        assert drilled._identity is not None
+        assert drilled._identity._id is not None
+        assert drilled._identity._audit is not None
+
+    def test_drill_down_preserves_rendering(self) -> None:
+        q = _make_question(fmt=ResponseKind.TABLE)
+        drilled = q.derive_drill_down("region", "WEST")
+        assert drilled._specification._rendering is not None
+        assert drilled._specification._rendering._decision._format is ResponseKind.TABLE
+
+    def test_drill_down_entity_id_is_valid_uuid(self) -> None:
+        # Kills mutmut_27: EntityId(None)
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "EAST")
+        assert isinstance(drilled._identity._id.value, UUID)
+
+    def test_drill_down_audit_created_is_not_none(self) -> None:
+        # Kills mutmut_28: _created=None
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("status", "active")
+        assert drilled._identity._audit._created is not None
+
+    def test_drill_down_audit_updated_is_not_none(self) -> None:
+        # Kills mutmut_29: _updated=None
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("status", "active")
+        assert drilled._identity._audit._updated is not None
+
+    def test_drill_down_audit_created_value_is_utc_aware(self) -> None:
+        # Kills mutmut_32 (CreatedAt(None)) and mutmut_33 (datetime.now(None) = naive)
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "EAST")
+        created = drilled._identity._audit._created.value
+        assert isinstance(created, datetime)
+        assert created.tzinfo is not None
+
+    def test_drill_down_audit_updated_value_is_utc_aware(self) -> None:
+        # Kills mutmut_34 (UpdatedAt(None)) and mutmut_35 (datetime.now(None) = naive)
+        q = _make_question(sql="SELECT 1 FROM t")
+        drilled = q.derive_drill_down("region", "EAST")
+        updated = drilled._identity._audit._updated.value
+        assert isinstance(updated, datetime)
+        assert updated.tzinfo is not None
+
+
+class TestRenamePreservesFields:
+    """Kill rename mutmut_3 (rendering=None) and mutmut_7 (_query=None)."""
+
+    def test_rename_preserves_rendering(self) -> None:
+        # Kills mutmut_3: rendering=None
+        q = _make_question(fmt=ResponseKind.CHART)
+        original_rendering = q._specification._rendering
+        q.rename(QuestionTitle("New Title"))
+        assert q._specification._rendering is original_rendering
+
+    def test_rename_preserves_query(self) -> None:
+        # Kills mutmut_7: _query=None
+        q = _make_question(sql="SELECT id FROM sales")
+        original_query = q._specification._description._query
+        q.rename(QuestionTitle("New Title"))
+        assert q._specification._description._query is original_query

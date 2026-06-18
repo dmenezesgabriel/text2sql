@@ -29,3 +29,17 @@ class TestDuckDBQueryExecutor:
         executor = DuckDBQueryExecutor(engine=engine)  # type: ignore[arg-type]
         result = await executor.execute(sql="SELECT 1", dataset_id=EntityId(uuid4()))
         assert result.row_count() == 1
+
+    async def test_execute_passes_exact_sql_to_engine(self) -> None:
+        from uuid import uuid4
+
+        class _CapturingEngine:
+            captured: str | None = None
+
+            async def execute(self, sql: str) -> QueryResult:
+                _CapturingEngine.captured = sql
+                return QueryResult(_columns=("x",), _rows=({"x": 1},))
+
+        executor = DuckDBQueryExecutor(engine=_CapturingEngine())  # type: ignore[arg-type]
+        await executor.execute(sql="SELECT 42 AS val", dataset_id=EntityId(uuid4()))
+        assert _CapturingEngine.captured == "SELECT 42 AS val"

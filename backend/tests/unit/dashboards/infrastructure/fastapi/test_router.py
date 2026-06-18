@@ -48,3 +48,16 @@ class TestCreateDashboardsRouter:
         router = _make_router()
         paths = [r.path for r in router.routes]
         assert "/api/v1/dashboards" in paths
+
+    def test_router_tags_contains_dashboards(self) -> None:
+        router = _make_router()
+        assert "dashboards" in router.tags
+
+    def test_router_tags_no_xx(self) -> None:
+        router = _make_router()
+        assert not any("XX" in str(t) for t in (router.tags or []))
+
+    def test_router_tags_lowercase(self) -> None:
+        router = _make_router()
+        tags = router.tags or []
+        assert all(t == t.lower() for t in tags)

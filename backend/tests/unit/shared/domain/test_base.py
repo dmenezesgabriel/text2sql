@@ -8,6 +8,7 @@ import pytest
 from src.shared.domain.base import (
     AuditRecord,
     CreatedAt,
+    Entity,
     EntityId,
     QueryResult,
     ResponseKind,
@@ -95,6 +96,32 @@ class TestQueryResult:
             _rows=({"name": "Alice"},),
         )
         assert not result.has_numeric_columns()
+
+
+class _ConcreteEntity(Entity):
+    def __init__(self, identity: EntityId | None = None) -> None:
+        if identity is not None:
+            self._identity = identity
+
+
+class TestEntity:
+    def test_equal_with_same_identity(self) -> None:
+        uid = uuid4()
+        assert _ConcreteEntity(EntityId(uid)) == _ConcreteEntity(EntityId(uid))
+
+    def test_not_equal_with_different_identity(self) -> None:
+        assert _ConcreteEntity(EntityId(uuid4())) != _ConcreteEntity(EntityId(uuid4()))
+
+    def test_not_equal_to_non_entity_returns_not_implemented(self) -> None:
+        result = _ConcreteEntity(EntityId(uuid4())).__eq__("not an entity")
+        assert result is NotImplemented
+
+    def test_two_entities_without_identity_are_equal(self) -> None:
+        # getattr fallback to None for both sides
+        assert _ConcreteEntity() == _ConcreteEntity()
+
+    def test_entity_with_identity_not_equal_to_entity_without(self) -> None:
+        assert _ConcreteEntity(EntityId(uuid4())) != _ConcreteEntity()
 
 
 class TestResponseKind:

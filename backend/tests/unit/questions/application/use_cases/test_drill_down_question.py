@@ -92,3 +92,89 @@ class TestDrillDownQuestionUseCase:
         drilled = use_case.execute(request)
         assert drilled is not None
         assert "WHERE country = 'US'" in drilled.compiled_sql()
+
+    def test_not_found_error_message_exact(self) -> None:
+        missing_id = EntityId(uuid4())
+        repo = FakeQuestionRepository()
+        use_case = DrillDownQuestionUseCase(questions=repo)
+        request = DrillDownRequest(_source_id=missing_id, _column="x", _value="1")
+        with pytest.raises(QuestionNotFoundError) as exc_info:
+            use_case.execute(request)
+        assert str(missing_id.value) in str(exc_info.value)
+
+    def test_change_viz_requires_both_change_viz_true_and_new_viz_not_none(self) -> None:
+        # Kills `or` mutation: `if request._change_viz or request._new_viz is not None`
+        # With `or`, change_viz=False but new_viz set → change_decision called → SameVizError (or error)
+        # With `and`, change_viz=False → skipped (correct)
+        source = _make_question()
+        repo = FakeQuestionRepository({source._identity._id: source})
+        use_case = DrillDownQuestionUseCase(questions=repo)
+        # change_viz=False with new_viz set: should NOT call change_decision
+        new_viz = VizDecision(
+            _format=ResponseKind.CHART,
+            _spec=VizSpec(_component="BarChart", _props={}, _children=()),
+        )
+        request = DrillDownRequest(
+            _source_id=source._identity._id,
+            _column="country",
+            _value="US",
+            _change_viz=False,
+            _new_viz=new_viz,
+        )
+        drilled = use_case.execute(request)
+        # Should keep original TABLE format (change_decision not called)
+        assert drilled._specification._rendering._decision._format is ResponseKind.TABLE
+
+    def test_change_viz_true_with_none_viz_does_not_change_decision(self) -> None:
+        # Kills `_new_viz is None` mutation: `if request._change_viz and request._new_viz is None`
+        source = _make_question()
+        repo = FakeQuestionRepository({source._identity._id: source})
+        use_case = DrillDownQuestionUseCase(questions=repo)
+        request = DrillDownRequest(
+            _source_id=source._identity._id,
+            _column="country",
+            _value="US",
+            _change_viz=True,
+            _new_viz=None,
+        )
+        drilled = use_case.execute(request)
+        # new_viz is None: condition `_change_viz and _new_viz is not None` = True and False = False
+        # so change_decision is NOT called, original TABLE stays
+        assert drilled._specification._rendering._decision._format is ResponseKind.TABLE
+
+    def test_change_viz_true_with_valid_viz_changes_decision(self) -> None:
+        source = _make_question()
+        repo = FakeQuestionRepository({source._identity._id: source})
+        use_case = DrillDownQuestionUseCase(questions=repo)
+        new_viz = VizDecision(
+            _format=ResponseKind.CHART,
+            _spec=VizSpec(_component="BarChart", _props={}, _children=()),
+        )
+        request = DrillDownRequest(
+            _source_id=source._identity._id,
+            _column="country",
+            _value="US",
+            _change_viz=True,
+            _new_viz=new_viz,
+        )
+        drilled = use_case.execute(request)
+        assert drilled._specification._rendering._decision._format is ResponseKind.CHART
+
+    def test_change_decision_arg_is_new_viz(self) -> None:
+        # Kills `derived.change_decision(None)` mutation
+        source = _make_question()
+        repo = FakeQuestionRepository({source._identity._id: source})
+        use_case = DrillDownQuestionUseCase(questions=repo)
+        new_viz = VizDecision(
+            _format=ResponseKind.CHART,
+            _spec=VizSpec(_component="LineChart", _props={}, _children=()),
+        )
+        request = DrillDownRequest(
+            _source_id=source._identity._id,
+            _column="x",
+            _value="1",
+            _change_viz=True,
+            _new_viz=new_viz,
+        )
+        drilled = use_case.execute(request)
+        assert drilled._specification._rendering._decision._spec._component == "LineChart"
