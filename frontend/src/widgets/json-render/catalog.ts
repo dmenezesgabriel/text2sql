@@ -67,12 +67,15 @@ export const biCatalog = defineCatalog(schema, {
       description: 'Save response as a question artifact',
     },
     add_to_dashboard: {
+      params: z.object({ dashboardId: z.string() }),
       description: 'Add this viz to a dashboard',
     },
     export_data: {
-      description: 'Export underlying data as CSV',
+      params: z.object({ format: z.enum(['csv', 'json', 'xlsx']) }),
+      description: 'Export underlying data as CSV, JSON, or XLSX',
     },
     drill_down: {
+      params: z.object({ column: z.string(), value: z.string() }),
       description: 'Filter by a dimension value',
     },
   },

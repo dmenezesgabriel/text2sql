@@ -7,24 +7,8 @@ import { useDashboardStore } from '@/features/dashboard/model/store';
 import { BiDashboardGridReact } from '@/features/dashboard/ui/dashboard-grid';
 import { BiDashboardTileReact } from '@/features/dashboard/ui/dashboard-tile';
 import { getQuestion } from '@/features/question/api/question-api';
+import { buildVizSpec } from '@/features/question/lib/build-viz-spec';
 import { registry } from '@/widgets/json-render/registry';
-
-/**
- *
- * @param q
- */
-function buildVizSpec(q: Question): Record<string, unknown> {
-  return {
-    root: 'main',
-    elements: {
-      main: {
-        type: q.vizComponent,
-        props: q.vizProps,
-        children: q.vizChildren ?? [],
-      },
-    },
-  };
-}
 
 /**
  *
@@ -103,8 +87,7 @@ export function DashboardDetail() {
               >
                 {q && (
                   <JSONUIProvider registry={registry}>
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
-                    <Renderer spec={buildVizSpec(q) as any} registry={registry} />
+                    <Renderer spec={buildVizSpec(q)} registry={registry} />
                   </JSONUIProvider>
                 )}
               </BiDashboardTileReact>

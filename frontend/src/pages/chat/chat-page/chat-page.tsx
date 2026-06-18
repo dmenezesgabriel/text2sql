@@ -1,6 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { sendChatMessage } from '@/features/chat/api/chat-api';
+import { getConversationMessages } from '@/features/chat/api/conversation-api';
+import { useConversationsStore } from '@/features/chat/model/conversations-store';
 import { useChatStore } from '@/features/chat/model/store';
 import { ChatInput } from '@/features/chat/ui/chat-input';
 import { ChatMessage } from '@/features/chat/ui/chat-message';
@@ -31,6 +34,8 @@ function generateId(): string {
  *
  */
 export function ChatPage() {
+  const { conversationId: urlConversationId } = useParams<{ conversationId?: string }>();
+
   const {
     messages,
     isStreaming,
@@ -40,7 +45,26 @@ export function ChatPage() {
     setErrorOnLastAssistant,
     setStreaming,
     setConversationId,
+    loadMessages,
+    clear,
   } = useChatStore();
+
+  const { loadConversations } = useConversationsStore();
+
+  useEffect(() => {
+    if (urlConversationId) {
+      getConversationMessages(urlConversationId)
+        .then((msgs) => {
+          loadMessages(urlConversationId, msgs);
+        })
+        .catch(() => {
+          // if history load fails, still set the conversation ID so the user can continue
+          setConversationId(urlConversationId);
+        });
+    } else {
+      clear();
+    }
+  }, [urlConversationId]);
 
   const handleSend = useCallback(
     (content: string) => {
@@ -75,6 +99,7 @@ export function ChatPage() {
         },
         () => {
           setStreaming(false);
+          void loadConversations();
         },
       );
     },
@@ -85,6 +110,7 @@ export function ChatPage() {
       setErrorOnLastAssistant,
       setStreaming,
       setConversationId,
+      loadConversations,
     ],
   );
 

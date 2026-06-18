@@ -2,27 +2,10 @@ import { JSONUIProvider, Renderer } from '@json-render/react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import type { Question } from '@/entities/question/types';
+import { buildVizSpec } from '@/features/question/lib/build-viz-spec';
 import { useQuestionStore } from '@/features/question/model/store';
 import { BiInputReact } from '@/shared/components/input';
 import { registry } from '@/widgets/json-render/registry';
-
-/**
- *
- * @param q
- */
-function buildVizSpec(q: Question): Record<string, unknown> {
-  return {
-    root: 'main',
-    elements: {
-      main: {
-        type: q.vizComponent,
-        props: q.vizProps,
-        children: q.vizChildren ?? [],
-      },
-    },
-  };
-}
 
 /**
  *
@@ -103,8 +86,7 @@ export function QuestionDetail() {
         <>
           <bi-card heading="Visualization">
             <JSONUIProvider registry={registry}>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
-              <Renderer spec={buildVizSpec(selectedQuestion) as any} registry={registry} />
+              <Renderer spec={buildVizSpec(selectedQuestion)} registry={registry} />
             </JSONUIProvider>
           </bi-card>
 

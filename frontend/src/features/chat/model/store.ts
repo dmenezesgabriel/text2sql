@@ -14,6 +14,7 @@ interface ChatState {
   handleEvent: (event: AgentEvent) => void;
   setStreaming: (streaming: boolean) => void;
   setConversationId: (id: string) => void;
+  loadMessages: (conversationId: string, messages: AgentMessage[]) => void;
   clear: () => void;
 }
 
@@ -86,6 +87,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setConversationId: (id) => {
     set({ conversationId: id });
+  },
+
+  loadMessages: (conversationId, messages) => {
+    set({ conversationId, messages, isStreaming: false });
   },
 
   clear: () => {

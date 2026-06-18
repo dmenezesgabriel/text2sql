@@ -1,3 +1,4 @@
+import type { Spec } from '@json-render/react';
 import { JSONUIProvider, Renderer } from '@json-render/react';
 import { useState } from 'react';
 
@@ -79,8 +80,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       >
         {!isUser && message.spec ? (
           <JSONUIProvider registry={registry}>
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment */}
-            <Renderer spec={message.spec as any} registry={registry} />
+            <Renderer spec={message.spec as Spec} registry={registry} />
           </JSONUIProvider>
         ) : (
           message.content

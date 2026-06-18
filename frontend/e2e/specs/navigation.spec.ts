@@ -10,9 +10,9 @@ test.describe('Navigation', () => {
     await expect(page.getByRole('button', { name: /send/i })).toBeVisible();
   });
 
-  test('sidebar nav links are present', async ({ page }) => {
+  test('sidebar has New Chat button and nav links', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('link', { name: 'Chat' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /new chat/i })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Datasets' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Questions' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Dashboards' })).toBeVisible();
@@ -25,9 +25,9 @@ test.describe('Navigation', () => {
     await expect(page.getByText('Register a Dataset')).toBeVisible();
   });
 
-  test('navigates back to chat', async ({ page }) => {
+  test('New Chat button navigates to /chat', async ({ page }) => {
     await page.goto('/datasets');
-    await page.getByRole('link', { name: 'Chat' }).click();
+    await page.getByRole('button', { name: /new chat/i }).click();
     await expect(page).toHaveURL(/\/chat$/);
     await expect(page.getByPlaceholder(/question/i)).toBeVisible();
   });
@@ -35,10 +35,8 @@ test.describe('Navigation', () => {
   test('active nav link is highlighted', async ({ page }) => {
     await page.goto('/datasets');
     const datasetsLink = page.getByRole('link', { name: 'Datasets' });
-    // Check that the active link has a different appearance (background color set)
     await expect(datasetsLink).toBeVisible();
-    const chatLink = page.getByRole('link', { name: 'Chat' });
-    await chatLink.click();
+    await page.getByRole('button', { name: /new chat/i }).click();
     await expect(page).toHaveURL(/\/chat$/);
   });
 });
