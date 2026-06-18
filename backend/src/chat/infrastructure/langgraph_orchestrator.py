@@ -4,7 +4,7 @@ import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from src.chat.application.ports.i_agent_orchestrator import IAgentOrchestrator
 from src.chat.domain.value_objects import (
@@ -55,6 +55,31 @@ class LangGraphOrchestrator(IAgentOrchestrator):
         yield ThinkingEvent("Analyzing your question...")
         async for event in _stream_graph(self._graph, initial, config):
             yield event
+
+    async def get_messages(
+        self,
+        conversation_id: ConversationId,
+    ) -> list[dict[str, object]]:
+        config = {"configurable": {"thread_id": str(conversation_id.value)}}
+        state = await self._graph.aget_state(config)
+        if state is None or not state.values.get("messages"):
+            return []
+        messages = [_base_msg_to_dict(m) for m in state.values["messages"]]
+        spec = state.values.get("spec")
+        if spec:
+            for msg in reversed(messages):
+                if msg["role"] == "assistant":
+                    msg["spec"] = spec
+                    break
+        return messages
+
+
+def _base_msg_to_dict(msg: Any) -> dict[str, object]:
+    if isinstance(msg, HumanMessage):
+        return {"role": "user", "content": str(msg.content)}
+    if isinstance(msg, AIMessage):
+        return {"role": "assistant", "content": str(msg.content)}
+    return {"role": "assistant", "content": ""}
 
 
 def _dataset_views(datasets: list[Dataset]) -> dict[str, str]:

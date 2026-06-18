@@ -152,3 +152,47 @@ class TestChat:
         # Successful response means conversation was created and persisted
         types = {e["type"] for e in events}
         assert "ErrorEvent" not in types, f"Got error: {events}"
+
+
+class TestConversations:
+    def test_list_conversations_returns_200(self) -> None:
+        result = _get("/api/v1/conversations")
+        assert "conversations" in result
+        assert isinstance(result["conversations"], list)
+
+    def test_conversations_have_required_fields(self) -> None:
+        result = _get("/api/v1/conversations")
+        for conv in result["conversations"]:
+            assert "id" in conv
+            assert "title" in conv
+            assert "updated_at" in conv
+
+    def test_conversation_appears_after_chat(self) -> None:
+        """Sending a chat message should cause the conversation to show up in the list."""
+        import json as _json
+        import subprocess  # noqa: E401
+
+        msg = "How many products are there?"
+        subprocess.run(
+            [
+                "curl",
+                "-sN",
+                "-X",
+                "POST",
+                f"{BASE}/api/v1/chat",
+                "-H",
+                "Content-Type: application/json",
+                "-d",
+                _json.dumps({"message": msg}),
+                "--max-time",
+                "30",
+            ],
+            capture_output=True,
+            check=False,
+        )
+        result = _get("/api/v1/conversations")
+        titles = [c["title"] for c in result["conversations"]]
+        # The title should match the first 80 chars of the message
+        assert any(msg[:80] in t for t in titles), (
+            f"Expected title containing message, got: {titles}"
+        )

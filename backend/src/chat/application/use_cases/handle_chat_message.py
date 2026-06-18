@@ -44,7 +44,7 @@ class HandleChatMessageUseCase:
     async def execute(self, request: ProcessMessageRequest) -> AsyncIterator[AgentEvent]:
         conv_id = request._conversation_id
         _logger.info("chat.start", extra={"conversation_id": str(conv_id.value)})
-        conversation = self._load_or_create(conv_id)
+        conversation = self._load_or_create(conv_id, request._content.value)
         yield ThinkingEvent("Processing your question...")
         async for event in self._agent._orchestrator.run(
             content=request._content.value,
@@ -54,8 +54,10 @@ class HandleChatMessageUseCase:
         self._conversations.save(conversation)
         _logger.info("chat.complete", extra={"conversation_id": str(conv_id.value)})
 
-    def _load_or_create(self, conversation_id: ConversationId) -> Conversation:
+    def _load_or_create(self, conversation_id: ConversationId, content: str) -> Conversation:
         existing = self._conversations.load(conversation_id)
         if existing is not None:
             return existing
-        return Conversation(identity=EntityId(conversation_id.value))
+        conversation = Conversation(identity=EntityId(conversation_id.value))
+        conversation.set_title(content)
+        return conversation

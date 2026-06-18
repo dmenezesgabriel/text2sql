@@ -114,7 +114,7 @@ def compose(pool: DuckDBPool, config: ComposeConfig | None = None) -> Compositio
 
     # ── Routers ──
     return Composition(
-        chat_router=create_chat_router(chat_use_case),
+        chat_router=create_chat_router(chat_use_case, conversation_repo, orchestrator),
         questions_router=create_questions_router(
             question_repo=question_repo,
             save_use_case=save_question_use_case,

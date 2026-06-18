@@ -138,9 +138,8 @@ reportGeneralTypeIssues = false
 reportDeprecated = false
 
 [tool.mutmut]
-paths_to_mutate = "src/"
-test_command = "pytest tests/ -x"
-runner = "pytest"
+paths_to_mutate = ["src/"]
+tests_dir = ["tests/"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

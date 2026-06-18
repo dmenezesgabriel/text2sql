@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from src.chat.application.ports.i_conversation_repository import (
+    ConversationSummary,
     IConversationRepository,
 )
 from src.chat.domain.entities import Conversation, ConversationState
@@ -17,6 +18,7 @@ class DynamoConversationRepository(IConversationRepository):
         model = ConversationModel(
             id=str(conversation._identity.value),
             state=conversation._state.name,
+            title=conversation._title,
             updated_at=datetime.now(UTC).isoformat(),
         )
         model.save()
@@ -34,9 +36,23 @@ class DynamoConversationRepository(IConversationRepository):
         except ConversationModel.DoesNotExist:
             return
 
+    def find_all(self) -> list[ConversationSummary]:
+        rows = list(ConversationModel.scan())
+        rows.sort(key=lambda m: m.updated_at, reverse=True)
+        return [
+            ConversationSummary(
+                id=m.id,
+                title=m.title or "Untitled chat",
+                updated_at=m.updated_at,
+            )
+            for m in rows[:50]
+        ]
+
 
 def _model_to_conversation(model: ConversationModel) -> Conversation:
     conversation = Conversation(identity=EntityId(UUID(model.id)))
+    if model.title:
+        conversation.set_title(model.title)
     if model.state == ConversationState.CLOSED.name:
         conversation.close()
     return conversation

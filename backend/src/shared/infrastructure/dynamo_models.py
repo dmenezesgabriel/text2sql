@@ -20,6 +20,7 @@ class ConversationModel(BaseModel):
 
     id = UnicodeAttribute(hash_key=True)
     state = UnicodeAttribute()
+    title = UnicodeAttribute(null=True)
     updated_at = UnicodeAttribute()
 
 

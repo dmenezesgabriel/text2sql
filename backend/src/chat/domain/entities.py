@@ -83,6 +83,10 @@ class Conversation(Entity):
     def __init__(self, identity: EntityId) -> None:
         self._identity = identity
         self._state: ConversationState = ConversationState.ACTIVE
+        self._title: str | None = None
+
+    def set_title(self, title: str) -> None:
+        self._title = title[:80]
 
     def close(self) -> None:
         if self._state is ConversationState.CLOSED:

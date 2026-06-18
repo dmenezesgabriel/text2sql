@@ -12,3 +12,8 @@ class IAgentOrchestrator(Protocol):
         content: str,
         conversation_id: ConversationId,
     ) -> AsyncIterator[AgentEvent]: ...
+
+    async def get_messages(
+        self,
+        conversation_id: ConversationId,
+    ) -> list[dict[str, object]]: ...
