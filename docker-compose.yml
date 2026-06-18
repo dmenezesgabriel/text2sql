@@ -47,8 +47,10 @@ services:
       - S3_SECRET_ACCESS_KEY=minioadmin
       - S3_BUCKET=bi-data
     volumes:
+      - ./backend/src:/app/src
       - duckdb-data:/data
       - ${HOME}/.config/litellm/github_copilot:/root/.config/litellm/github_copilot
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       dynamodb-local:
         condition: service_healthy
@@ -62,13 +64,39 @@ services:
       start_period: 5s
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: builder
+    # Distinct image name so the dev (builder/Vite) image never collides with
+    # a prod nginx image built from the same Dockerfile.
+    image: text2sql-frontend-dev
+    command: sh -c "pnpm install --prefer-offline && pnpm dev --host 0.0.0.0 --port 5173"
     ports:
-      - "5173:80"
+      - "5173:5173"
+    environment:
+      - VITE_API_TARGET=http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
     depends_on:
       backend:
         condition: service_healthy
 
+  # Component workshop + design-system reference. Serves the addon-mcp endpoint
+  # at /mcp, which .mcp.json points Claude Code at. Browse at http://localhost:6006.
+  storybook:
+    build:
+      context: ./frontend
+      target: builder
+    command: sh -c "pnpm install --prefer-offline && pnpm storybook --host 0.0.0.0 --port 6006 --no-open"
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./frontend:/app
+      - storybook_node_modules:/app/node_modules
+
 volumes:
   duckdb-data:
   minio-data:
+  frontend_node_modules:
+  storybook_node_modules:

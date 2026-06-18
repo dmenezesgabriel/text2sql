@@ -4,15 +4,11 @@
         check-backend test-backend backend \
         check test all dev dev-down
 
-# Dev stack with hot reload: Vite HMR frontend (http://localhost:5174) +
-# uvicorn --reload backend. Merges the base compose file with the dev override.
-COMPOSE_DEV := docker compose -f docker-compose.yml -f docker-compose.dev.yml
-
 dev:
-	$(COMPOSE_DEV) up
+	docker compose up
 
 dev-down:
-	$(COMPOSE_DEV) down
+	docker compose down
 
 check-frontend:
 	$(MAKE) -C frontend check
